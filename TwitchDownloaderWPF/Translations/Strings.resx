@@ -149,6 +149,9 @@
   <data name="Browse" xml:space="preserve">
     <value>Browse</value>
   </data>
+  <data name="SplitByChapters" xml:space="preserve">
+    <value>Split by Chapters</value>
+  </data>
   <data name="BttvEmotes" xml:space="preserve">
     <value>BTTV Emotes:</value>
   </data>

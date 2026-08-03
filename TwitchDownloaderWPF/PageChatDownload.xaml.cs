@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -636,6 +637,87 @@ namespace TwitchDownloaderWPF
                 WindowStartupLocation = WindowStartupLocation.CenterOwner
             };
             queueOptions.ShowDialog();
+        }
+
+        private async void MenuItemSplitByChapters_Click(object sender, RoutedEventArgs e)
+        {
+            if (!SplitBtnDownload.IsDropDownOpen)
+                return;
+
+            if (downloadType != DownloadType.Video || !long.TryParse(downloadId, out var videoId))
+            {
+                MessageBox.Show(Application.Current.MainWindow!, "Load a VOD (not a clip) first to split its chat by chapters.", "No VOD Loaded", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            try
+            {
+                SplitBtnDownload.IsEnabled = false;
+
+                var videoInfo = new VideoInfo
+                {
+                    lengthSeconds = (int)vodLength.TotalSeconds,
+                    game = new Game { displayName = game }
+                };
+
+                var progress = new WpfTaskProgress((LogLevel)Settings.Default.LogLevels, SetPercent, SetStatus, AppendLog);
+                var chapterResponse = await TwitchHelper.GetOrGenerateVideoChapters(videoId, videoInfo, progress);
+                var chapters = chapterResponse.data.video.moments.edges;
+
+                if (chapters.Count <= 1)
+                {
+                    MessageBox.Show(Application.Current.MainWindow!, "This VOD has only one chapter, so there is nothing to split.", "Single Chapter", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                var msg = $"Enqueue {chapters.Count} separate chat downloads (one per chapter)?";
+                if (MessageBox.Show(Application.Current.MainWindow!, msg, "Split by Chapters", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+                    return;
+
+                string folder = Settings.Default.QueueFolder;
+
+                for (int i = 0; i < chapters.Count; i++)
+                {
+                    var chapter = chapters[i].node;
+                    var startSec = chapter.positionMilliseconds / 1000;
+                    var endSec = startSec + chapter.durationMilliseconds / 1000;
+                    var chapterStart = TimeSpan.FromSeconds(startSec);
+                    var chapterEnd = TimeSpan.FromSeconds(Math.Min(endSec, (int)vodLength.TotalSeconds));
+                    var gameName = chapter.details?.game?.displayName ?? chapter.description ?? game;
+
+                    var options = GetOptions(null);
+                    options.TrimBeginning = true;
+                    options.TrimBeginningTime = startSec;
+                    options.TrimEnding = true;
+                    options.TrimEndingTime = Math.Min(endSec, (int)vodLength.TotalSeconds);
+                    options.Filename = Path.Combine(folder,
+                        FilenameService.GetFilename(Settings.Default.TemplateChat, textTitle.Text, options.Id, currentVideoTime, textStreamer.Text, streamerId,
+                            chapterStart, chapterEnd, vodLength, viewCount, gameName) + $"_ch{i + 1:D2}" + options.FileExtension);
+
+                    var task = new TwitchTasks.ChatDownloadTask
+                    {
+                        DownloadOptions = options,
+                        Info =
+                        {
+                            Title = $"{textTitle.Text} - {gameName} (Ch. {i + 1})",
+                            Thumbnail = imgThumbnail.Source
+                        }
+                    };
+                    PageQueue.taskList.Add(task);
+                }
+
+                if (Application.Current.MainWindow is MainWindow mw)
+                    mw.Main.Content = MainWindow.pageQueue;
+            }
+            catch (Exception ex)
+            {
+                AppendLog(Translations.Strings.ErrorLog + ex.Message);
+                MessageBox.Show(Application.Current.MainWindow!, "Failed to fetch chapters: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                SplitBtnDownload.IsEnabled = true;
+            }
         }
 
         private async void TextUrl_OnKeyDown(object sender, KeyEventArgs e)
