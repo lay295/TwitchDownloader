@@ -59,11 +59,20 @@
             <emoji:TextBlock TextWrapping="Wrap" x:Name="textTitle" Foreground="{DynamicResource AppText}" />
         </StackPanel>
         <!-- MIDDLE -->
-        <WrapPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="4" Margin="0,0,0,10" Orientation="Horizontal" HorizontalAlignment="Center">
-            <TextBlock Margin="3,8,3,3" Text="{lex:Loc VodLinkId}" Foreground="{DynamicResource AppText}" />
-            <TextBox x:Name="textUrl" Margin="3" MinWidth="200" MaxWidth="400" KeyDown="TextUrl_OnKeyDown" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
-            <Button x:Name="btnGetInfo" Margin="3" MinWidth="50" Content="{lex:Loc GetInfo}" Click="btnGetInfo_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
-        </WrapPanel>
+        <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="4" Margin="0,0,0,10" HorizontalAlignment="Center">
+            <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <TextBlock x:Name="labelUrl" Margin="3,8,3,3" Text="{lex:Loc VodLinkId}" Foreground="{DynamicResource AppText}" />
+                <TextBox x:Name="textUrl" Margin="3" MinWidth="200" MaxWidth="400" KeyDown="TextUrl_OnKeyDown" Background="{DynamicResource AppElementBackground}" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                <Button x:Name="btnGetInfo" Margin="3" MinWidth="50" Content="{lex:Loc GetInfo}" Click="btnGetInfo_Click" Background="{DynamicResource ActionButtonBackground}" Foreground="{DynamicResource ActionButtonText}" BorderBrush="{DynamicResource ActionButtonBorder}"/>
+            </WrapPanel>
+            <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,0">
+                <CheckBox x:Name="checkRecoverHidden" VerticalAlignment="Center" Checked="checkRecoverHidden_Changed" Unchecked="checkRecoverHidden_Changed" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}">
+                    <TextBlock Foreground="{DynamicResource AppText}"><Run Text="Recover hidden VOD (channel with past broadcasts off)"/><Hyperlink ToolTipService.ShowDuration="60000" Foreground="{DynamicResource AppHyperlink}"><Hyperlink.ToolTip><TextBlock MaxWidth="420" TextWrapping="Wrap"><Run Text="Reconstructs the broadcast's hidden DVR playlist directly from Twitch's public CDN using the channel's live stream metadata, then lets you pick from whichever quality renditions Twitch retained. This is an unofficial method that Twitch could break at any time. It only works while the channel is live or has very recently ended (DVR segments are usually purged within a day or two). Enter the channel name (not a video URL) and the channel must be live to capture the required stream id and start time."/></TextBlock></Hyperlink.ToolTip>(?)</Hyperlink></TextBlock>
+                </CheckBox>
+            </WrapPanel>
+            <TextBlock x:Name="textRecoverWarning" Visibility="Collapsed" Margin="0,4,0,0" MaxWidth="460" TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center" Foreground="#E0A030"
+                       Text="Hidden VOD recovery is unofficial and best-effort: enter the channel name above (the channel must be live), only the quality renditions Twitch retained are available, and this may stop working if Twitch changes their CDN scheme." />
+        </StackPanel>
         <StackPanel Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Margin="0,20,0,0" Orientation="Horizontal" HorizontalAlignment="Center">
             <StackPanel HorizontalAlignment="Left">
                 <TextBlock Text="{lex:Loc Length}" HorizontalAlignment="Right" Foreground="{DynamicResource AppText}" />

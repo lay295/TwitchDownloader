@@ -21,6 +21,20 @@ namespace TwitchDownloaderCore.Tools
             await SerializeChapters(sw, videoMomentEdges, startOffset, videoLength);
         }
 
+        /// <summary>
+        /// Serializes metadata for a recovered hidden VOD, where no <see cref="VideoInfo"/> is available
+        /// because the broadcast was never published. Only the values we can derive from the live
+        /// stream metadata are written, and there are no chapters.
+        /// </summary>
+        public static async Task SerializeRecoveredAsync(string filePath, string streamId, [AllowNull] string streamer, DateTimeOffset createdAt)
+        {
+            await using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
+            await using var sw = new StreamWriter(fs) { NewLine = LINE_FEED };
+
+            var title = string.IsNullOrWhiteSpace(streamer) ? $"Recovered broadcast {streamId}" : $"{streamer} - recovered broadcast {streamId}";
+            await SerializeGlobalMetadata(sw, streamer, streamId, title, createdAt.UtcDateTime, 0);
+        }
+
         public static async Task SerializeAsync(string filePath, string videoId, ShareClipRenderStatusClip clip, IEnumerable<VideoMomentEdge> videoMomentEdges)
         {
             await using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
