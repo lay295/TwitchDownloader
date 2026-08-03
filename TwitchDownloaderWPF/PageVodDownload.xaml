@@ -105,6 +105,7 @@
                 <hc:SplitButton.DropDownContent>
                     <StackPanel>
                         <MenuItem x:Name="MenuItemEnqueue" Header="{lex:Loc EnqueueDownload}" Click="MenuItemEnqueue_Click"/>
+                        <MenuItem x:Name="MenuItemSplitByChapters" Header="{lex:Loc SplitByChapters}" Click="MenuItemSplitByChapters_Click"/>
                     </StackPanel>
                 </hc:SplitButton.DropDownContent>
             </hc:SplitButton>
