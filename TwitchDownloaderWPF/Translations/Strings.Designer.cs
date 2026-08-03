@@ -283,7 +283,106 @@ namespace TwitchDownloaderWPF.Translations {
                 return ResourceManager.GetString("Browse", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Preview ähnelt.
+        /// </summary>
+        public static string Preview {
+            get {
+                return ResourceManager.GetString("Preview", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Preview at: ähnelt.
+        /// </summary>
+        public static string PreviewAt {
+            get {
+                return ResourceManager.GetString("PreviewAt", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Click Preview to render a frame ähnelt.
+        /// </summary>
+        public static string PreviewHint {
+            get {
+                return ResourceManager.GetString("PreviewHint", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Rendering... ähnelt.
+        /// </summary>
+        public static string PreviewRendering {
+            get {
+                return ResourceManager.GetString("PreviewRendering", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Invalid position. Use H:MM:SS. ähnelt.
+        /// </summary>
+        public static string PreviewInvalidPosition {
+            get {
+                return ResourceManager.GetString("PreviewInvalidPosition", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Image ähnelt.
+        /// </summary>
+        public static string PreviewImage {
+            get {
+                return ResourceManager.GetString("PreviewImage", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Video ähnelt.
+        /// </summary>
+        public static string PreviewVideo {
+            get {
+                return ResourceManager.GetString("PreviewVideo", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Clip length in seconds (video mode) ähnelt.
+        /// </summary>
+        public static string PreviewDuration {
+            get {
+                return ResourceManager.GetString("PreviewDuration", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die View full size ähnelt.
+        /// </summary>
+        public static string PreviewFullscreen {
+            get {
+                return ResourceManager.GetString("PreviewFullscreen", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Play ähnelt.
+        /// </summary>
+        public static string PreviewPlay {
+            get {
+                return ResourceManager.GetString("PreviewPlay", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Pause ähnelt.
+        /// </summary>
+        public static string PreviewPause {
+            get {
+                return ResourceManager.GetString("PreviewPause", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to BTTV Emotes:.
         /// </summary>
