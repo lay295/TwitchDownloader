@@ -7,7 +7,7 @@
  Baixador de VOD/Clip/Chat da Twitch e Renderizador de Chat
     <br />
     <br />
-    <a href="https://github.com/lay295/TwitchDownloader/issues">Report Bug</a>
+    <a href="https://github.com/lay295/TwitchDownloader/issues">Reporte um Bug</a>
   </div>
 </div>
 
