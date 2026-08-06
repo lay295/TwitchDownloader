@@ -180,10 +180,10 @@
     <value>Tamanho da Fonte:</value>
   </data>
   <data name="ChatUsernameFontSize" xml:space="preserve">
-    <value>Username Size:</value>
+    <value>Tamanho do nome de usuário:</value>
   </data>
   <data name="ChatUsernameFontSizeTooltip" xml:space="preserve">
-    <value>Username font size as a multiple of the message font size. 1.0 = same size as the message text.</value>
+    <value>Tamanho da fonte do nome de usuário como múltiplo do tamanho da fonte da mensagem. 1.0 = o mesmo tamanho do texto da mensagem.</value>
   </data>
   <data name="ChatHeight" xml:space="preserve">
     <value>Altura:</value>
@@ -291,7 +291,7 @@
     <value>Clique aqui para aprender sobre as opções do FFmpeg</value>
   </data>
   <data name="FfmpegOutputArguments" xml:space="preserve">
-    <value>Output dos Argumentos:</value>
+    <value>Saída dos Argumentos:</value>
   </data>
   <data name="FfmpegReset" xml:space="preserve">
     <value>Restaurar para os padrões</value>
@@ -319,11 +319,11 @@
     <value>Lista de nomes de usuário - separados por vírgulas, espaços ao redor das vírgulas serão ignoradas, NÃO é sensível à capitalização.</value>
   </data>
   <data name="HighlightUsersList" xml:space="preserve">
-    <value>Highlight Users List </value>
+    <value>Lista de usuários em destaque </value>
     <comment>Leave a trailing space</comment>
   </data>
   <data name="HighlightUsersListTooltip" xml:space="preserve">
-    <value>List of usernames whose message backgrounds will be drawn in the chosen highlight color - comma separated, spaces around commas ignored, NOT case-sensitive.</value>
+    <value>Lista de nomes de usuário cujos fundos das mensagens serão desenhados na cor de destaque escolhida - separados por vírgulas, espaços ao redor das vírgulas são ignorados, NÃO diferencia maiúsculas de minúsculas.</value>
   </data>
   <data name="InvalidClipLinkId" xml:space="preserve">
     <value>Link/ID do Clip é Inválido</value>
@@ -341,7 +341,7 @@
     <value>Link/ID do vídeo é Inválido</value>
   </data>
   <data name="InvalidVideoLinkIdMessage" xml:space="preserve">
-    <value>Por favor coloque um Link/ID de vídeo válido\nExamples:\nhttps://www.twitch.tv/videos/470741744\n470741744</value>
+    <value>Por favor coloque um Link/ID de vídeo válido\nExemplos:\nhttps://www.twitch.tv/videos/470741744\n470741744</value>
   </data>
   <data name="JsonFile" xml:space="preserve">
     <value>Arquivo JSON:</value>
@@ -841,7 +841,7 @@
     <value>{0:N0} dias</value>
   </data>
   <data name="LogLevels" xml:space="preserve">
-    <value>Log Levels:</value>
+    <value>Níveis de Log:</value>
   </data>
   <data name="LogLevelVerbose" xml:space="preserve">
     <value>Detalhado</value>
