@@ -259,21 +259,7 @@ namespace TwitchDownloaderCore.Tools
 
 					if (_endConnection.IsCancellationRequested)
 					{
-						try
-						{
-							await websocket.CloseAsync();
-						} catch (Exception ex)
-						{
-							// there is a race condition that can lead to CloseAsync throwing despite correctly closing the connection
-							// relevant because we might send an unsubscribe right before closing, triggering the race condition
-							// see: https://github.com/dotnet/runtime/issues/132006
-							var isIncorrectException = websocket.State == WebSocketState.Closed && ex.Message.Contains("without completing the close handshake");
-							
-							if (!isIncorrectException)
-							{
-								throw;
-							}
-						}
+						await websocket.CloseAsync();
 					}
 					else
 					{

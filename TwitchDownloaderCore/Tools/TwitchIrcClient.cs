@@ -56,16 +56,9 @@ namespace TwitchDownloaderCore.Tools
 					var completedTask = await Task.WhenAny(reconnectionRequired.Task, Task.Delay(Timeout.Infinite, stopListening));
 
 					websocket.MessageReceived -= eventHandler;
-					try
-					{
-						logger.LogVerbose($"[{websocket._instanceId}] state before CloseAsync = {websocket.State}");
-						await websocket.CloseAsync();
-					}
-					catch
-					{
-						logger.LogVerbose($"[{websocket._instanceId}] state after failure = {websocket.State}");
-						throw;
-					}
+					await websocket.CloseAsync();
+
+					
 				}
 
 				channel.TryComplete();

@@ -34,10 +34,25 @@ namespace TwitchDownloaderCore.Tools
             _receiveLoopTask = ReceiveLoopAsync(uri, _receiveLoopCts.Token);
         }
 
-        public Task CloseAsync(CancellationToken cancellationToken = default)
+        public async Task CloseAsync(CancellationToken cancellationToken = default)
         {
-            _logger.LogVerbose($"[{_instanceId}] close frame send");
-            return _socket.CloseAsync(WebSocketCloseStatus.NormalClosure, null, cancellationToken);
+            try
+            {
+                _logger.LogVerbose($"[{_instanceId}] send close frame");
+                await _socket.CloseAsync(WebSocketCloseStatus.NormalClosure, null, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                // there is a race condition that can lead to CloseAsync throwing despite correctly closing the connection
+                // relevant because we might send an unsubscribe right before closing, triggering the race condition
+                // see: https://github.com/dotnet/runtime/issues/132006
+                var isIncorrectException = _socket.State == WebSocketState.Closed && ex.Message.Contains("without completing the close handshake");
+
+                if (!isIncorrectException)
+                {
+                    throw;
+                }
+            }
         }
 
         private async Task ReceiveLoopAsync(Uri uri, CancellationToken cancellationToken)
