@@ -259,13 +259,28 @@ namespace TwitchDownloaderCore.Tools
 
 					if (_endConnection.IsCancellationRequested)
 					{
-						await websocket.CloseAsync();
+						try
+						{
+							await websocket.CloseAsync();
+						} catch (Exception ex)
+						{
+							// there is a race condition that can lead to CloseAsync throwing despite correctly closing the connection
+							// relevant because we might send an unsubscribe right before closing, triggering the race condition
+							// see: https://github.com/dotnet/runtime/issues/132006
+							var isIncorrectException = websocket.State == WebSocketState.Closed && ex.Message.Contains("without completing the close handshake");
+							
+							if (!isIncorrectException)
+							{
+								throw;
+							}
+						}
 					}
 					else
 					{
 						/*
-						we need to use the recoveryUrl, which gets invalidated upon normal close
-						the connection for the recovery url would be instant refused 
+						in case the cancellation was not requested we need to use the recoveryUrl, which gets invalidated upon normal close
+						the connection for the recovery url would be instantly refused 
+						therefore we can't call CloseAsync here
 						in my tests there usually weren't any messages being lost, but technically there could be
 						messages arriving in between deregistering the message handler and connecting with the new websocket
 						*/
