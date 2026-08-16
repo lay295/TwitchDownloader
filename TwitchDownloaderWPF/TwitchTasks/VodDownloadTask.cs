@@ -28,7 +28,9 @@ namespace TwitchDownloaderWPF.TwitchTasks
         {
             var progress = new WpfTaskProgress(i => Progress = i, s => DisplayStatus = s);
 
-            if (DownloadOptions.DelayDownload)
+            // Hidden-VOD recovery is keyed on a channel + captured stream metadata, not a published
+            // video id, so the offline-delay poll (which queries a video id) does not apply.
+            if (DownloadOptions.DelayDownload && !DownloadOptions.RecoverHiddenVod)
             {
                 var success = await DelayUntilVideoOffline(DownloadOptions.Id, progress);
                 if (!success)
