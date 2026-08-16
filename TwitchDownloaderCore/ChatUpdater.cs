@@ -148,7 +148,7 @@ namespace TwitchDownloaderCore
                 }
 
                 chatRoot.video.title = videoInfo.title;
-                chatRoot.video.description = videoInfo.description;
+                chatRoot.video.description = videoInfo.description.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd();
                 chatRoot.video.created_at = videoInfo.createdAt;
                 chatRoot.video.length = videoInfo.lengthSeconds;
                 chatRoot.video.viewCount = videoInfo.viewCount;
