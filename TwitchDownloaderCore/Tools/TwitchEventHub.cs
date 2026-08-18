@@ -8,6 +8,9 @@ using TwitchDownloaderCore.Models;
 
 namespace TwitchDownloaderCore.Tools
 {
+	// TODO: there is an issue where if you leave the scope of a subGroup and it triggers an unsubscription
+	// and then create a new SubGroup for the same topic it will go through with the unsubscription but
+	// the new subGroup thinks it is valid
 	public sealed class TwitchEventHub : IDisposable
 	{
 
@@ -235,6 +238,7 @@ namespace TwitchDownloaderCore.Tools
 					// connect to the underlying websocket
 					var uri = new Uri(_recoveryUrl ?? "wss://hermes.twitch.tv/v1?clientId=kimne78kx3ncx6brgo4mv6wki5h1ko");
 					_recoveryUrl = null;
+					// TODO: during long connections the server might request a close and then the subscriptions need to be renewed
 					// TODO: retry connect as in irc client
 					await websocket.ConnectAsync(uri, _endConnection.Token);
 

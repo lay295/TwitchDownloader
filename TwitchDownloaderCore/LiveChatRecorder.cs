@@ -41,7 +41,7 @@ namespace TwitchDownloaderCore
                 throw new ArgumentException("Invalid channel name.");
             }
 
-            if (_recorderOptions.Duration is not null && _recorderOptions.NextStream)
+            if (_recorderOptions.Duration.HasValue && _recorderOptions.NextStream)
             {
                 throw new ArgumentException("Can't set both a duration and next-stream");
             }
@@ -57,28 +57,28 @@ namespace TwitchDownloaderCore
             try
             {
                 var streamerId = (await TwitchHelper.GetUserIds([_recorderOptions.Channel])).data.users[0].id;
+                using var eventHub = new TwitchEventHub(_progress);
 
 
                 if (_recorderOptions.NextStream)
                 {
-                    using var eventHub = new TwitchEventHub(_progress);
                     var streamInfo = await TwitchHelper.GetLiveStreamInfo(_recorderOptions.Channel);
 
                     if (streamInfo.data.stream is null)
                     {
                         try
                         {
-                            await WaitFor(StreamStateChange.START, eventHub, streamerId, CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, new CancellationTokenSource(new TimeSpan(0, 1, 0)).Token).Token);
+                            // TODO: remove dev only TimeSpan before merging, also, the try catch can be removed without the time based cancellation
+                            await WaitFor(StreamStateChange.START, eventHub, streamerId, CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, new CancellationTokenSource(new TimeSpan(0, 0, 10)).Token).Token);
                         }
                         catch { }
+                        await Task.Delay(2_000); // TODO: this is just a test because the unsubscribe might go through even if the following code needs the same subscription
                     }
                 }
 
 
-                // TODO: distinguish between task ending regularly signal and cancellation
-                // also this obv does not yet wait for stream end and uses 1min instead
-                var _cancellationSource = new CancellationTokenSource(_recorderOptions.Duration ?? new TimeSpan(0, 1, 0));
-                var chatRoot = await ProcessMessages(CancellationTokenSource.CreateLinkedTokenSource(_cancellationSource.Token, cancellationToken).Token);
+                var stopSignal = GetEndOfRecordingSignal(eventHub, streamerId, cancellationToken);
+                var chatRoot = await ProcessMessages(stopSignal, cancellationToken);
 
                 using (var outputStream = outputFileInfo.Open(FileMode.Create, FileAccess.Write, FileShare.Read))
                 {
@@ -95,7 +95,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private async Task<ChatRoot> ProcessMessages(CancellationToken cancellationToken)
+        private async Task<ChatRoot> ProcessMessages(Task stopSignal, CancellationToken cancellationToken)
         {
             ConcurrentQueue<Comment> Comments = new();
 
@@ -111,7 +111,7 @@ namespace TwitchDownloaderCore
                 embeddedData = new EmbeddedData()
             };
 
-            await foreach (var message in TwitchIrcClient.MessagesFor(_recorderOptions.Channel, cancellationToken, _progress).ReadAllAsync())
+            await foreach (var message in TwitchIrcClient.MessagesFor(_recorderOptions.Channel, stopSignal, cancellationToken, _progress).ReadAllAsync())
             {
                 try
                 {
@@ -155,6 +155,16 @@ namespace TwitchDownloaderCore
                     break;
                 }
             }
+        }
+
+        private Task GetEndOfRecordingSignal(TwitchEventHub eventHub, string streamerId, CancellationToken cancellationToken)
+        {
+            if (_recorderOptions.Duration.HasValue)
+            {
+                return Task.Delay(_recorderOptions.Duration.Value);
+            }
+
+            return WaitFor(StreamStateChange.END, eventHub, streamerId, cancellationToken);
         }
     }
 }

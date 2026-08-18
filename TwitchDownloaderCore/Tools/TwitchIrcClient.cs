@@ -12,37 +12,37 @@ namespace TwitchDownloaderCore.Tools
 		private static readonly string AnonymousUsername = $"justinfan{Random.Shared.Next(10_000, 99_999)}";
 
 
-		public static ChannelReader<IrcMessage> MessagesFor(string channelName, CancellationToken stopListening, ITaskLogger logger)
+		public static ChannelReader<IrcMessage> MessagesFor(string channelName, Task stopSignal, CancellationToken cancellationToken, ITaskLogger logger)
 		{
 			var channel = Channel.CreateUnbounded<IrcMessage>();
 
-			_ = RunMessagePump(channelName, channel.Writer, stopListening, logger);
+			_ = RunMessagePump(channelName, channel.Writer, stopSignal, cancellationToken, logger);
 
-			return channel;
+			return channel.Reader;
 		}
 
 		private static async Task RunMessagePump(
 			string channelName,
 			ChannelWriter<IrcMessage> channel,
-			CancellationToken stopListening,
+			Task stopSignal,
+			CancellationToken cancellationToken,
 			ITaskLogger logger
 		)
 		{
 			try
 			{
 				var parser = new IrcParser(logger);
-				// client.DebugFile = new FileInfo("debug.txt");
 
-				while (!stopListening.IsCancellationRequested)
+				while (true)
 				{
-					// this is used to signal a need for reconnection, which is then awaited and leads to this while loop being restarted
+					// this is used to signal a need for reconnection, which is then awaited and leads to this while loop going into the next round
 					var reconnectionRequired = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
 					using var websocket = new EventingWebSocket(logger);
 					EventHandler<EventingWebSocket.Message> eventHandler = (object sender, EventingWebSocket.Message msg) => HandleMessageReceived(sender, msg, websocket, channel, reconnectionRequired, logger, parser);
 					websocket.MessageReceived += eventHandler;
 
-					await ConnectToTwitchIrc(websocket, stopListening, logger);
+					await ConnectToTwitchIrc(websocket, cancellationToken, logger);
 
 					await websocket.SendTextPooledAsync("CAP REQ :twitch.tv/commands twitch.tv/tags", CancellationToken.None);
 					await websocket.SendTextPooledAsync($"PASS {ANONYMOUS_PASSWORD}", CancellationToken.None);
@@ -53,18 +53,18 @@ namespace TwitchDownloaderCore.Tools
 
 					// this waits for either a need for reconnection or the desired end of the listening
 					// WhenAny will mask the stopListening throw, so Disconnect happens either way
-					var completedTask = await Task.WhenAny(reconnectionRequired.Task, Task.Delay(Timeout.Infinite, stopListening));
+					var completedTask = await Task.WhenAny(reconnectionRequired.Task, stopSignal, Task.Delay(Timeout.Infinite, cancellationToken));
 
 					websocket.MessageReceived -= eventHandler;
 					await websocket.CloseAsync();
 
-					
+					cancellationToken.ThrowIfCancellationRequested();
+					if (completedTask != reconnectionRequired.Task)
+					{
+						break;
+					}
 				}
 
-				channel.TryComplete();
-			}
-			catch (OperationCanceledException)
-			{
 				channel.TryComplete();
 			}
 			catch (Exception ex)
