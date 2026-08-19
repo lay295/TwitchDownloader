@@ -1065,7 +1065,19 @@ namespace TwitchDownloaderWPF.Properties {
                 this["ReduceMotion"] = value;
             }
         }
-        
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool RemoveEmojisFromFilenames {
+            get {
+                return ((bool)(this["RemoveEmojisFromFilenames"]));
+            }
+            set {
+                this["RemoveEmojisFromFilenames"] = value;
+            }
+        }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         public global::System.Collections.Specialized.StringCollection RecentChannels {
