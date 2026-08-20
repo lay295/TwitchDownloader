@@ -8,9 +8,6 @@ using TwitchDownloaderCore.Models;
 
 namespace TwitchDownloaderCore.Tools
 {
-	// TODO: there is an issue where if you leave the scope of a subGroup and it triggers an unsubscription
-	// and then create a new SubGroup for the same topic it will go through with the unsubscription but
-	// the new subGroup thinks it is valid
 	public sealed class TwitchEventHub : IDisposable
 	{
 
@@ -18,7 +15,7 @@ namespace TwitchDownloaderCore.Tools
 		{
 			private readonly TwitchEventHub _hub;
 			internal readonly Channel<EventHubMessage> _channel;
-			private readonly string[] _topics;
+			internal readonly string[] _topics;
 			public ChannelReader<EventHubMessage> Messages { get => _channel.Reader; }
 
 			internal SubscriptionGroup(TwitchEventHub hub, Channel<EventHubMessage> channel, string[] topics)
@@ -31,38 +28,7 @@ namespace TwitchDownloaderCore.Tools
 			public void Dispose()
 			{
 				_channel.Writer.TryComplete();
-				foreach (var topic in _topics)
-				{
-					if (!_hub._subscriptionIds.TryGetValue(topic, out var subId))
-					{
-						_hub._logger.LogWarning($"tried to remove subscription for a topic that has no subscriptions: {topic}");
-						continue;
-					}
-
-					if (!_hub._notificationChannels.TryGetValue(subId, out var subGroups))
-					{
-						_hub._logger.LogWarning($"tried to remove subGroup for a subscription that has no subGroups: {subId}");
-						continue;
-					}
-
-					if (!subGroups.Remove(this))
-					{
-						_hub._logger.LogWarning($"subGroup is not a known listener for the subscription: {subId}");
-						continue;
-					}
-
-					// if this is the last listener for that subscription, clean up the subscription and unsubscribe
-					if (subGroups.Count < 1)
-					{
-						_hub._notificationChannels.TryRemove(subId, out _);
-						try
-						{
-							// we do not await unsubscriptions, they are fire and forget to keep the unsubscribe/dispose simple
-							_ = _hub.Unsubscribe(topic);
-						}
-						catch { }
-					}
-				}
+				_ = _hub.TryUnsubscribeSubGroupTopics(this); // no awaiting, we do not handle/propagate errors or need to do anything after the completion
 			}
 		}
 
@@ -71,6 +37,9 @@ namespace TwitchDownloaderCore.Tools
 		private readonly ITaskLogger _logger;
 		// internally used to signal that the connection loop should end
 		private readonly CancellationTokenSource _endConnection = new CancellationTokenSource();
+		// to ensure that un-/subscription attempts read a consistent state with regard to the current presence or absense of a subscription
+		// protects changes in _subscriptionIds and _notificationChannels
+		private readonly SemaphoreSlim _subscriptionLock = new SemaphoreSlim(1, 1);
 
 		// stores the subscription messages that are handled by the subscription loop
 		private readonly Channel<EventHubMessage> _messagesWaitingForSending = Channel.CreateUnbounded<EventHubMessage>();
@@ -103,41 +72,46 @@ namespace TwitchDownloaderCore.Tools
 
 			var subGroup = new SubscriptionGroup(this, subChannel, topics.ToArray());
 
-			var subTasks = topics.Select(async topic =>
-			{
-				// ensure that there is a subscription ongoing
-				if (!_subscriptionIds.ContainsKey(topic))
-				{
-					await Subscribe(topic);
-				}
-
-				_subscriptionIds.TryGetValue(topic, out var subId);
-
-				var listenerList = _notificationChannels.GetOrAdd(subId, new List<SubscriptionGroup>());
-
-				listenerList.Add(subGroup);
-			});
-
+			// multiple subscription attempts are allowed to happen in parallel, they cant influence each other
+			await _subscriptionLock.WaitAsync();
 			try
 			{
-				Task.WaitAll(subTasks);
+				var subTasks = topics.Select(async topic =>
+				{
+					// ensure that there is a subscription ongoing
+					if (!_subscriptionIds.ContainsKey(topic))
+					{
+						_subscriptionIds.TryAdd(topic, await Subscribe(topic));
+					}
+
+					_subscriptionIds.TryGetValue(topic, out var subId);
+
+					var listenerList = _notificationChannels.GetOrAdd(subId, new List<SubscriptionGroup>());
+
+					listenerList.Add(subGroup);
+				});
+
+				await Task.WhenAll(subTasks);
 			}
 			catch
 			{
 				subGroup.Dispose();
 				throw;
 			}
-
+			finally
+			{
+				_subscriptionLock.Release();
+			}
 
 			return subGroup;
 		}
 
 		/// <summary>
 		/// send a subscription request and wait for the response, throws if not sucessful<br/>
-		/// handles adding the id to _subscriptionIds in case of success
 		/// </summary>
 		/// <param name="topic">the combined string of the event name and streamer used for identifying what to subscribe to</param>
-		private async Task Subscribe(string topic)
+		/// <returns>the new subscription id</returns>
+		private async Task<string> Subscribe(string topic)
 		{
 			const int SUBSCRIPTION_TIMEOUT_SECS = 20;
 
@@ -158,7 +132,7 @@ namespace TwitchDownloaderCore.Tools
 					throw new HttpRequestException("the subscription was rejected");
 				}
 
-				_subscriptionIds.TryAdd(topic, subResponse.subscription.id);
+				return subResponse.subscription.id;
 			}
 			catch
 			{
@@ -174,17 +148,11 @@ namespace TwitchDownloaderCore.Tools
 
 		/// <summary>
 		/// send an unsubscription request and wait for the response, throws if not sucessful<br/>
-		/// handles removing the id from _subscriptionIds in case of success
 		/// </summary>
 		/// <param name="evt">the name of the event</param>
-		private async Task Unsubscribe(string topic)
+		private async Task Unsubscribe(string subId)
 		{
 			const int TIMEOUT_SECS = 20;
-
-			if (!_subscriptionIds.TryGetValue(topic, out var subId))
-			{
-				throw new ArgumentException($"no known subscription for {topic}", "evt");
-			}
 
 			EventHubMessage request = CreateUnsubscriptionMessage(subId);
 
@@ -201,8 +169,6 @@ namespace TwitchDownloaderCore.Tools
 				{
 					throw new HttpRequestException("the unsubscription has failed");
 				}
-
-				_subscriptionIds.TryRemove(topic, out _);
 			}
 			catch
 			{
@@ -487,8 +453,59 @@ namespace TwitchDownloaderCore.Tools
 			};
 		}
 
+		private async Task TryUnsubscribeSubGroupTopics(SubscriptionGroup subGroup)
+		{
+			// multiple unsubscribe requests can happen in parallel, they can't interfere with each other
+			// currently we do not await the Unsubscribe calls
+			// this should not cause issues as the messages are timestamped, but if there is a race condition
+			// then a simple await might be a solution at the cost of some latency
+			// in that case replicating the subTasks from SubscribeTo minimizes that latency
+			await _subscriptionLock.WaitAsync();
+			try
+			{
+				foreach (var topic in subGroup._topics)
+				{
+					if (!_subscriptionIds.TryGetValue(topic, out var subId))
+					{
+						_logger.LogWarning($"tried to remove subscription for a topic that has no subscriptions: {topic}");
+						continue;
+					}
+
+					if (!_notificationChannels.TryGetValue(subId, out var subGroups))
+					{
+						_logger.LogWarning($"tried to remove subGroup for a subscription that has no subGroups: {subId}");
+						continue;
+					}
+
+					if (!subGroups.Remove(subGroup))
+					{
+						_logger.LogWarning($"subGroup is not a known listener for the subscription: {subId}");
+						continue;
+					}
+
+					// if this is the last listener for that subscription, clean up the subscription and unsubscribe
+					if (subGroups.Count < 1)
+					{
+						_notificationChannels.TryRemove(subId, out _);
+						_subscriptionIds.TryRemove(topic, out _);
+						try
+						{
+							// we do not await unsubscriptions, they are fire and forget to keep the unsubscribe/dispose simple
+							_ = Unsubscribe(subId);
+						}
+						catch { }
+					}
+				}
+			}
+			finally
+			{
+				_subscriptionLock.Release();
+			}
+		}
+
 		public void Dispose()
 		{
+			_subscriptionLock.Dispose();
 			try
 			{
 				_messagesWaitingForSending.Writer.TryComplete();

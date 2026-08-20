@@ -72,7 +72,6 @@ namespace TwitchDownloaderCore
                             await WaitFor(StreamStateChange.START, eventHub, streamerId, CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, new CancellationTokenSource(new TimeSpan(0, 0, 10)).Token).Token);
                         }
                         catch { }
-                        await Task.Delay(2_000); // TODO: this is just a test because the unsubscribe might go through even if the following code needs the same subscription
                     }
                 }
 
