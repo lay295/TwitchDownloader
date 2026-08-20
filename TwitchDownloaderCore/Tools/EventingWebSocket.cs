@@ -125,6 +125,46 @@ namespace TwitchDownloaderCore.Tools
             return _socket.SendAsync(message, WebSocketMessageType.Binary, true, cancellation);
         }
 
+        public async Task ConnectWithRetries(Uri uri, int maxRetries = 1, CancellationToken cancellationToken = default)
+		{
+			var count = 0;
+			while (true)
+			{
+				try
+				{
+					await ConnectAsync(uri, cancellationToken);
+					return;
+				}
+                catch(OperationCanceledException)
+                {
+                    throw;
+                }
+				catch
+				{
+					if (++count >= maxRetries)
+					{
+						_logger.LogWarning($"Failed to connect to {uri} after {maxRetries} tries.");
+						throw;
+					}
+					var sleepTime = GetExponentialBackoff(count);
+					_logger.LogVerbose($"Failed to connect to {uri}, retrying in {sleepTime:N0}ms...");
+					await Task.Delay(sleepTime, cancellationToken);
+				}
+			}
+		}
+
+        /// <summary>
+        /// get an increasing number (min 165 for 1, max 30_000 from 8 onwards)[on avg] depending on count
+        /// </summary>
+        /// <param name="count">how far into the exponential sequence you want to go</param>
+        private static int GetExponentialBackoff(int count)
+		{
+			return (int)Math.Min(
+				Math.Pow(2.25, count) * Random.Shared.Next(50, 100),
+				30_000
+			);
+		}
+
         public void Dispose()
         {
             _logger.LogVerbose($"[{_instanceId}] dispose initiated");
