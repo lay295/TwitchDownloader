@@ -191,6 +191,8 @@ namespace TwitchDownloaderCore.Tools
 				var endConnectionTask = endConnectionTaskCompletionSource.Task;
 				using var reg = _endConnection.Token.Register(() => endConnectionTaskCompletionSource.TrySetResult());
 
+				var hadPriorConnection = false;
+
 				while (!_endConnection.IsCancellationRequested)
 				{
 					var reconnectionRequired = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -202,16 +204,26 @@ namespace TwitchDownloaderCore.Tools
 					websocket.MessageReceived += eventHandler;
 
 					// connect to the underlying websocket
+					var redoSubscriptions = _recoveryUrl is null && hadPriorConnection;
 					var uri = new Uri(_recoveryUrl ?? "wss://hermes.twitch.tv/v1?clientId=kimne78kx3ncx6brgo4mv6wki5h1ko");
 					_recoveryUrl = null;
-					// TODO: during long connections the server might request a close and then the subscriptions need to be renewed
 					const int MAX_RETRIES = 5;
 					await websocket.ConnectWithRetries(uri, MAX_RETRIES, _endConnection.Token);
+					hadPriorConnection = true;
 
 					// setup handling loops
 					using var supportLoopCancellationSource = new CancellationTokenSource();
 					var subscriptionProcessingTask = SendMessageLoop(websocket, supportLoopCancellationSource.Token);
 					var monitoringKeepaliveTask = MonitorConnectionKeepalive(reconnectionRequired, supportLoopCancellationSource.Token);
+
+					// during long connections (3h in my experience) the server might request a close and then the subscriptions need to be renewed
+					// the recoveryUrl will not work in case of a server requested close, leading to an instant close after connecting
+					// the next loop will then not have a recovery url and try to redo the subscriptions
+					// TODO: what happens when a crucial message like stream-end happens during a reconnect interruption
+					if (redoSubscriptions)
+					{
+						await RecoverPriorSubscriptions();
+					}
 
 					// wait until either the end of the connection is desired or a reconnection is needed
 					// reconnection might be needed if: the underlying websocket closes for some reason, the subscription processing errors out
@@ -272,7 +284,7 @@ namespace TwitchDownloaderCore.Tools
 					return;
 				case WebSocketMessageType.Close:
 					// this can happen when legitimatly closing after finishing to collect all data.
-					// Still, if something else triggers it, we need to reconnect, otherwise the stopListening check will catch it
+					// Still, if something else triggers it, we need to reconnect, otherwise the stopSignal check will catch it
 					_logger.LogVerbose($"received close request from underlying websocket");
 					reconnectRequired.TrySetResult();
 					return;
@@ -451,6 +463,28 @@ namespace TwitchDownloaderCore.Tools
 				timestamp = DateTime.UtcNow,
 				Data = new UnsubscribeData { id = subscribeId }
 			};
+		}
+
+		private async Task RecoverPriorSubscriptions()
+		{
+			await _subscriptionLock.WaitAsync();
+			try
+			{
+				var subTasks = _subscriptionIds.Select(async topicIdPair => { return (topicIdPair, await Subscribe(topicIdPair.Key)); });
+
+				var subTaskResults = await Task.WhenAll(subTasks);
+
+				foreach (var ((topic, oldSubId), newSubId) in subTaskResults)
+				{
+					_subscriptionIds[topic] = newSubId;
+					_notificationChannels[newSubId] = _notificationChannels[oldSubId];
+					_notificationChannels.TryRemove(oldSubId, out _);
+				}
+			}
+			finally
+			{
+				_subscriptionLock.Release();
+			}
 		}
 
 		private async Task TryUnsubscribeSubGroupTopics(SubscriptionGroup subGroup)
