@@ -37,31 +37,23 @@ namespace TwitchDownloaderCLI.Tools
 
         private FileInfo PromptUser(FileInfo fileInfo)
         {
-            // Deliberate use of Console.WriteLine instead of logger. Do not change.
-            Console.WriteLine($"The file '{fileInfo.FullName}' already exists.");
+            var behavior = UserPrompt.ShowOverwriteRenameExit($"The file '{fileInfo.FullName}' already exists.");
 
-            while (true)
+            switch (behavior)
             {
-                Console.Write("[O] Overwrite / [R] Rename / [E] Exit: ");
-
-                var userInput = Console.ReadLine();
-                if (userInput is null)
-                {
-                    Console.WriteLine();
+                case OverwriteBehavior.Overwrite:
+                    return fileInfo;
+                case OverwriteBehavior.Rename:
+                    return FilenameService.GetNonCollidingName(fileInfo);
+                case OverwriteBehavior.Exit:
+                    Environment.Exit(1);
+                    return null;
+                case null:
                     _logger.LogError("Could not read user input. Please specify the desired collision behavior with the CLI argument and try again.");
                     Environment.Exit(1);
-                }
-
-                switch (userInput.Trim().ToLower())
-                {
-                    case "o" or "overwrite":
-                        return fileInfo;
-                    case "e" or "exit":
-                        Environment.Exit(1);
-                        break;
-                    case "r" or "rename":
-                        return FilenameService.GetNonCollidingName(fileInfo);
-                }
+                    return null;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(behavior), behavior, null);
             }
         }
     }
