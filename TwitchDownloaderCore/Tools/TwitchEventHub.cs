@@ -193,6 +193,7 @@ namespace TwitchDownloaderCore.Tools
 
 				var hadPriorConnection = false;
 
+				// TODO: what happens when a crucial message like stream-end happens during a reconnect interruption
 				while (!_endConnection.IsCancellationRequested)
 				{
 					var reconnectionRequired = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -213,13 +214,11 @@ namespace TwitchDownloaderCore.Tools
 
 					// setup handling loops
 					using var supportLoopCancellationSource = new CancellationTokenSource();
-					var subscriptionProcessingTask = SendMessageLoop(websocket, supportLoopCancellationSource.Token);
+					var sendMessagesTask = SendMessageLoop(websocket, supportLoopCancellationSource.Token);
 					var monitoringKeepaliveTask = MonitorConnectionKeepalive(reconnectionRequired, supportLoopCancellationSource.Token);
 
-					// during long connections (3h in my experience) the server might request a close and then the subscriptions need to be renewed
-					// the recoveryUrl will not work in case of a server requested close, leading to an instant close after connecting
-					// the next loop will then not have a recovery url and try to redo the subscriptions
-					// TODO: what happens when a crucial message like stream-end happens during a reconnect interruption
+					// this was originally added before i knew of the reconnect message
+					// but having an emergency subscription recovery should still be better then not having it
 					if (redoSubscriptions)
 					{
 						await RecoverPriorSubscriptions();
@@ -227,12 +226,12 @@ namespace TwitchDownloaderCore.Tools
 
 					// wait until either the end of the connection is desired or a reconnection is needed
 					// reconnection might be needed if: the underlying websocket closes for some reason, the subscription processing errors out
-					var completedTask = await Task.WhenAny(reconnectionRequired.Task, subscriptionProcessingTask, monitoringKeepaliveTask, endConnectionTask);
+					var completedTask = await Task.WhenAny(reconnectionRequired.Task, sendMessagesTask, monitoringKeepaliveTask, endConnectionTask);
 
 					// ensure that the subscription processing ends cleanly before websocket is closed
 					// this is important for the recoveryUrl to truly give all subscriptions that are processed
 					supportLoopCancellationSource.Cancel();
-					await subscriptionProcessingTask;
+					await sendMessagesTask;
 
 					// remove message handler and clean up connection state
 					websocket.MessageReceived -= eventHandler;
@@ -257,7 +256,7 @@ namespace TwitchDownloaderCore.Tools
 			}
 			catch (OperationCanceledException)
 			{
-				// should really be okay
+				// should be okay
 			}
 			catch (Exception ex)
 			{
@@ -321,6 +320,12 @@ namespace TwitchDownloaderCore.Tools
 					break;
 				case null:
 					// keepalive message, whose only purpose it is to update _lastMessageReceived
+					break;
+				case ReconnectData reconnect:
+					// 30s before the connection gets closed automatically and all subscriptions are lost and need to be redone
+					_logger.LogVerbose($"server requested reconnect");
+					_recoveryUrl = reconnect.url;
+					reconnectRequired.TrySetResult();
 					break;
 				case NotificationData notifData:
 					if (!_notificationChannels.TryGetValue(notifData.subscription.id, out var subGroups))
@@ -539,20 +544,22 @@ namespace TwitchDownloaderCore.Tools
 
 		public void Dispose()
 		{
-			_subscriptionLock.Dispose();
 			try
 			{
+				// this ends the connection loop and cleans up the underlying websocket
+				// has to come before completing the messing sending channel as it otherwise would simple trigger a reconnect because the sending task ends before the endConnection task
+				_endConnection.Cancel();
+
 				_messagesWaitingForSending.Writer.TryComplete();
 				foreach (var subscriptionListeners in _notificationChannels)
 				{
 					// for subgroups with n subscriptions this will be called for each underlying subscription but the operation is idempotent
 					subscriptionListeners.Value.ForEach(subGroup => subGroup._channel.Writer.TryComplete());
 				}
-				// this ends the connection loop and cleans up the underlying websocket
-				_endConnection.Cancel();
 			}
 			finally
 			{
+				_subscriptionLock.Dispose();
 				_endConnection.Dispose();
 			}
 		}

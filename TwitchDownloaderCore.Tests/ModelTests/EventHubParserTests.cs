@@ -89,6 +89,14 @@ namespace TwitchDownloaderCore.Tests.ToolTests
 				"2026-06-06T13:08:51.267573703Z",
 				null,
 				new NotificationData { subscription = new SubscriptionId { id = "B8eXrEKW70eEQlKmlHwbq" }, pubsub = "{\"type\":\"viewcount\",\"server_time\":1780751330.723397,\"viewers\":196,\"collaboration_status\":\"none\",\"collaboration_viewers\":0,\"costream_status\":\"\",\"costream_viewers\":0}" }
+			],
+			[
+				"{\"reconnect\":{\"url\":\"wss://hermes.twitch.tv/c/v1?clientId=kimne78kx3ncx6brgo4mv6wki5h1ko&t=PH8DAQEIZW52ZWxvcGUB_4AAAQMBDEVuY3J5cHRlZEtleQEKAAEKQ2lwaGVyVGV4dAEKAAECSVYBCgAAAP4Bc_\"},\"id\":\"25e70642-9cde-5a16-91d7-64cc82fcc993-msg47-topic3B8eXrEKW70eEQlKmlHwbq\",\"type\":\"reconnect\",\"timestamp\":\"2026-06-06T23:08:51.267573703Z\"}",
+				"25e70642-9cde-5a16-91d7-64cc82fcc993-msg47-topic3B8eXrEKW70eEQlKmlHwbq",
+				EventHubMessageType.Reconnect,
+				"2026-06-06T23:08:51.267573703Z",
+				null,
+				new ReconnectData { url = "wss://hermes.twitch.tv/c/v1?clientId=kimne78kx3ncx6brgo4mv6wki5h1ko&t=PH8DAQEIZW52ZWxvcGUB_4AAAQMBDEVuY3J5cHRlZEtleQEKAAEKQ2lwaGVyVGV4dAEKAAECSVYBCgAAAP4Bc_" }
 			]
 		];
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
@@ -140,6 +148,12 @@ namespace TwitchDownloaderCore.Tests.ToolTests
 					break;
 				case EventHubMessageType.KeepAlive:
 					Assert.Null(message.Data);
+					break;
+				case EventHubMessageType.Reconnect:
+					Assert.IsType<ReconnectData>(message.Data);
+					var reconnectExpected = (ReconnectData)expectedData;
+					var reconnectData = (ReconnectData)message.Data;
+					Assert.Equal(reconnectExpected.url, reconnectData.url);
 					break;
 				case EventHubMessageType.Notification:
 					Assert.IsType<NotificationData>(message.Data);

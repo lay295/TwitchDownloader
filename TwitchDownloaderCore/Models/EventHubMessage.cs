@@ -11,6 +11,7 @@ namespace TwitchDownloaderCore.Models
 		UnsubscribeResponse,
 		Welcome,
 		KeepAlive,
+		Reconnect,
 		Notification
 	}
 
@@ -65,6 +66,11 @@ namespace TwitchDownloaderCore.Models
 		public int keepaliveSec { get; set; }
 		public string recoveryUrl { get; set; }
 		public string sessionId { get; set; }
+	}
+
+	public sealed class ReconnectData : EventHubMessageData
+	{
+		public string url { get; set; }
 	}
 
 	public sealed class NotificationData : EventHubMessageData

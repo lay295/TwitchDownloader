@@ -21,6 +21,7 @@ namespace TwitchDownloaderCore.Models
 					"unsubscribe" => EventHubMessageType.Unsubscribe,
 					"unsubscribeResponse" => EventHubMessageType.UnsubscribeResponse,
 					"keepalive" => EventHubMessageType.KeepAlive,
+					"reconnect" => EventHubMessageType.Reconnect,
 					"notification" => EventHubMessageType.Notification,
 					_ => EventHubMessageType.Unknown
 				},
@@ -52,6 +53,7 @@ namespace TwitchDownloaderCore.Models
 					},
 					subscription = root.GetProperty("unsubscribeResponse").GetProperty("subscription").Deserialize<SubscriptionId>(options)
 				},
+				EventHubMessageType.Reconnect => root.GetProperty("reconnect").Deserialize<ReconnectData>(options),
 				EventHubMessageType.Notification => root.GetProperty("notification").Deserialize<NotificationData>(options),
 				_ => null
 			};
@@ -78,6 +80,7 @@ namespace TwitchDownloaderCore.Models
 				EventHubMessageType.UnsubscribeResponse => "unsubscribeResponse",
 				EventHubMessageType.Notification => "notification",
 				EventHubMessageType.KeepAlive => "keepalive",
+				EventHubMessageType.Reconnect => "reconnect",
 				_ => throw new JsonException($"can't serialize unknown event type {value.type}")
 			});
 			writer.WriteString("timestamp", value.timestamp);
@@ -99,6 +102,10 @@ namespace TwitchDownloaderCore.Models
 				case SubscriptionChangeResponseData subscriptionChangeResponse:
 					writer.WritePropertyName(value.type == EventHubMessageType.SubscribeResponse ? "subscribeResponse" : "unsubscribeResponse");
 					JsonSerializer.Serialize(writer, subscriptionChangeResponse, options);
+					break;
+				case ReconnectData reconnect:
+					writer.WritePropertyName("reconnect");
+					JsonSerializer.Serialize(writer, reconnect, options);
 					break;
 				case NotificationData notification:
 					writer.WritePropertyName("notification");
