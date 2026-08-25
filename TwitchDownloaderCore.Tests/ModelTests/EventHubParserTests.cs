@@ -240,7 +240,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
 			{
 				id = "testid",
 				type = EventHubMessageType.Subscribe,
-				timestamp = DateTime.UnixEpoch,
+				timestamp = DateTimeOffset.FromUnixTimeMilliseconds(123456789),
 				Data = new SubscribeData
 				{
 					id = "subid",
@@ -251,7 +251,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
 				}
 			};
 
-			const string EXPECTED_SUB = "{\"id\":\"testid\",\"type\":\"subscribe\",\"timestamp\":\"1970-01-01T00:00:00Z\",\"subscribe\":{\"id\":\"subid\",\"type\":\"pubsub\",\"pubsub\":{\"topic\":\"testtopic\"}}}";
+			const string EXPECTED_SUB = "{\"id\":\"testid\",\"type\":\"subscribe\",\"timestamp\":\"1970-01-02T10:17:36.789Z\",\"subscribe\":{\"id\":\"subid\",\"type\":\"pubsub\",\"pubsub\":{\"topic\":\"testtopic\"}}}";
 
 			Assert.Equal(EXPECTED_SUB, JsonSerializer.Serialize(subRequest, _fixture.Options));
 
@@ -268,7 +268,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
 				}
 			};
 
-			const string EXPECTED_UNSUB = "{\"id\":\"testid\",\"type\":\"unsubscribe\",\"timestamp\":\"1970-01-01T00:00:00Z\",\"unsubscribe\":{\"id\":\"subid\"}}";
+			const string EXPECTED_UNSUB = "{\"id\":\"testid\",\"type\":\"unsubscribe\",\"timestamp\":\"1970-01-01T00:00:00.000Z\",\"unsubscribe\":{\"id\":\"subid\"}}";
 
 			Assert.Equal(EXPECTED_UNSUB, JsonSerializer.Serialize(unsubRequest, _fixture.Options));
 		}

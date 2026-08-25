@@ -27,7 +27,7 @@ namespace TwitchDownloaderCore.Models
 	{
 		public string id { get; set; }
 		public EventHubMessageType type { get; set; }
-		public DateTime timestamp { get; set; }
+		public DateTimeOffset timestamp { get; set; }
 		[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] // unnecessary since this is handled by a custom converter, but here for documentation
 		public string parentId { get; set; } = null;
 		public EventHubMessageData Data { get; set; }

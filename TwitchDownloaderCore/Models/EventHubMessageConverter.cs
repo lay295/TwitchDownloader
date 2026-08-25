@@ -25,7 +25,7 @@ namespace TwitchDownloaderCore.Models
 					"notification" => EventHubMessageType.Notification,
 					_ => EventHubMessageType.Unknown
 				},
-				timestamp = root.GetProperty("timestamp").GetDateTime()
+				timestamp = root.GetProperty("timestamp").GetDateTimeOffset().ToUniversalTime()
 			};
 
 			message.Data = message.type switch
@@ -87,7 +87,8 @@ namespace TwitchDownloaderCore.Models
 				EventHubMessageType.Reconnect => "reconnect",
 				_ => throw new JsonException($"can't serialize unknown event type {value.type}")
 			});
-			writer.WriteString("timestamp", value.timestamp);
+			// this is to be in line witz how js formats the timestamps on the twitch website 
+			writer.WriteString("timestamp", value.timestamp.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ"));
 
 			switch (value.Data)
 			{
