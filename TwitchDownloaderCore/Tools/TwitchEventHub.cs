@@ -32,7 +32,7 @@ namespace TwitchDownloaderCore.Tools
 			}
 		}
 
-		private static readonly JsonSerializerOptions _jsonSerializerOptions = new() { Converters = { new EventHubMessageConverter() } };
+		private static readonly JsonSerializerOptions _jsonSerializerOptions = new() { Converters = { new EventHubMessageConverter() }, AllowOutOfOrderMetadataProperties = true };
 
 		private readonly ITaskLogger _logger;
 		// internally used to signal that the connection loop should end
@@ -440,6 +440,7 @@ namespace TwitchDownloaderCore.Tools
 			return evt switch
 			{
 				TwitchChatEvent.VideoPlaybackById => $"video-playback-by-id.{streamerId}",
+				TwitchChatEvent.BroadcastSettingsUpdate => $"broadcast-settings-update.{streamerId}",
 				_ => throw new NotImplementedException(),
 			};
 		}

@@ -11,6 +11,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
 		public EventHubMessageConverterFixture()
 		{
 			Options = new JsonSerializerOptions();
+			Options.AllowOutOfOrderMetadataProperties = true; // necessary, broadcast_settings_update does not start with type
 			Options.Converters.Add(new EventHubMessageConverter());
 		}
 	}
@@ -25,7 +26,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
 		}
 
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-		public static IEnumerable<object[]> ParseData => [
+		public static IEnumerable<object[]> ParseDataMessages => [
 			[
 				"{\"welcome\":{\"keepaliveSec\":99,\"recoveryUrl\":\"wss://hermes.twitch.tv/b/v1?clientId=kimne78kx3ncx6brgo4mv6wki5h1ko&t=_pZFusBEGksnqB7bAIaGMLts_qr38QA\",\"sessionId\":\"b9457b15-ceeb-4c1f-ac47-ab321601df80\"},\"id\":\"cab7bea8-c243-4271-b259-1ad7ce41dd5a\",\"type\":\"welcome\",\"timestamp\":\"2026-01-01T12:12:12.123456789Z\"}",
 				"cab7bea8-c243-4271-b259-1ad7ce41dd5a",
@@ -83,14 +84,6 @@ namespace TwitchDownloaderCore.Tests.ToolTests
 				null
 			],
 			[
-				"{\"notification\":{\"subscription\":{\"id\":\"B8eXrEKW70eEQlKmlHwbq\"},\"type\":\"pubsub\",\"pubsub\":\"{\\\"type\\\":\\\"viewcount\\\",\\\"server_time\\\":1780751330.723397,\\\"viewers\\\":196,\\\"collaboration_status\\\":\\\"none\\\",\\\"collaboration_viewers\\\":0,\\\"costream_status\\\":\\\"\\\",\\\"costream_viewers\\\":0}\"},\"id\":\"25e70652-9cde-5a16-91d7-64cc82fcc993-msg47-topic3B8eXrEKW70eEQlKmlHwbq\",\"type\":\"notification\",\"timestamp\":\"2026-06-06T13:08:51.267573703Z\"}",
-				"25e70652-9cde-5a16-91d7-64cc82fcc993-msg47-topic3B8eXrEKW70eEQlKmlHwbq",
-				EventHubMessageType.Notification,
-				"2026-06-06T13:08:51.267573703Z",
-				null,
-				new NotificationData { subscription = new SubscriptionId { id = "B8eXrEKW70eEQlKmlHwbq" }, pubsub = "{\"type\":\"viewcount\",\"server_time\":1780751330.723397,\"viewers\":196,\"collaboration_status\":\"none\",\"collaboration_viewers\":0,\"costream_status\":\"\",\"costream_viewers\":0}" }
-			],
-			[
 				"{\"reconnect\":{\"url\":\"wss://hermes.twitch.tv/c/v1?clientId=kimne78kx3ncx6brgo4mv6wki5h1ko&t=PH8DAQEIZW52ZWxvcGUB_4AAAQMBDEVuY3J5cHRlZEtleQEKAAEKQ2lwaGVyVGV4dAEKAAECSVYBCgAAAP4Bc_\"},\"id\":\"25e70642-9cde-5a16-91d7-64cc82fcc993-msg47-topic3B8eXrEKW70eEQlKmlHwbq\",\"type\":\"reconnect\",\"timestamp\":\"2026-06-06T23:08:51.267573703Z\"}",
 				"25e70642-9cde-5a16-91d7-64cc82fcc993-msg47-topic3B8eXrEKW70eEQlKmlHwbq",
 				EventHubMessageType.Reconnect,
@@ -99,11 +92,34 @@ namespace TwitchDownloaderCore.Tests.ToolTests
 				new ReconnectData { url = "wss://hermes.twitch.tv/c/v1?clientId=kimne78kx3ncx6brgo4mv6wki5h1ko&t=PH8DAQEIZW52ZWxvcGUB_4AAAQMBDEVuY3J5cHRlZEtleQEKAAEKQ2lwaGVyVGV4dAEKAAECSVYBCgAAAP4Bc_" }
 			]
 		];
+
+		public static IEnumerable<object[]> ParseDataNotifications => [
+			[
+				"{\"notification\":{\"subscription\":{\"id\":\"B8eXrEKW70eEQlKmlHwbq\"},\"type\":\"pubsub\",\"pubsub\":\"{\\\"type\\\":\\\"stream-up\\\",\\\"server_time\\\":123.456,\\\"play_delay\\\":42}\"},\"id\":\"25e70652-9cde-5a16-91d7-64cc82fcc993-msg47-topic3B8eXrEKW70eEQlKmlHwbq\",\"type\":\"notification\",\"timestamp\":\"2026-06-06T13:08:51.267573703Z\"}",
+				new StreamUpData { server_time = 123.456, play_delay = 42 }
+			],
+			[
+				"{\"notification\":{\"subscription\":{\"id\":\"B8eXrEKW70eEQlKmlHwbq\"},\"type\":\"pubsub\",\"pubsub\":\"{\\\"type\\\":\\\"stream-down\\\",\\\"server_time\\\":123.456}\"},\"id\":\"25e70652-9cde-5a16-91d7-64cc82fcc993-msg47-topic3B8eXrEKW70eEQlKmlHwbq\",\"type\":\"notification\",\"timestamp\":\"2026-06-06T13:08:51.267573703Z\"}",
+				new StreamDownData { server_time = 123.456 }
+			],
+			[
+				"{\"notification\":{\"subscription\":{\"id\":\"B8eXrEKW70eEQlKmlHwbq\"},\"type\":\"pubsub\",\"pubsub\":\"{\\\"type\\\":\\\"viewcount\\\",\\\"server_time\\\":123.456,\\\"viewers\\\":196,\\\"collaboration_status\\\":\\\"none\\\",\\\"collaboration_viewers\\\":0,\\\"costream_status\\\":\\\"\\\",\\\"costream_viewers\\\":0}\"},\"id\":\"25e70652-9cde-5a16-91d7-64cc82fcc993-msg47-topic3B8eXrEKW70eEQlKmlHwbq\",\"type\":\"notification\",\"timestamp\":\"2026-06-06T13:08:51.267573703Z\"}",
+				new ViewCountData { server_time = 123.456, viewers = 196, collaboration_status = "none", collaboration_viewers = 0, costream_status = "", costream_viewers = 0 }
+			],
+			[
+				"{\"notification\":{\"subscription\":{\"id\":\"B8eXrEKW70eEQlKmlHwbq\"},\"type\":\"pubsub\",\"pubsub\":\"{\\\"type\\\":\\\"commercial\\\",\\\"server_time\\\":123.456,\\\"length\\\":42,\\\"scheduled\\\":true}\"},\"id\":\"25e70652-9cde-5a16-91d7-64cc82fcc993-msg47-topic3B8eXrEKW70eEQlKmlHwbq\",\"type\":\"notification\",\"timestamp\":\"2026-06-06T13:08:51.267573703Z\"}",
+				new CommercialData { length = 42, scheduled = true, server_time = 123.456 }
+			],
+			[
+				"{\"notification\":{\"subscription\":{\"id\":\"B8eXrEKW70eEQlKmlHwbq\"},\"type\":\"pubsub\",\"pubsub\":\"{\\\"channel_id\\\":\\\"12345677\\\",\\\"type\\\":\\\"broadcast_settings_update\\\",\\\"channel\\\":\\\"testchannel\\\",\\\"old_status\\\":\\\"oldstat\\\",\\\"status\\\":\\\"stat\\\",\\\"old_game_id\\\":33,\\\"game_id\\\":22,\\\"old_game\\\":\\\"oGame\\\",\\\"game\\\":\\\"gaem\\\"}\"},\"id\":\"25e70652-9cde-5a16-91d7-64cc82fcc993-msg47-topic3B8eXrEKW70eEQlKmlHwbq\",\"type\":\"notification\",\"timestamp\":\"2026-06-06T13:08:51.267573703Z\"}",
+				new BroadcastSettingsUpdateData { channel = "testchannel", channel_id = "12345677", old_status = "oldstat", status = "stat", old_game_id = 33, game_id = 22, old_game = "oGame", game = "gaem" }
+			],
+		];
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
 
 		[Theory]
-		[MemberData(nameof(ParseData))]
+		[MemberData(nameof(ParseDataMessages))]
 		public void CorrectlyParsesMessage(string rawMessage, string messageId, EventHubMessageType type, DateTime timestamp, string parentId, EventHubMessageData expectedData)
 		{
 			var message = JsonSerializer.Deserialize<EventHubMessage>(rawMessage, _fixture.Options);
@@ -155,16 +171,60 @@ namespace TwitchDownloaderCore.Tests.ToolTests
 					var reconnectData = (ReconnectData)message.Data;
 					Assert.Equal(reconnectExpected.url, reconnectData.url);
 					break;
-				case EventHubMessageType.Notification:
-					Assert.IsType<NotificationData>(message.Data);
-					var notificationExpected = (NotificationData)expectedData;
-					var notificationData = (NotificationData)message.Data;
-					Assert.Equal(notificationExpected.type, notificationData.type);
-					Assert.Equal(notificationExpected.subscription.id, notificationData.subscription.id);
-					Assert.Equal(notificationExpected.pubsub, notificationData.pubsub);
-					break;
 				case EventHubMessageType.Unknown:
 					Assert.Fail("this case shouldn't be reached");
+					break;
+			}
+		}
+
+		[Theory]
+		[MemberData(nameof(ParseDataNotifications))]
+		public void CorrectlyParsesNotifications(string rawMessage, PubSubData expectedData)
+		{
+			var message = JsonSerializer.Deserialize<EventHubMessage>(rawMessage, _fixture.Options);
+
+			Assert.NotNull(message);
+			Assert.IsType<NotificationData>(message.Data);
+
+			switch (((NotificationData)message.Data).pubsub)
+			{
+				case StreamUpData streamUp:
+					StreamUpData expectedStreamUp = (StreamUpData)expectedData;
+					Assert.Equal(expectedStreamUp.server_time, streamUp.server_time);
+					Assert.Equal(expectedStreamUp.play_delay, streamUp.play_delay);
+					break;
+				case StreamDownData streamDown:
+					StreamDownData expectedStreamDown = (StreamDownData)expectedData;
+					Assert.Equal(expectedStreamDown.server_time, streamDown.server_time);
+					break;
+				case ViewCountData viewCount:
+					ViewCountData expectedViewCount = (ViewCountData)expectedData;
+					Assert.Equal(expectedViewCount.server_time, viewCount.server_time);
+					Assert.Equal(expectedViewCount.viewers, viewCount.viewers);
+					Assert.Equal(expectedViewCount.collaboration_status, viewCount.collaboration_status);
+					Assert.Equal(expectedViewCount.collaboration_viewers, viewCount.collaboration_viewers);
+					Assert.Equal(expectedViewCount.costream_status, viewCount.costream_status);
+					Assert.Equal(expectedViewCount.collaboration_viewers, viewCount.collaboration_viewers);
+					break;
+				case CommercialData commercial:
+					CommercialData expectedCommercial = (CommercialData)expectedData;
+					Assert.Equal(expectedCommercial.server_time, commercial.server_time);
+					Assert.Equal(expectedCommercial.length, commercial.length);
+					Assert.Equal(expectedCommercial.scheduled, commercial.scheduled);
+					break;
+				case BroadcastSettingsUpdateData broadcastSettings:
+					BroadcastSettingsUpdateData expectedBroadcast = (BroadcastSettingsUpdateData)expectedData;
+					Assert.Equal(expectedBroadcast.channel_id, broadcastSettings.channel_id);
+					Assert.Equal(expectedBroadcast.channel, broadcastSettings.channel);
+					Assert.Equal(expectedBroadcast.old_status, broadcastSettings.old_status);
+					Assert.Equal(expectedBroadcast.status, broadcastSettings.status);
+					Assert.Equal(expectedBroadcast.old_game_id, broadcastSettings.old_game_id);
+					Assert.Equal(expectedBroadcast.game_id, broadcastSettings.game_id);
+					Assert.Equal(expectedBroadcast.old_game, broadcastSettings.old_game);
+					Assert.Equal(expectedBroadcast.game, broadcastSettings.game);
+					break;
+				default:
+					Assert.Fail("unknown PubSub subtype");
 					break;
 			}
 		}

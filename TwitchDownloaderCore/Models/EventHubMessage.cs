@@ -77,38 +77,45 @@ namespace TwitchDownloaderCore.Models
 	{
 		public SubscriptionId subscription { get; set; }
 		public string type { get => "pubsub"; }
-		public string pubsub { get; set; }
+		public PubSubData pubsub { get; set; }
 	}
 
 	/* 
 	================================================================================================================
 	================================================ NOTIFICATIONS =================================================
 	================================================================================================================
-
 	These are the types that can be parsed from a EventHubMessage.Data.pubsub for notifications
 	*/
-	
-	public abstract class NotificationSpecificData;
 
-	public abstract class VideoPlaybackByIdData : NotificationSpecificData
+	/*
+	not all possible pubsub values have a type property
+	should we ever need for example PlusProgramPoints or LeaderBoardEventsBitsAndGiftSubs
+	then we would need separate handling for those
+	*/
+	[JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
+	[JsonDerivedType(typeof(StreamUpData), typeDiscriminator: "stream-up")]
+	[JsonDerivedType(typeof(StreamDownData), typeDiscriminator: "stream-down")]
+	[JsonDerivedType(typeof(ViewCountData), typeDiscriminator: "viewcount")]
+	[JsonDerivedType(typeof(CommercialData), typeDiscriminator: "commercial")]
+	[JsonDerivedType(typeof(BroadcastSettingsUpdateData), typeDiscriminator: "broadcast_settings_update")]
+	public abstract class PubSubData;
+
+	public abstract class VideoPlaybackByIdData : PubSubData
 	{
-		public int server_time { get; set; }
+		public double server_time { get; set; }
 	}
 
 	public sealed class StreamUpData : VideoPlaybackByIdData
 	{
-		public string type { get => "stream-up"; }
 		public int play_delay { get; set; }
 	}
 
 	public sealed class StreamDownData : VideoPlaybackByIdData
 	{
-		public string type { get => "stream-down"; }
 	}
 
 	public sealed class ViewCountData : VideoPlaybackByIdData
 	{
-		public string type { get => "viewcount"; }
 		public int viewers { get; set; }
 		public string collaboration_status { get; set; } /* "none" */
 		public int collaboration_viewers { get; set; }
@@ -118,8 +125,19 @@ namespace TwitchDownloaderCore.Models
 
 	public sealed class CommercialData : VideoPlaybackByIdData
 	{
-		public string type { get => "commercial"; }
 		public int length { get; set; }
 		public bool scheduled { get; set; }
 	}
+
+	public sealed class BroadcastSettingsUpdateData : PubSubData
+	{
+		public string channel_id { get; set; }
+		public string channel { get; set; }
+		public string old_status { get; set; }
+		public string status { get; set; }
+		public int old_game_id { get; set; }
+		public string old_game { get; set; }
+		public int game_id { get; set; }
+		public string game { get; set; }
+	};
 }

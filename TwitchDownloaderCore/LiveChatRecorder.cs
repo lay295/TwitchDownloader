@@ -145,11 +145,11 @@ namespace TwitchDownloaderCore
         {
             using var sub = await eventHub.SubscribeTo(streamerId, [TwitchEventHub.TwitchChatEvent.VideoPlaybackById]);
 
-            var eventTarget = target switch { StreamStateChange.START => "stream-up", StreamStateChange.END => "stream-down", _ => throw new ArgumentException("invalid StreamStateChange", "target") };
+            var eventTarget = target switch { StreamStateChange.START => typeof(StreamUpData), StreamStateChange.END => typeof(StreamDownData), _ => throw new ArgumentException("invalid StreamStateChange", "target") };
 
             await foreach (var msg in sub.Messages.ReadAllAsync(cancellationToken))
             {
-                if (((NotificationData)msg.Data).pubsub.Contains(eventTarget))
+                if (eventTarget.IsInstanceOfType(((NotificationData)msg.Data).pubsub))
                 {
                     break;
                 }

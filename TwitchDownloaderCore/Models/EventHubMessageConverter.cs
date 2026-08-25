@@ -54,7 +54,11 @@ namespace TwitchDownloaderCore.Models
 					subscription = root.GetProperty("unsubscribeResponse").GetProperty("subscription").Deserialize<SubscriptionId>(options)
 				},
 				EventHubMessageType.Reconnect => root.GetProperty("reconnect").Deserialize<ReconnectData>(options),
-				EventHubMessageType.Notification => root.GetProperty("notification").Deserialize<NotificationData>(options),
+				EventHubMessageType.Notification => new NotificationData
+				{
+					subscription = root.GetProperty("notification").GetProperty("subscription").Deserialize<SubscriptionId>(options),
+					pubsub = JsonDocument.Parse(root.GetProperty("notification").GetProperty("pubsub").GetString()).Deserialize<PubSubData>(options)
+				},
 				_ => null
 			};
 
