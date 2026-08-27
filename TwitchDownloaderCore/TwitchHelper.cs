@@ -1356,6 +1356,34 @@ namespace TwitchDownloaderCore
             return await response.Content.ReadFromJsonAsync<GqlStreamResponse>();
         }
 
+        public static async Task<GqlBroadcastSettingsResponse> GetBroadcastSettings(string streamer)
+        {
+            var request = new HttpRequestMessage()
+            {
+                RequestUri = new Uri("https://gql.twitch.tv/gql"),
+                Method = HttpMethod.Post,
+                Content = new StringContent("{\"query\":\"query{user(login:\\\"" + streamer + "\\\"){broadcastSettings{title,game{id,displayName,boxArtURL(width:40,height:53)}}}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
+            };
+            request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
+            using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<GqlBroadcastSettingsResponse>();
+        }
+
+        public static async Task<GqlGameResponse> GetGameInfo(string gameId)
+        {
+            var request = new HttpRequestMessage()
+            {
+                RequestUri = new Uri("https://gql.twitch.tv/gql"),
+                Method = HttpMethod.Post,
+                Content = new StringContent("{\"query\":\"query{game(id:\\\"" + gameId + "\\\"){id,displayName,boxArtURL(width:40,height:53)}}\",\"variables\":{}}", Encoding.UTF8, "application/json")
+            };
+            request.Headers.Add("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko");
+            using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<GqlGameResponse>();
+        }
+
         public static async Task<TwitchEmote> GetFirstPartyEmote(string id, DirectoryInfo cacheDir, bool offline, ITaskLogger logger, CancellationToken cancellationToken)
         {
             var (bytes, codec) = await GetImage(cacheDir, $"https://static-cdn.jtvnw.net/emoticons/v2/{id}/default/dark/2.0", id, 2, "png", offline, logger, cancellationToken);

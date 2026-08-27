@@ -34,7 +34,7 @@ namespace TwitchDownloaderCore.Models
             return new Comment
             {
                 _id = id,
-                created_at = DateTimeOffset.FromUnixTimeMilliseconds(sentMillis).DateTime,
+                created_at = DateTimeOffset.FromUnixTimeMilliseconds(sentMillis).UtcDateTime,
                 channel_id = roomId,
                 content_type = "video",
                 content_id = null,
