@@ -27,6 +27,7 @@ namespace TwitchDownloaderWPF
         public static PageChatUpdate pageChatUpdate = new PageChatUpdate();
         public static PageChatRender pageChatRender = new PageChatRender();
         public static PageQueue pageQueue = new PageQueue();
+        public static PageLiveMonitor pageLiveMonitor = new PageLiveMonitor();
 
         public MainWindow()
         {
@@ -61,6 +62,11 @@ namespace TwitchDownloaderWPF
         private void btnQueue_Click(object sender, RoutedEventArgs e)
         {
             Main.Content = pageQueue;
+        }
+
+        private void btnLiveMonitor_Click(object sender, RoutedEventArgs e)
+        {
+            Main.Content = pageLiveMonitor;
         }
 
         private void Window_OnSourceInitialized(object sender, EventArgs e)

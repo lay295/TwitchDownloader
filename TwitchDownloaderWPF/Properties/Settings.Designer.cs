@@ -1100,5 +1100,17 @@ namespace TwitchDownloaderWPF.Properties {
                 this["AvatarScale"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LiveMonitorChannels {
+            get {
+                return ((string)(this["LiveMonitorChannels"]));
+            }
+            set {
+                this["LiveMonitorChannels"] = value;
+            }
+        }
     }
 }
