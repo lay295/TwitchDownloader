@@ -93,15 +93,20 @@ namespace TwitchDownloaderCore
                     continue;
                 }
 
-                // video.comments can be null for some dumb reason
-                if (commentResponse.data.video.comments?.edges is null)
+                // video.comments can be null for some dumb reason. Twitch also occasionally times out internally and
+                // returns HTTP 200 with {"errors":[{"message":"context deadline exceeded"}]} and no data object at all.
+                // Both are transient, so retry the same request.
+                // This issue was discovered when downloading chat just after a live stream ends, and VOD storage is enabled.
+                if (commentResponse?.data?.video?.comments?.edges is null)
                 {
+                    var errorMessage = commentResponse?.errors?.FirstOrDefault()?.message ?? "null comment list";
+
                     if (++nullCount > 10)
                     {
-                        throw new Exception("Received too many null comment lists. Try reducing your download threads.");
+                        throw new Exception($"Received too many null comment lists ('{errorMessage}'). Try reducing your download threads or retry a few hours later.");
                     }
 
-                    _progress.LogVerbose($"Received null comment list at {latestMessage}s ({cursor}) in range {downloadRange}. Current null factor: {nullCount}.");
+                    _progress.LogVerbose($"Received '{errorMessage}' at {latestMessage}s ({cursor}) in range {downloadRange}. Current null factor: {nullCount}.");
                     await Task.Delay((int)(100 * nullCount), cancellationToken);
                     continue;
                 }
