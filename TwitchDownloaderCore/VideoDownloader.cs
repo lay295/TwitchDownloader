@@ -64,7 +64,7 @@ namespace TwitchDownloaderCore
                 GqlVideoResponse videoInfoResponse = await TwitchHelper.GetVideoInfo(downloadOptions.Id);
                 if (videoInfoResponse.data.video == null)
                 {
-                    throw new NullReferenceException("Invalid VOD, deleted/expired VOD possibly?");
+                    throw new TwitchDownloaderException("Invalid VOD, deleted/expired VOD possibly?");
                 }
 
                 GqlVideoChapterResponse videoChapterResponse = await TwitchHelper.GetOrGenerateVideoChapters(downloadOptions.Id, videoInfoResponse.data.video, _progress);
@@ -678,13 +678,13 @@ namespace TwitchDownloaderCore
 
             if (accessToken.data.videoPlaybackAccessToken is null)
             {
-                throw new NullReferenceException("Invalid VOD, deleted/expired VOD possibly?");
+                throw new TwitchDownloaderException("Invalid VOD, deleted/expired VOD possibly?");
             }
 
             var playlistString = await TwitchHelper.GetVideoPlaylist(downloadOptions.Id, accessToken.data.videoPlaybackAccessToken.value, accessToken.data.videoPlaybackAccessToken.signature);
             if (playlistString.Contains("vod_manifest_restricted") || playlistString.Contains("unauthorized_entitlements"))
             {
-                throw new NullReferenceException("Insufficient access to VOD, OAuth may be required.");
+                throw new TwitchDownloaderException("Insufficient access to VOD, OAuth may be required.");
             }
 
             var m3u8 = M3U8.Parse(playlistString);
@@ -700,7 +700,7 @@ namespace TwitchDownloaderCore
                 })
                 .ToArray();
 
-            return (allQualityPaths, userQuality?.Item ?? throw new NullReferenceException($"Unknown quality: {downloadOptions.Quality}"));
+            return (allQualityPaths, userQuality?.Item ?? throw new TwitchDownloaderException($"Unknown quality: {downloadOptions.Quality}"));
         }
 
         private void Cleanup(string downloadFolder)

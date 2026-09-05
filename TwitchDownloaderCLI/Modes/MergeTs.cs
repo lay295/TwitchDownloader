@@ -17,7 +17,7 @@ namespace TwitchDownloaderCLI.Modes
             var mergeOptions = GetMergeOptions(inputOptions, collisionHandler);
 
             var tsMerger = new TsMerger(mergeOptions, progress);
-            tsMerger.MergeAsync(new CancellationToken()).Wait();
+            tsMerger.MergeAsync(new CancellationToken()).GetAwaiter().GetResult();
         }
 
         private static TsMergeOptions GetMergeOptions(TsMergeArgs inputOptions, FileCollisionHandler collisionHandler)

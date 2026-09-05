@@ -17,8 +17,8 @@ namespace TwitchDownloaderCLI.Modes
             var updateOptions = GetUpdateOptions(inputOptions, collisionHandler, progress);
 
             var chatUpdater = new ChatUpdater(updateOptions, progress);
-            chatUpdater.ParseJsonAsync().Wait();
-            chatUpdater.UpdateAsync(new CancellationToken()).Wait();
+            chatUpdater.ParseJsonAsync().GetAwaiter().GetResult();
+            chatUpdater.UpdateAsync(new CancellationToken()).GetAwaiter().GetResult();
         }
 
         private static ChatUpdateOptions GetUpdateOptions(ChatUpdateArgs inputOptions, FileCollisionHandler collisionHandler, ITaskLogger logger)
