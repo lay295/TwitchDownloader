@@ -211,7 +211,7 @@ cd TwitchDownloader
 dotnet restore
 ```
 
-- 非 Windows 裝置可能需要明確指定要還原的專案，即 `dotnet restore TwitchDownloaderCLI`
+根目錄 `TwitchDownloader.slnx` 不包含 Windows WPF 專案，因此可在 Windows、Linux 和 macOS 上還原。Windows 上請開啟 `TwitchDownloaderWPF/TwitchDownloaderWPF.slnx` 以使用 WPF GUI。
 
 4. a) 構建 GUI：
 

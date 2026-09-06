@@ -212,7 +212,7 @@ cd TwitchDownloader
 dotnet restore
 ```
 
-- Sur certains systèmes non-Windows, il peut être nécessaire de préciser le projet à restaurer, par ex. `dotnet restore TwitchDownloaderCLI`
+The root `TwitchDownloader.slnx` does not include the Windows WPF project, so restore works on Windows, Linux, and macOS. Open `TwitchDownloaderWPF/TwitchDownloaderWPF.slnx` on Windows for the WPF GUI.
 
 4. a) Compiler l’interface GUI :
 

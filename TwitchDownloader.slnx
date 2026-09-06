@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="TwitchDownloaderAvalonia/TwitchDownloaderAvalonia.csproj" />
+  <Project Path="TwitchDownloaderCLI.Tests/TwitchDownloaderCLI.Tests.csproj" />
+  <Project Path="TwitchDownloaderCLI/TwitchDownloaderCLI.csproj" />
+  <Project Path="TwitchDownloaderCore.Tests/TwitchDownloaderCore.Tests.csproj" />
+  <Project Path="TwitchDownloaderCore/TwitchDownloaderCore.csproj" />
+</Solution>

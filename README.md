@@ -38,9 +38,21 @@ This document is also available in:
 
 # GUI
 
+## Cross-platform Avalonia
+
+Twitch Downloader now includes an Avalonia desktop GUI for Windows, Linux, and macOS. Feature parity with the Windows WPF GUI is the long-term goal; VOD download is available first.
+
+Open the repository solution [`TwitchDownloader.slnx`](TwitchDownloader.slnx) (Core, CLI, tests, and Avalonia). This is the default solution and restores on every OS.
+
+```
+dotnet run --project TwitchDownloaderAvalonia
+```
+
 ## Windows WPF
 
 ![](https://i.imgur.com/bLegxGX.gif)
+
+The original Windows-only WPF GUI remains available. Open [`TwitchDownloaderWPF/TwitchDownloaderWPF.slnx`](TwitchDownloaderWPF/TwitchDownloaderWPF.slnx) on Windows when working on it. Do not open that solution on macOS or Linux.
 
 ### [See the full WPF documentation here](TwitchDownloaderWPF/README.md)
 
@@ -65,13 +77,9 @@ The Windows WPF GUI comes bundled with both light and dark themes, along with an
 <https://www.youtube.com/watch?v=0W3MhfhnYjk>
 (older version, same concept)
 
-## Linux?
+## Linux and macOS
 
-Check twitch-downloader-gui on [github](https://github.com/mohad12211/twitch-downloader-gui) or on the [AUR](https://aur.archlinux.org/packages/twitch-downloader-gui) for a Linux GUI wrapper for the CLI.
-
-## MacOS?
-
-No GUI is available for MacOS yet :(
+Use the [Avalonia GUI](#cross-platform-avalonia) or the CLI. A third-party Linux GUI wrapper for the CLI is also available: [twitch-downloader-gui](https://github.com/mohad12211/twitch-downloader-gui) / [AUR](https://aur.archlinux.org/packages/twitch-downloader-gui).
 
 # CLI
 
@@ -216,21 +224,29 @@ git clone https://github.com/lay295/TwitchDownloader.git
 cd TwitchDownloader
 ```
 
-3. Restore the solution:
+3. Restore the default (cross-platform) solution:
 
 ```
 dotnet restore
 ```
 
-- Non-Windows devices may need to explicitly specify a project to restore, i.e. `dotnet restore TwitchDownloaderCLI`
+The root solution [`TwitchDownloader.slnx`](TwitchDownloader.slnx) does not include the Windows WPF project, so restore works on Windows, Linux, and macOS.
 
-4. a) Build the GUI:
+To work on the Windows WPF GUI, open [`TwitchDownloaderWPF/TwitchDownloaderWPF.slnx`](TwitchDownloaderWPF/TwitchDownloaderWPF.slnx) on Windows.
+
+4. a) Build the Avalonia GUI:
+
+```
+dotnet publish TwitchDownloaderAvalonia -c Release
+```
+
+4. b) Build the Windows WPF GUI (Windows only):
 
 ```
 dotnet publish TwitchDownloaderWPF -p:PublishProfile=Windows
 ```
 
-4. b) Build the CLI:
+4. c) Build the CLI:
 
 ```
 dotnet publish TwitchDownloaderCLI -p:PublishProfile=<Profile>
@@ -238,13 +254,19 @@ dotnet publish TwitchDownloaderCLI -p:PublishProfile=<Profile>
 
 - Applicable Profiles: `Windows`, `Linux`, `LinuxAlpine`, `LinuxArm`, `LinuxArm64`, `MacOS`, `MacOSArm64`
 
-5. a) Navigate to the GUI build folder:
+5. a) Navigate to the Avalonia GUI build folder:
+
+```
+cd TwitchDownloaderAvalonia/bin/Release/net10.0/publish
+```
+
+5. b) Navigate to the WPF GUI build folder:
 
 ```
 cd TwitchDownloaderWPF/bin/Release/net10.0-windows/publish/win-x64
 ```
 
-5. b) Navigate to the CLI build folder:
+5. c) Navigate to the CLI build folder:
 
 ```
 cd TwitchDownloaderCLI/bin/Release/net10.0/publish

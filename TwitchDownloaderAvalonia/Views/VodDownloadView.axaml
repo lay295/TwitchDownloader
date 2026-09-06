@@ -1,0 +1,154 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
+    xmlns:models="using:TwitchDownloaderAvalonia.Models"
+    xmlns:c="using:TwitchDownloaderAvalonia.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignWidth="860"
+    d:DesignHeight="480"
+    x:Class="TwitchDownloaderAvalonia.Views.VodDownloadView"
+    x:DataType="vm:VodDownloadViewModel">
+
+    <Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="240,*,240">
+        <StackPanel
+            Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"
+            Orientation="Horizontal"
+            HorizontalAlignment="Center"
+            Spacing="8"
+            Margin="0,0,0,12">
+            <TextBlock Text="VOD link / ID" VerticalAlignment="Center" />
+            <TextBox
+                Width="320"
+                PlaceholderText="https://www.twitch.tv/videos/..."
+                Text="{Binding VideoUrl}">
+                <TextBox.KeyBindings>
+                    <KeyBinding Gesture="Enter" Command="{Binding GetInfoCommand}" />
+                </TextBox.KeyBindings>
+            </TextBox>
+            <Button
+                Content="Get Info"
+                Command="{Binding GetInfoCommand}"
+                IsEnabled="{Binding !IsBusy}" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Grid.Column="0" Spacing="8" Margin="0,0,12,0">
+            <Border
+                BorderBrush="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                BorderThickness="1"
+                Height="140">
+                <Image Source="{Binding Thumbnail}" Stretch="UniformToFill" />
+            </Border>
+            <TextBlock Text="{Binding InfoStreamer, StringFormat='Streamer: {0}'}" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding InfoCreatedAt, StringFormat='Created: {0}'}" TextWrapping="Wrap" />
+            <TextBlock Text="Title" FontWeight="SemiBold" />
+            <TextBlock Text="{Binding InfoTitle}" TextWrapping="Wrap" />
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" Grid.Column="1" Margin="0,0,12,0">
+            <StackPanel Spacing="10">
+                <TextBlock Text="{Binding LengthText, StringFormat='Length: {0}'}" />
+                <TextBlock Text="Quality" />
+                <ComboBox
+                    ItemsSource="{Binding Qualities}"
+                    SelectedItem="{Binding SelectedQuality}"
+                    IsEnabled="{Binding InfoLoaded}"
+                    HorizontalAlignment="Stretch">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="models:QualityOption">
+                            <TextBlock Text="{Binding DisplayName}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
+                <TextBlock Text="Trim mode" />
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <RadioButton
+                        Content="Safe"
+                        GroupName="VodTrim"
+                        Command="{Binding SetTrimModeCommand}"
+                        CommandParameter="Safe"
+                        IsChecked="{Binding TrimMode, Converter={x:Static c:VideoTrimModeEqualsConverter.Instance}, ConverterParameter=Safe, Mode=OneWay}"
+                        IsEnabled="{Binding InfoLoaded}" />
+                    <RadioButton
+                        Content="Exact"
+                        GroupName="VodTrim"
+                        Command="{Binding SetTrimModeCommand}"
+                        CommandParameter="Exact"
+                        IsChecked="{Binding TrimMode, Converter={x:Static c:VideoTrimModeEqualsConverter.Instance}, ConverterParameter=Exact, Mode=OneWay}"
+                        IsEnabled="{Binding InfoLoaded}" />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <CheckBox Content="Trim start" IsChecked="{Binding TrimStart}" IsEnabled="{Binding InfoLoaded}" />
+                    <NumericUpDown Width="70" Minimum="0" Maximum="48" FormatString="0" Value="{Binding StartHour}"
+                                   IsEnabled="{Binding CanEditTrimStart}" />
+                    <NumericUpDown Width="70" Minimum="0" Maximum="59" FormatString="0" Value="{Binding StartMinute}"
+                                   IsEnabled="{Binding CanEditTrimStart}" />
+                    <NumericUpDown Width="70" Minimum="0" Maximum="59" FormatString="0" Value="{Binding StartSecond}"
+                                   IsEnabled="{Binding CanEditTrimStart}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <CheckBox Content="Trim end" IsChecked="{Binding TrimEnd}" IsEnabled="{Binding InfoLoaded}" />
+                    <NumericUpDown Width="70" Minimum="0" Maximum="48" FormatString="0" Value="{Binding EndHour}"
+                                   IsEnabled="{Binding CanEditTrimEnd}" />
+                    <NumericUpDown Width="70" Minimum="0" Maximum="59" FormatString="0" Value="{Binding EndMinute}"
+                                   IsEnabled="{Binding CanEditTrimEnd}" />
+                    <NumericUpDown Width="70" Minimum="0" Maximum="59" FormatString="0" Value="{Binding EndSecond}"
+                                   IsEnabled="{Binding CanEditTrimEnd}" />
+                </StackPanel>
+
+                <TextBlock Text="Download threads" />
+                <NumericUpDown
+                    Width="100"
+                    HorizontalAlignment="Left"
+                    Minimum="1"
+                    Maximum="20"
+                    FormatString="0"
+                    Value="{Binding DownloadThreads}"
+                    IsEnabled="{Binding InfoLoaded}" />
+
+                <TextBlock Text="OAuth (for subscriber-only VODs)" />
+                <TextBox Text="{Binding Oauth}" PlaceholderText="Optional" />
+
+                <StackPanel
+                    Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
+                    <Button
+                        Content="Download"
+                        MinWidth="120"
+                        MinHeight="36"
+                        Command="{Binding DownloadCommand}"
+                        IsVisible="{Binding !IsDownloading}" />
+                    <Button
+                        Content="Cancel"
+                        MinWidth="120"
+                        MinHeight="36"
+                        Command="{Binding CancelCommand}"
+                        IsVisible="{Binding IsDownloading}" />
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+
+        <DockPanel Grid.Row="1" Grid.Column="2">
+            <TextBlock DockPanel.Dock="Top" Text="Log" FontWeight="SemiBold" />
+            <Button
+                DockPanel.Dock="Bottom"
+                Margin="0,8,0,0"
+                Content="Clear log"
+                Command="{Binding ClearLogCommand}" />
+            <TextBox
+                Text="{Binding LogText}"
+                IsReadOnly="True"
+                AcceptsReturn="True"
+                TextWrapping="Wrap"
+                VerticalAlignment="Stretch" />
+        </DockPanel>
+
+        <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,12,0,0" ColumnDefinitions="*,Auto">
+            <TextBlock Text="{Binding Status}" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <ProgressBar Grid.Column="1" Width="220" Height="16" Minimum="0" Maximum="100" Value="{Binding Progress}" />
+        </Grid>
+    </Grid>
+</UserControl>

@@ -1,0 +1,63 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
+    xmlns:m="using:TwitchDownloaderAvalonia.Models"
+    xmlns:c="using:TwitchDownloaderAvalonia.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignWidth="900"
+    d:DesignHeight="560"
+    x:Class="TwitchDownloaderAvalonia.Views.MainWindow"
+    x:DataType="vm:MainWindowViewModel"
+    Icon="/Assets/icon.ico"
+    Title="{Binding WindowTitle}"
+    MinWidth="780"
+    MinHeight="520"
+    Width="900"
+    Height="580">
+
+    <DockPanel>
+        <UniformGrid DockPanel.Dock="Top" Rows="1" Columns="6" Margin="8">
+            <Button
+                Margin="4"
+                Command="{Binding NavigateCommand}"
+                CommandParameter="{x:Static m:AppPage.Vod}"
+                Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=Vod}"
+                Content="VOD Download" />
+            <Button
+                Margin="4"
+                Command="{Binding NavigateCommand}"
+                CommandParameter="{x:Static m:AppPage.Clip}"
+                Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=Clip}"
+                Content="Clip Download" />
+            <Button
+                Margin="4"
+                Command="{Binding NavigateCommand}"
+                CommandParameter="{x:Static m:AppPage.ChatDownload}"
+                Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=ChatDownload}"
+                Content="Chat Download" />
+            <Button
+                Margin="4"
+                Command="{Binding NavigateCommand}"
+                CommandParameter="{x:Static m:AppPage.ChatUpdate}"
+                Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=ChatUpdate}"
+                Content="Chat Updater" />
+            <Button
+                Margin="4"
+                Command="{Binding NavigateCommand}"
+                CommandParameter="{x:Static m:AppPage.ChatRender}"
+                Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=ChatRender}"
+                Content="Chat Render" />
+            <Button
+                Margin="4"
+                Command="{Binding NavigateCommand}"
+                CommandParameter="{x:Static m:AppPage.Queue}"
+                Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=Queue}"
+                Content="Task Queue" />
+        </UniformGrid>
+
+        <ContentControl Margin="8,0,8,8" Content="{Binding CurrentPage}"/>
+    </DockPanel>
+</Window>

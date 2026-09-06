@@ -1,0 +1,17 @@
+<Application
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="TwitchDownloaderAvalonia.App"
+    xmlns:local="using:TwitchDownloaderAvalonia"
+    RequestedThemeVariant="Default">
+    <Application.DataTemplates>
+        <local:ViewLocator/>
+    </Application.DataTemplates>
+
+    <Application.Styles>
+        <FluentTheme />
+        <Style Selector="Button.selected">
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+    </Application.Styles>
+</Application>

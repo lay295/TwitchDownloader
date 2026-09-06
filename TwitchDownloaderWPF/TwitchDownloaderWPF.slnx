@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="../TwitchDownloaderCore/TwitchDownloaderCore.csproj" />
+  <Project Path="TwitchDownloaderWPF.csproj" />
+</Solution>
