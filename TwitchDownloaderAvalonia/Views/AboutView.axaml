@@ -1,0 +1,18 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignWidth="740"
+    d:DesignHeight="480"
+    x:Class="TwitchDownloaderAvalonia.Views.AboutView"
+    x:DataType="vm:AboutViewModel">
+
+    <StackPanel Spacing="8" MaxWidth="480" HorizontalAlignment="Left">
+        <TextBlock Text="{Binding VersionText}" Classes="title" />
+        <TextBlock Text="{Binding Details}" TextWrapping="Wrap" />
+        <TextBlock Classes="muted" Text="MIT License. Original project by lay295 and contributors." TextWrapping="Wrap" />
+    </StackPanel>
+</UserControl>

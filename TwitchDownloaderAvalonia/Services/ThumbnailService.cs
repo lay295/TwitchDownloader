@@ -8,7 +8,7 @@ namespace TwitchDownloaderAvalonia.Services
 
         private readonly HttpClient _httpClient = new()
         {
-            Timeout = TimeSpan.FromSeconds(15)
+            Timeout = TimeSpan.FromSeconds(15),
         };
 
         public async Task<Bitmap?> TryGetAsync(string? url, CancellationToken cancellationToken = default)

@@ -17,6 +17,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
     public partial class VodDownloadViewModel : ViewModelBase
     {
         private readonly SettingsService _settings;
+        private readonly AppStatus _appStatus;
         private readonly FfmpegService _ffmpeg;
         private readonly DialogService _dialogs;
         private readonly FileDialogService _fileDialogs;
@@ -34,6 +35,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
 
         public VodDownloadViewModel(
             SettingsService settings,
+            AppStatus appStatus,
             FfmpegService ffmpeg,
             DialogService dialogs,
             FileDialogService fileDialogs,
@@ -41,6 +43,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
             ThumbnailService thumbnails)
         {
             _settings = settings;
+            _appStatus = appStatus;
             _ffmpeg = ffmpeg;
             _dialogs = dialogs;
             _fileDialogs = fileDialogs;
@@ -112,6 +115,13 @@ namespace TwitchDownloaderAvalonia.ViewModels
         public partial string LogText { get; set; } = string.Empty;
 
         [ObservableProperty]
+        public partial bool IsLogExpanded { get; set; }
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasSuggestedFileName))]
+        public partial string SuggestedFileName { get; set; } = string.Empty;
+
+        [ObservableProperty]
         public partial string Status { get; set; }
 
         [ObservableProperty]
@@ -130,6 +140,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
         public bool CanEditTrimStart => InfoLoaded && !IsDownloading && TrimStart;
         public bool CanEditTrimEnd => InfoLoaded && !IsDownloading && TrimEnd;
         public bool CanDownload => InfoLoaded && !IsDownloading && SelectedQuality is not null;
+        public bool HasSuggestedFileName => !string.IsNullOrWhiteSpace(SuggestedFileName);
 
         [RelayCommand(CanExecute = nameof(CanGetInfo))]
         private async Task GetInfoAsync()
@@ -205,6 +216,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
 
                 InfoLoaded = true;
                 UpdateVideoSizeEstimates();
+                UpdateSuggestedFileName();
                 NotifyDownloadState();
             }
             catch (Exception ex)
@@ -237,18 +249,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
             }
 
             var extension = FilenameService.GuessVodFileExtension(SelectedQuality!.Quality.Name);
-            var suggestedName = FilenameService.GetFilename(
-                _settings.Current.TemplateVod,
-                _videoTitle,
-                _videoId.ToString(),
-                _videoTime,
-                _streamerName,
-                _streamerId,
-                TrimStart ? StartTime : TimeSpan.Zero,
-                TrimEnd ? EndTime : _vodLength,
-                _vodLength,
-                _viewCount,
-                _game) + extension;
+            var suggestedName = BuildSuggestedFileName(extension);
 
             var filterName = SelectedQuality.Quality.Name.Contains("Audio", StringComparison.OrdinalIgnoreCase)
                 ? "M4A files"
@@ -322,6 +323,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
         private void ClearLog()
         {
             LogText = string.Empty;
+            IsLogExpanded = false;
         }
 
         partial void OnOauthChanged(string value)
@@ -345,25 +347,39 @@ namespace TwitchDownloaderAvalonia.ViewModels
         partial void OnTrimStartChanged(bool value)
         {
             UpdateVideoSizeEstimates();
+            UpdateSuggestedFileName();
             NotifyDownloadState();
         }
 
         partial void OnTrimEndChanged(bool value)
         {
             UpdateVideoSizeEstimates();
+            UpdateSuggestedFileName();
             NotifyDownloadState();
         }
 
-        partial void OnStartHourChanged(int value) => UpdateVideoSizeEstimates();
-        partial void OnStartMinuteChanged(int value) => UpdateVideoSizeEstimates();
-        partial void OnStartSecondChanged(int value) => UpdateVideoSizeEstimates();
-        partial void OnEndHourChanged(int value) => UpdateVideoSizeEstimates();
-        partial void OnEndMinuteChanged(int value) => UpdateVideoSizeEstimates();
-        partial void OnEndSecondChanged(int value) => UpdateVideoSizeEstimates();
-        partial void OnSelectedQualityChanged(QualityOption? value) => DownloadCommand.NotifyCanExecuteChanged();
+        partial void OnStartHourChanged(int value) => UpdateEstimatesAndSuggestedName();
+        partial void OnStartMinuteChanged(int value) => UpdateEstimatesAndSuggestedName();
+        partial void OnStartSecondChanged(int value) => UpdateEstimatesAndSuggestedName();
+        partial void OnEndHourChanged(int value) => UpdateEstimatesAndSuggestedName();
+        partial void OnEndMinuteChanged(int value) => UpdateEstimatesAndSuggestedName();
+        partial void OnEndSecondChanged(int value) => UpdateEstimatesAndSuggestedName();
+        partial void OnSelectedQualityChanged(QualityOption? value)
+        {
+            UpdateSuggestedFileName();
+            DownloadCommand.NotifyCanExecuteChanged();
+        }
+
         partial void OnIsBusyChanged(bool value) => NotifyDownloadState();
         partial void OnInfoLoadedChanged(bool value) => NotifyDownloadState();
-        partial void OnIsDownloadingChanged(bool value) => NotifyDownloadState();
+        partial void OnIsDownloadingChanged(bool value)
+        {
+            NotifyDownloadState();
+            PushAppStatus();
+        }
+
+        partial void OnStatusChanged(string value) => PushAppStatus();
+        partial void OnProgressChanged(double value) => _appStatus.Progress = value;
 
         private VideoDownloadOptions BuildOptions(string filename)
         {
@@ -413,6 +429,40 @@ namespace TwitchDownloaderAvalonia.ViewModels
             }
         }
 
+        private void UpdateEstimatesAndSuggestedName()
+        {
+            UpdateVideoSizeEstimates();
+            UpdateSuggestedFileName();
+        }
+
+        private void UpdateSuggestedFileName()
+        {
+            if (!InfoLoaded || SelectedQuality is null)
+            {
+                SuggestedFileName = string.Empty;
+                return;
+            }
+
+            var extension = FilenameService.GuessVodFileExtension(SelectedQuality.Quality.Name);
+            SuggestedFileName = BuildSuggestedFileName(extension);
+        }
+
+        private string BuildSuggestedFileName(string extension)
+        {
+            return FilenameService.GetFilename(
+                _settings.Current.TemplateVod,
+                _videoTitle,
+                _videoId.ToString(),
+                _videoTime,
+                _streamerName,
+                _streamerId,
+                TrimStart ? StartTime : TimeSpan.Zero,
+                TrimEnd ? EndTime : _vodLength,
+                _vodLength,
+                _viewCount,
+                _game) + extension;
+        }
+
         private void NotifyDownloadState()
         {
             OnPropertyChanged(nameof(CanGetInfo));
@@ -431,6 +481,21 @@ namespace TwitchDownloaderAvalonia.ViewModels
 
             builder.Append(message);
             LogText = builder.ToString();
+            if (!IsLogExpanded)
+                IsLogExpanded = true;
+        }
+
+        private void PushAppStatus()
+        {
+            var kind = Status switch
+            {
+                "Canceling" => AppStatusKind.Canceling,
+                "Error" => AppStatusKind.Error,
+                _ when IsDownloading => AppStatusKind.Running,
+                _ => AppStatusKind.Idle,
+            };
+
+            _appStatus.Set(kind, Status, Progress);
         }
     }
 }

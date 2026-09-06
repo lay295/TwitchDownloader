@@ -5,13 +5,19 @@
     xmlns:local="using:TwitchDownloaderAvalonia"
     RequestedThemeVariant="Default">
     <Application.DataTemplates>
-        <local:ViewLocator/>
+        <local:ViewLocator />
     </Application.DataTemplates>
 
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="/Styles/Colors.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+
     <Application.Styles>
-        <FluentTheme />
-        <Style Selector="Button.selected">
-            <Setter Property="FontWeight" Value="Bold"/>
-        </Style>
+        <SimpleTheme />
+        <StyleInclude Source="/Styles/Controls.axaml" />
     </Application.Styles>
 </Application>

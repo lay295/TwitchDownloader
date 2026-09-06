@@ -11,6 +11,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
 
         public MainWindowViewModel(
             SettingsService settings,
+            AppStatus status,
             FfmpegService ffmpeg,
             DialogService dialogs,
             FileDialogService fileDialogs,
@@ -18,31 +19,67 @@ namespace TwitchDownloaderAvalonia.ViewModels
             ThumbnailService thumbnails)
         {
             _ffmpeg = ffmpeg;
-            Vod = new VodDownloadViewModel(settings, ffmpeg, dialogs, fileDialogs, collision, thumbnails);
-            Clip = new PlaceholderViewModel("Clip Download", "Clip download will be added in a later milestone.");
-            ChatDownload = new PlaceholderViewModel("Chat Download", "Chat download will be added in a later milestone.");
-            ChatUpdate = new PlaceholderViewModel("Chat Updater", "Chat updating will be added in a later milestone.");
-            ChatRender = new PlaceholderViewModel("Chat Render", "Chat rendering will be added in a later milestone.");
-            Queue = new PlaceholderViewModel("Task Queue", "The download queue will be added in a later milestone.");
+            Status = status;
+            Vod = new VodDownloadViewModel(settings, status, ffmpeg, dialogs, fileDialogs, collision, thumbnails);
+            Clip = new DownloadPlaceholderViewModel(
+                "Clip",
+                "https://www.twitch.tv/user/clip/...",
+                "Download",
+                "Clip download uses the same Get Info → quality → Download flow as Video.");
+            ChatDownload = new DownloadPlaceholderViewModel(
+                "Chat",
+                "https://www.twitch.tv/videos/...",
+                "Download",
+                "Chat download will reuse this layout: URL, Get Info, options, Advanced, log.");
+            ChatUpdate = new DownloadPlaceholderViewModel(
+                "Chat Update",
+                "Path to an existing chat JSON / ZIP",
+                "Update",
+                "Chat Update stays in the sidebar. Embed missing emotes and restamp chats here later.");
+            ChatRender = new ChatRenderViewModel();
+            Search = new SearchViewModel();
+            Queue = new QueueViewModel();
+            SettingsPage = new SettingsViewModel(settings, status);
+            About = new AboutViewModel();
             CurrentPage = Vod;
             WindowTitle = $"Twitch Downloader v{typeof(MainWindowViewModel).Assembly.GetName().Version?.ToString(3)}";
         }
 
+        public AppStatus Status { get; }
         public VodDownloadViewModel Vod { get; }
-        public PlaceholderViewModel Clip { get; }
-        public PlaceholderViewModel ChatDownload { get; }
-        public PlaceholderViewModel ChatUpdate { get; }
-        public PlaceholderViewModel ChatRender { get; }
-        public PlaceholderViewModel Queue { get; }
+        public DownloadPlaceholderViewModel Clip { get; }
+        public DownloadPlaceholderViewModel ChatDownload { get; }
+        public DownloadPlaceholderViewModel ChatUpdate { get; }
+        public ChatRenderViewModel ChatRender { get; }
+        public SearchViewModel Search { get; }
+        public QueueViewModel Queue { get; }
+        public SettingsViewModel SettingsPage { get; }
+        public AboutViewModel About { get; }
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(PageTitle))]
         public partial ViewModelBase CurrentPage { get; set; }
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(PageTitle))]
         public partial AppPage SelectedPage { get; set; } = AppPage.Vod;
 
         [ObservableProperty]
-        public partial string WindowTitle { get; set; } = "Twitch Downloader";
+        public partial string WindowTitle { get; set; }
+
+        public string PageTitle => SelectedPage switch
+        {
+            AppPage.Vod => "Video",
+            AppPage.Clip => "Clip",
+            AppPage.ChatDownload => "Chat",
+            AppPage.ChatUpdate => "Chat Update",
+            AppPage.ChatRender => "Chat Render",
+            AppPage.Search => "Search",
+            AppPage.Queue => "Queue",
+            AppPage.Settings => "Settings",
+            AppPage.About => "About",
+            _ => "Video",
+        };
 
         [RelayCommand]
         private void Navigate(AppPage page)
@@ -59,7 +96,10 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 AppPage.ChatDownload => ChatDownload,
                 AppPage.ChatUpdate => ChatUpdate,
                 AppPage.ChatRender => ChatRender,
+                AppPage.Search => Search,
                 AppPage.Queue => Queue,
+                AppPage.Settings => SettingsPage,
+                AppPage.About => About,
                 _ => Vod,
             };
         }
@@ -70,18 +110,26 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 return;
 
             var previousTitle = WindowTitle;
+            var previousKind = Status.Kind;
+            var previousMessage = Status.Message;
             var progress = new AvaloniaTaskProgress(
                 LogLevel.Info | LogLevel.Error,
-                _ => { },
-                status => WindowTitle = $"{previousTitle} - {status}");
+                percent => Status.Progress = percent,
+                status =>
+                {
+                    WindowTitle = $"{previousTitle} - {status}";
+                    Status.Set(AppStatusKind.Running, status);
+                });
 
             try
             {
                 await _ffmpeg.EnsureAvailableAsync(progress);
+                Status.Set(previousKind, previousMessage, 0);
             }
             catch (Exception ex)
             {
                 WindowTitle = previousTitle;
+                Status.Set(AppStatusKind.Error, "FFmpeg download failed", 0);
                 Vod.AppendLog("ERROR: Unable to download FFmpeg: " + ex.Message);
                 return;
             }

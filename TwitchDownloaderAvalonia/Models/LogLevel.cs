@@ -8,6 +8,6 @@ namespace TwitchDownloaderAvalonia.Models
         Info = 1 << 1,
         Warning = 1 << 2,
         Error = 1 << 3,
-        Ffmpeg = 1 << 4
+        Ffmpeg = 1 << 4,
     }
 }

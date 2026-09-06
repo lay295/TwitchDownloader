@@ -9,12 +9,14 @@ namespace TwitchDownloaderAvalonia
             .StartWithClassicDesktopLifetime(args);
 
         public static AppBuilder BuildAvaloniaApp()
-            => AppBuilder.Configure<App>()
+        {
+            return AppBuilder.Configure<App>()
                 .UsePlatformDetect()
 #if DEBUG
                 .WithDeveloperTools()
 #endif
                 .WithInterFont()
                 .LogToTrace();
+        }
     }
 }

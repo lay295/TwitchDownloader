@@ -15,9 +15,7 @@ namespace TwitchDownloaderAvalonia.Services
         public async Task<string?> SaveFileAsync(string suggestedFileName, string filterName, string extension)
         {
             if (_owner is null)
-            {
                 return null;
-            }
 
             var normalizedExtension = extension.TrimStart('.');
             var file = await _owner.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
@@ -28,9 +26,9 @@ namespace TwitchDownloaderAvalonia.Services
                 [
                     new FilePickerFileType(filterName)
                     {
-                        Patterns = [$"*.{normalizedExtension}"]
-                    }
-                ]
+                        Patterns = [$"*.{normalizedExtension}"],
+                    },
+                ],
             });
 
             return file?.TryGetLocalPath();

@@ -15,5 +15,6 @@ namespace TwitchDownloaderAvalonia.Models
         public CollisionBehavior FileCollisionBehavior { get; set; } = CollisionBehavior.Prompt;
         public bool VerboseErrors { get; set; }
         public bool UtcVideoTime { get; set; }
+        public bool ReduceMotion { get; set; }
     }
 }

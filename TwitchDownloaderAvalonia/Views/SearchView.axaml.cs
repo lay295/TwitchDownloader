@@ -2,9 +2,9 @@ using Avalonia.Controls;
 
 namespace TwitchDownloaderAvalonia.Views
 {
-    public partial class PlaceholderView : UserControl
+    public partial class SearchView : UserControl
     {
-        public PlaceholderView()
+        public SearchView()
         {
             InitializeComponent();
         }

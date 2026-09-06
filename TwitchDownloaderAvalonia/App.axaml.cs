@@ -23,6 +23,7 @@ namespace TwitchDownloaderAvalonia
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
                 var settings = new SettingsService();
+                var status = new AppStatus(settings);
                 var ffmpeg = new FfmpegService();
                 var dialogs = new DialogService();
                 var files = new FileDialogService();
@@ -31,7 +32,7 @@ namespace TwitchDownloaderAvalonia
 
                 var mainWindow = new MainWindow
                 {
-                    DataContext = new MainWindowViewModel(settings, ffmpeg, dialogs, files, collision, thumbnails)
+                    DataContext = new MainWindowViewModel(settings, status, ffmpeg, dialogs, files, collision, thumbnails),
                 };
 
                 dialogs.SetOwner(mainWindow);

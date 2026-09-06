@@ -15,6 +15,6 @@ namespace TwitchDownloaderAvalonia.Models
         public IVideoQuality<M3U8.Stream> Quality { get; }
 
         [ObservableProperty]
-        private string _displayName = string.Empty;
+        public partial string DisplayName { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 using System.Globalization;
+using Avalonia.Data;
 using Avalonia.Data.Converters;
 using TwitchDownloaderCore.Models;
 
@@ -24,7 +25,7 @@ namespace TwitchDownloaderAvalonia.Converters
             if (value is true && parameter is string text && Enum.TryParse(text, out VideoTrimMode parsed))
                 return parsed;
 
-            return Avalonia.Data.BindingOperations.DoNothing;
+            return BindingOperations.DoNothing;
         }
     }
 }

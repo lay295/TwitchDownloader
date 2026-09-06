@@ -1,0 +1,30 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignWidth="740"
+    d:DesignHeight="480"
+    x:Class="TwitchDownloaderAvalonia.Views.SearchView"
+    x:DataType="vm:SearchViewModel">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <DockPanel Grid.Row="0" Margin="0,0,0,8">
+            <ComboBox DockPanel.Dock="Left" Width="110" Margin="0,0,6,0" IsEnabled="False" PlaceholderText="Channel" />
+            <Button DockPanel.Dock="Right" Content="Search" IsEnabled="False" />
+            <TextBox Margin="0,0,8,0" PlaceholderText="Channel, VOD, or clip" IsEnabled="False" />
+        </DockPanel>
+
+        <Border Grid.Row="1" Classes="card">
+            <TextBlock
+                Classes="muted"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Text="Results will list here. Selected items enqueue to Queue." />
+        </Border>
+
+        <TextBlock Grid.Row="2" Classes="muted" Margin="0,8,0,0" Text="{Binding Details}" TextWrapping="Wrap" />
+    </Grid>
+</UserControl>

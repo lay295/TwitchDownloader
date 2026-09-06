@@ -9,7 +9,7 @@ namespace TwitchDownloaderAvalonia.Services
         private static readonly JsonSerializerOptions JsonOptions = new()
         {
             WriteIndented = true,
-            Converters = { new JsonStringEnumConverter() }
+            Converters = { new JsonStringEnumConverter() },
         };
 
         private readonly string _filePath;
@@ -42,9 +42,7 @@ namespace TwitchDownloaderAvalonia.Services
             try
             {
                 if (!File.Exists(_filePath))
-                {
                     return new AppSettings();
-                }
 
                 var json = File.ReadAllText(_filePath);
                 return JsonSerializer.Deserialize<AppSettings>(json, JsonOptions) ?? new AppSettings();

@@ -7,6 +7,9 @@ namespace TwitchDownloaderAvalonia.Models
         ChatDownload,
         ChatUpdate,
         ChatRender,
+        Search,
         Queue,
+        Settings,
+        About,
     }
 }

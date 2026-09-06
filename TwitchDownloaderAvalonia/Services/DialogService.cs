@@ -9,22 +9,14 @@ namespace TwitchDownloaderAvalonia.Services
     {
         private Window? _owner;
 
-        public void SetOwner(Window owner)
-        {
-            _owner = owner;
-        }
+        public void SetOwner(Window owner) => _owner = owner;
 
-        public Task ShowErrorAsync(string title, string message)
-        {
-            return ShowMessageAsync(title, message);
-        }
+        public Task ShowErrorAsync(string title, string message) => ShowMessageAsync(title, message);
 
         public async Task ShowMessageAsync(string title, string message)
         {
             if (_owner is null)
-            {
                 return;
-            }
 
             await Dispatcher.UIThread.InvokeAsync(async () =>
             {

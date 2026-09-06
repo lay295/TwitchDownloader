@@ -1,0 +1,49 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignWidth="740"
+    d:DesignHeight="480"
+    x:Class="TwitchDownloaderAvalonia.Views.ChatRenderView"
+    x:DataType="vm:ChatRenderViewModel">
+
+    <Grid ColumnDefinitions="*,260" RowDefinitions="*,Auto">
+        <Border Grid.Row="0" Grid.Column="0" Classes="card" Margin="0,0,8,0">
+            <Panel>
+                <TextBlock
+                    Classes="muted"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    TextAlignment="Center"
+                    Text="Render preview&#x0a;A live preview will appear here." />
+            </Panel>
+        </Border>
+
+        <ScrollViewer Grid.Row="0" Grid.Column="1">
+            <StackPanel Spacing="8">
+                <TextBlock Classes="label" Text="Output" />
+                <ComboBox IsEnabled="False" PlaceholderText="MP4" />
+                <TextBlock Classes="label" Text="Framerate" />
+                <NumericUpDown Value="30" IsEnabled="False" />
+                <TextBlock Classes="label" Text="Codec" />
+                <ComboBox IsEnabled="False" PlaceholderText="H.264" />
+                <Button Classes="accent" Content="Render" HorizontalAlignment="Left" IsEnabled="False" />
+                <Expander Header="Advanced" IsEnabled="False">
+                    <TextBlock Classes="muted" Margin="0,6,0,0" Text="Font, emote scale, mask, and FFmpeg args." />
+                </Expander>
+            </StackPanel>
+        </ScrollViewer>
+
+        <TextBlock
+            Grid.Row="1"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            Classes="muted"
+            Margin="0,8,0,0"
+            Text="{Binding Details}"
+            TextWrapping="Wrap" />
+    </Grid>
+</UserControl>

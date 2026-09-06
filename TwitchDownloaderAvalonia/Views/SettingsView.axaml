@@ -1,0 +1,30 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignWidth="740"
+    d:DesignHeight="480"
+    x:Class="TwitchDownloaderAvalonia.Views.SettingsView"
+    x:DataType="vm:SettingsViewModel">
+
+    <StackPanel Spacing="10" MaxWidth="520" HorizontalAlignment="Left">
+        <Border Classes="card">
+            <StackPanel Spacing="6">
+                <TextBlock Classes="label" Text="Motion" />
+                <CheckBox Content="Reduce motion (hide status GIF)" IsChecked="{Binding ReduceMotion}" />
+            </StackPanel>
+        </Border>
+
+        <Border Classes="card">
+            <StackPanel Spacing="6">
+                <TextBlock Classes="label" Text="Downloads" />
+                <TextBlock Classes="muted" Text="Temp folder, filename templates, bandwidth limit, and file collision behavior will be added here." TextWrapping="Wrap" />
+            </StackPanel>
+        </Border>
+
+        <TextBlock Classes="muted" Text="{Binding Details}" TextWrapping="Wrap" />
+    </StackPanel>
+</UserControl>
