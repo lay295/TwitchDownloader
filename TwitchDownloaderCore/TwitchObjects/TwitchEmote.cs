@@ -10,6 +10,8 @@ namespace TwitchDownloaderCore.TwitchObjects
         ThirdParty
     }
 
+    // Frames are decoded lazily and can be released again: a long animated 7TV emote is a few hundred KB compressed
+    // but tens of MB as bitmaps, and a busy channel has hundreds. Size and timings come from the codec header.
     [DebuggerDisplay("{Name}")]
     public sealed class TwitchEmote : IDisposable
     {
@@ -17,19 +19,32 @@ namespace TwitchDownloaderCore.TwitchObjects
         public SKCodec Codec { get; }
         public byte[] ImageData { get; set; }
         public EmoteProvider EmoteProvider { get; set; }
-        private List<SKBitmap> EmoteBitmaps { get; } = [];
+
+        private List<SKBitmap> _emoteBitmaps;
         private SKImage[] _emoteFrames;
+        private SKImageInfo _info;
+
+        private List<SKBitmap> EmoteBitmaps => _emoteBitmaps ??= ExtractFrames();
         public SKImage[] EmoteFrames => _emoteFrames ??= EmoteBitmaps.Select(SKImage.FromBitmap).ToArray();
+
         public List<int> EmoteFrameDurations { get; private set; } = [];
         public int TotalDuration { get; set; }
         public string Name { get; }
         public string Id { get; }
+        // Only set for images resolved at runtime, such as chat GIFs
+        public string Url { get; set; }
         public int ImageScale { get; }
         public bool IsZeroWidth { get; set; }
         public int FrameCount { get; }
         public int Height => Info.Height;
         public int Width => Info.Width;
-        public SKImageInfo Info => EmoteBitmaps[0].Info;
+
+        // The size the emote draws at, known from the header without decoding a frame
+        public SKImageInfo Info => _info;
+        public bool FramesMaterialized => _emoteBitmaps is not null;
+        public long DecodedByteSize => (long)_info.Width * _info.Height * 4 * FrameCount;
+        // Stamped by the renderer as it draws, so the least recently used can be released
+        public long LastUsedTick { get; set; }
 
         public TwitchEmote(byte[] imageData, [AllowNull] SKCodec codec, EmoteProvider emoteProvider, int imageScale, string imageId, string imageName, bool isZeroWidth = false)
         {
@@ -55,7 +70,9 @@ namespace TwitchDownloaderCore.TwitchObjects
             IsZeroWidth = isZeroWidth;
             FrameCount = Math.Max(1, Codec.FrameCount);
 
-            ExtractFrames();
+            var codecInfo = Codec.Info;
+            _info = new SKImageInfo(codecInfo.Width, codecInfo.Height);
+
             CalculateDurations();
         }
 
@@ -94,19 +111,52 @@ namespace TwitchDownloaderCore.TwitchObjects
             }
         }
 
-        private void ExtractFrames()
+        // Decodes every frame, scaling straight to Info so a full sized copy of the animation is never held
+        private List<SKBitmap> ExtractFrames()
         {
+            ObjectDisposedException.ThrowIf(Disposed, this);
+
             var codecInfo = Codec.Info;
+            var scaled = _info.Width != codecInfo.Width || _info.Height != codecInfo.Height;
+            var bitmaps = new List<SKBitmap>(FrameCount);
+
             for (int i = 0; i < FrameCount; i++)
             {
-                SKImageInfo imageInfo = new SKImageInfo(codecInfo.Width, codecInfo.Height);
-                SKBitmap newBitmap = new SKBitmap(imageInfo);
-                IntPtr pointer = newBitmap.GetPixels();
-                SKCodecOptions codecOptions = new SKCodecOptions(i);
-                Codec.GetPixels(imageInfo, pointer, codecOptions);
+                var nativeInfo = new SKImageInfo(codecInfo.Width, codecInfo.Height);
+                var nativeBitmap = new SKBitmap(nativeInfo);
+                Codec.GetPixels(nativeInfo, nativeBitmap.GetPixels(), new SKCodecOptions(i));
+
+                if (!scaled)
+                {
+                    nativeBitmap.SetImmutable();
+                    bitmaps.Add(nativeBitmap);
+                    continue;
+                }
+
+                var newBitmap = new SKBitmap(_info);
+                nativeBitmap.ScalePixels(newBitmap, SKFilterQuality.High);
+                nativeBitmap.Dispose();
                 newBitmap.SetImmutable();
-                EmoteBitmaps.Add(newBitmap);
+                bitmaps.Add(newBitmap);
             }
+
+            return bitmaps;
+        }
+
+        /// <summary>Drops the decoded frames. They are decoded again if the emote is drawn later.</summary>
+        public void ReleaseFrames()
+        {
+            foreach (var image in _emoteFrames ?? [])
+            {
+                image?.Dispose();
+            }
+            _emoteFrames = null;
+
+            foreach (var bitmap in _emoteBitmaps ?? [])
+            {
+                bitmap?.Dispose();
+            }
+            _emoteBitmaps = null;
         }
 
         /// <summary>
@@ -119,21 +169,7 @@ namespace TwitchDownloaderCore.TwitchObjects
 
             height = TwitchHelper.SnapResizeHeight(height, upSnapThreshold, downSnapThreshold, codecInfo.Height);
 
-            var imageInfo = new SKImageInfo((int)(height / (double)codecInfo.Height * codecInfo.Width), height);
-            for (var i = 0; i < FrameCount; i++)
-            {
-                var newBitmap = new SKBitmap(imageInfo);
-                EmoteBitmaps[i].ScalePixels(newBitmap, SKFilterQuality.High);
-                EmoteBitmaps[i].Dispose();
-                newBitmap.SetImmutable();
-                EmoteBitmaps[i] = newBitmap;
-            }
-
-            foreach (var image in _emoteFrames ?? [])
-            {
-                image?.Dispose();
-            }
-            _emoteFrames = null;
+            SetTargetSize(new SKImageInfo((int)(height / (double)codecInfo.Height * codecInfo.Width), height));
         }
 
         public void Scale(double newScale) => SnapScale(newScale, 0, 0);
@@ -148,21 +184,19 @@ namespace TwitchDownloaderCore.TwitchObjects
             var codecInfo = Codec.Info;
             var height = TwitchHelper.SnapResizeHeight((int)(codecInfo.Height * newScale), upSnapThreshold, downSnapThreshold, codecInfo.Height);
 
-            var imageInfo = new SKImageInfo((int)(height / (double)codecInfo.Height * codecInfo.Width), height);
-            for (var i = 0; i < FrameCount; i++)
+            SetTargetSize(new SKImageInfo((int)(height / (double)codecInfo.Height * codecInfo.Width), height));
+        }
+
+        // Records the size to decode at; anything already decoded is dropped so it comes back at the new size
+        private void SetTargetSize(SKImageInfo info)
+        {
+            if (info.Width == _info.Width && info.Height == _info.Height)
             {
-                var newBitmap = new SKBitmap(imageInfo);
-                EmoteBitmaps[i].ScalePixels(newBitmap, SKFilterQuality.High);
-                EmoteBitmaps[i].Dispose();
-                newBitmap.SetImmutable();
-                EmoteBitmaps[i] = newBitmap;
+                return;
             }
 
-            foreach (var image in _emoteFrames ?? [])
-            {
-                image?.Dispose();
-            }
-            _emoteFrames = null;
+            _info = info;
+            ReleaseFrames();
         }
 
         public void Dispose()
@@ -181,16 +215,7 @@ namespace TwitchDownloaderCore.TwitchObjects
 
                 if (isDisposing)
                 {
-                    foreach (var image in _emoteFrames ?? [])
-                    {
-                        image?.Dispose();
-                    }
-
-                    foreach (var bitmap in EmoteBitmaps)
-                    {
-                        bitmap?.Dispose();
-                    }
-
+                    ReleaseFrames();
                     Codec?.Dispose();
                 }
             }

@@ -45,6 +45,15 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("stv", Default = true, HelpText = "Enable 7TV emotes.")]
         public bool? StvEmotes { get; set; }
 
+        [Option("gifs", Default = true, HelpText = "Render GIFs posted in chat as a full width image. GIFs that cannot be resolved stay as their bracketed alt text.")]
+        public bool? Gifs { get; set; }
+
+        [Option("gif-max-height-percent", Default = 50, HelpText = "Cap on the height of a GIF posted in chat, as a percentage of the chat height. 100 lets one GIF fill the chat.")]
+        public int GifMaxHeightPercent { get; set; }
+
+        [Option("image-cache-mb", Default = 256, HelpText = "Megabytes of off-screen emote and GIF imagery to retain decoded. On-screen images are always kept. Lower it on constrained machines, raise it to re-decode less often.")]
+        public int ImageCacheMb { get; set; }
+
         [Option("allow-unlisted-emotes", Default = true, HelpText = "Allow unlisted 7TV emotes in the render.")]
         public bool? AllowUnlistedEmotes { get; set; }
 

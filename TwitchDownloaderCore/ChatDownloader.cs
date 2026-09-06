@@ -1,4 +1,4 @@
-using System.IO.Compression;
+﻿using System.IO.Compression;
 using System.Net.Http.Json;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -309,6 +309,11 @@ namespace TwitchDownloaderCore
             if (downloadOptions.EmbedData && (downloadOptions.DownloadFormat is ChatFormat.Json or ChatFormat.Html))
             {
                 await EmbedImages(chatRoot, cancellationToken);
+            }
+
+            if (downloadOptions.Gifs && (downloadOptions.DownloadFormat is ChatFormat.Json or ChatFormat.Html))
+            {
+                await EmbedGiphyGifs(chatRoot, cancellationToken);
             }
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -632,6 +637,41 @@ namespace TwitchDownloaderCore
 
                 chatRoot.embeddedData.twitchBits.Add(newBit);
                 _progress.ReportProgress(++imagesProcessed * 100 / totalImageCount);
+            }
+        }
+
+        private async Task EmbedGiphyGifs(ChatRoot chatRoot, CancellationToken cancellationToken)
+        {
+            _progress.SetStatus("Resolving Chat GIFs");
+            chatRoot.embeddedData ??= new EmbeddedData();
+
+            List<TwitchEmote> gifs;
+            try
+            {
+                gifs = await TwitchHelper.GetGiphyGifs(chatRoot.comments, _cacheDir, _progress, cancellationToken: cancellationToken);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                // A broken Giphy must not cost the user the chat itself
+                _progress.LogWarning($"Unable to resolve chat GIFs: {ex.Message} Continuing without them.");
+                return;
+            }
+
+            foreach (var gif in gifs)
+            {
+                chatRoot.embeddedData.gifs.Add(new EmbedEmoteData
+                {
+                    id = gif.Id,
+                    imageScale = 1,
+                    // Url only unless archiving, in which case the image is re-fetched at render time
+                    data = downloadOptions.GifsEmbed ? gif.ImageData : null,
+                    name = gif.Name,
+                    url = gif.Url,
+                    width = gif.Width,
+                    height = gif.Height,
+                });
+
+                gif.Dispose();
             }
         }
 

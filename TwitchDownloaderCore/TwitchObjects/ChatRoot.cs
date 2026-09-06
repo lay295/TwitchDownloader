@@ -227,6 +227,7 @@ namespace TwitchDownloaderCore.TwitchObjects
     {
         public string id { get; set; }
         public int imageScale { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public byte[] data { get; set; }
         public string name { get; set; }
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -264,6 +265,8 @@ namespace TwitchDownloaderCore.TwitchObjects
         public List<EmbedEmoteData> firstParty { get; set; } = new();
         public List<EmbedChatBadge> twitchBadges { get; set; } = new();
         public List<EmbedCheerEmote> twitchBits { get; set; } = new();
+        /// <summary>GIFs posted in chat, keyed by <see cref="EmbedEmoteData.name"/> holding the Giphy title.</summary>
+        public List<EmbedEmoteData> gifs { get; set; } = new();
     }
 
     public class LegacyEmbeddedData

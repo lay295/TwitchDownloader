@@ -662,6 +662,128 @@ namespace TwitchDownloaderCore
             }
         }
 
+        /// <summary>Fetches the Giphy GIFs posted across <paramref name="comments"/>, keyed by the Giphy title.</summary>
+        /// <remarks>Prefers embedded data, then the recorded url, then a Giphy search. Unresolved titles are skipped and stay as text.</remarks>
+        public static async Task<List<TwitchEmote>> GetGiphyGifs(List<Comment> comments, string cacheFolder, ITaskLogger logger, EmbeddedData embeddedData = null, bool offline = false,
+            CancellationToken cancellationToken = default)
+        {
+            var gifs = new Dictionary<string, TwitchEmote>(StringComparer.OrdinalIgnoreCase);
+
+            // Load our embedded GIFs
+            foreach (var gifData in embeddedData?.gifs ?? [])
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if (gifData.data is not { Length: > 0 })
+                {
+                    continue;
+                }
+
+                try
+                {
+                    var embeddedGif = new TwitchEmote(gifData.data, null, EmoteProvider.ThirdParty, 1, gifData.id, gifData.name) { Url = gifData.url };
+                    if (!gifs.TryAdd(gifData.name, embeddedGif))
+                    {
+                        embeddedGif.Dispose();
+                        logger.LogVerbose($"Tried to add duplicate GIF from embedded data: {gifData.name}.");
+                    }
+                }
+                catch (Exception e) when (e is not OperationCanceledException)
+                {
+                    logger.LogVerbose($"An exception occurred while loading embedded GIF '{gifData.name}': {e.Message}.");
+                }
+            }
+
+            var gifFolder = new DirectoryInfo(Path.Combine(cacheFolder, "giphy"));
+            if (!gifFolder.Exists)
+                gifFolder = CreateDirectory(gifFolder.FullName);
+
+            foreach (var title in GiphyResolver.GetTitles(comments))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if (gifs.ContainsKey(title))
+                {
+                    continue;
+                }
+
+                var embedded = embeddedData?.gifs?.FirstOrDefault(x => title.Equals(x.name, StringComparison.OrdinalIgnoreCase));
+                var gifId = embedded?.id;
+                var gifUrl = embedded?.url ?? (embedded?.id is null ? null : GiphyResolver.MediaUrl(embedded.id));
+
+                // The size Giphy claims the image is, used below to tell the real GIF apart from a stand-in.
+                var expectedWidth = embedded?.width ?? 0;
+                var expectedHeight = embedded?.height ?? 0;
+
+                try
+                {
+                    if (gifUrl is null)
+                    {
+                        if (offline)
+                        {
+                            continue;
+                        }
+
+                        var resolved = await GiphyResolver.ResolveAsync(title, logger, cancellationToken);
+                        if (resolved is null)
+                        {
+                            continue;
+                        }
+
+                        (gifId, gifUrl) = (resolved.Value.Id, resolved.Value.Url);
+                        (expectedWidth, expectedHeight) = (resolved.Value.Width, resolved.Value.Height);
+                    }
+
+                    var (bytes, codec) = await GetImage(gifFolder, gifUrl, gifId, 1, "gif", offline, logger, cancellationToken);
+                    if (bytes is null)
+                    {
+                        continue;
+                    }
+
+                    // Constructing reads the header only, so this does not pay for the frames
+                    var newGif = new TwitchEmote(bytes, codec, EmoteProvider.ThirdParty, 1, gifId, title) { Url = gifUrl };
+
+                    // Giphy serves a "content is not available" image under a 200, so a size mismatch means we got that
+                    if (expectedWidth > 0 && expectedHeight > 0 && (newGif.Width != expectedWidth || newGif.Height != expectedHeight))
+                    {
+                        logger.LogVerbose(
+                            $"Giphy served {newGif.Width}x{newGif.Height} for '{title}' but advertised {expectedWidth}x{expectedHeight}, discarding it.");
+                        newGif.Dispose();
+                        DeleteCachedImage(gifFolder, gifId, 1, "gif", logger);
+                        continue;
+                    }
+
+                    if (!gifs.TryAdd(title, newGif))
+                    {
+                        newGif.Dispose();
+                    }
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException)
+                {
+                    logger.LogVerbose($"An exception occurred while fetching GIF '{title}': {ex.Message}.");
+                }
+            }
+
+            return gifs.Values.ToList();
+        }
+
+        // Removes a cached image so a rejected download is not reused next run
+        private static void DeleteCachedImage(DirectoryInfo cacheDir, string imageId, int imageScale, string imageType, ITaskLogger logger)
+        {
+            try
+            {
+                var file = new FileInfo(Path.Combine(cacheDir.FullName, $"{imageId}_{imageScale}.{imageType}"));
+                if (file.Exists)
+                {
+                    file.Delete();
+                }
+            }
+            catch (Exception e) when (e is IOException or SecurityException or UnauthorizedAccessException)
+            {
+                logger.LogVerbose($"Failed to delete cached {imageId}: {e.Message}");
+            }
+        }
+
         public static async Task<List<TwitchEmote>> GetEmotes(List<Comment> comments, string cacheFolder, ITaskLogger logger, EmbeddedData embeddedData = null, bool offline = false, CancellationToken cancellationToken = default)
         {
             var emotes = new Dictionary<string, TwitchEmote>();

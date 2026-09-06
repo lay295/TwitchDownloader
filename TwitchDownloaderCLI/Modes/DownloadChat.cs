@@ -62,6 +62,8 @@ namespace TwitchDownloaderCLI.Modes
                 BttvEmotes = (bool)inputOptions.BttvEmotes!,
                 FfzEmotes = (bool)inputOptions.FfzEmotes!,
                 StvEmotes = (bool)inputOptions.StvEmotes!,
+                Gifs = inputOptions.Gifs || inputOptions.GifsEmbed,
+                GifsEmbed = inputOptions.GifsEmbed,
                 TempFolder = inputOptions.TempFolder,
                 FileCollisionCallback = collisionHandler.HandleCollisionCallback,
             };
