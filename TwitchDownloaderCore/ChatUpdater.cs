@@ -61,7 +61,8 @@ namespace TwitchDownloaderCore
             int totalSteps = 2;
             if (_updateOptions.TrimBeginning || _updateOptions.TrimEnding) totalSteps++;
             if (_updateOptions.OutputFormat is ChatFormat.Json or ChatFormat.Html
-                && (_updateOptions.EmbedMissing || _updateOptions.ReplaceEmbeds || _updateOptions.GiphyGifs)) totalSteps++;
+                && (_updateOptions.EmbedMissing || _updateOptions.ReplaceEmbeds
+                    || (_updateOptions.GiphyGifs && _updateOptions.OutputFormat is ChatFormat.Json))) totalSteps++;
 
             currentStep++;
             await UpdateVideoInfo(totalSteps, currentStep, cancellationToken);
@@ -75,7 +76,8 @@ namespace TwitchDownloaderCore
 
             // If we are updating/replacing embeds
             if (_updateOptions.OutputFormat is ChatFormat.Json or ChatFormat.Html
-                && (_updateOptions.EmbedMissing || _updateOptions.ReplaceEmbeds || _updateOptions.GiphyGifs))
+                && (_updateOptions.EmbedMissing || _updateOptions.ReplaceEmbeds
+                    || (_updateOptions.GiphyGifs && _updateOptions.OutputFormat is ChatFormat.Json)))
             {
                 currentStep++;
                 await UpdateEmbeds(currentStep, totalSteps, cancellationToken);
@@ -295,7 +297,7 @@ namespace TwitchDownloaderCore
                 embedTasks.Add(Task.Run(() => BitTask(cancellationToken), cancellationToken));
             }
 
-            if (_updateOptions.GiphyGifs)
+            if (_updateOptions.GiphyGifs && _updateOptions.OutputFormat is ChatFormat.Json)
             {
                 embedTasks.Add(Task.Run(() => GifTask(cancellationToken), cancellationToken));
             }
