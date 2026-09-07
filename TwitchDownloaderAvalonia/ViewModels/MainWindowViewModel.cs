@@ -25,7 +25,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
             ChatDownload = new ChatDownloadViewModel(settings, status, dialogs, fileDialogs, collision, thumbnails);
             ChatUpdate = new ChatUpdateViewModel(settings, status, dialogs, fileDialogs, collision, thumbnails);
             ChatRender = new ChatRenderViewModel(settings, status, ffmpeg, dialogs, fileDialogs, collision, thumbnails);
-            Search = new SearchViewModel(status);
+            Search = new SearchViewModel(settings, status, dialogs, thumbnails, OpenSearchResultAsync);
             Queue = new QueueViewModel(status);
             SettingsPage = new SettingsViewModel(settings, status);
             About = new AboutViewModel();
@@ -83,7 +83,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
             AppPage.ChatDownload => "Download VOD or clip chat.",
             AppPage.ChatUpdate => "Update existing chat files.",
             AppPage.ChatRender => "Render chat to video.",
-            AppPage.Search => "Find VODs and clips.",
+            AppPage.Search => "Find VODs and clips, then open one to download.",
             AppPage.Queue => "Manage downloads and renders.",
             AppPage.Settings => "Preferences for this app.",
             AppPage.About => "About Twitch Downloader.",
@@ -94,6 +94,24 @@ namespace TwitchDownloaderAvalonia.ViewModels
         private void Navigate(AppPage page)
         {
             SelectedPage = page;
+        }
+
+        private async Task OpenSearchResultAsync(SearchResultItem item)
+        {
+            if (item.IsClip)
+            {
+                Clip.ClipUrl = item.Url;
+                Navigate(AppPage.Clip);
+                if (Clip.GetInfoCommand.CanExecute(null))
+                    await Clip.GetInfoCommand.ExecuteAsync(null);
+
+                return;
+            }
+
+            Vod.VideoUrl = item.Url;
+            Navigate(AppPage.Vod);
+            if (Vod.GetInfoCommand.CanExecute(null))
+                await Vod.GetInfoCommand.ExecuteAsync(null);
         }
 
         partial void OnSelectedPageChanged(AppPage value)

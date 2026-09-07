@@ -9,6 +9,10 @@
             <Color x:Key="ThemeControlHighColor">#EBE6F2</Color>
             <SolidColorBrush x:Key="ThemeBackgroundBrush" Color="{StaticResource ThemeBackgroundColor}" />
             <SolidColorBrush x:Key="ThemeAccentBrush" Color="{StaticResource ThemeAccentColor}" />
+            <SolidColorBrush x:Key="ThemeAccentBrush2" Color="#CC9146FF" />
+            <SolidColorBrush x:Key="ThemeAccentBrush3" Color="#B39146FF" />
+            <SolidColorBrush x:Key="ThemeAccentBrush4" Color="#809146FF" />
+            <SolidColorBrush x:Key="ThemeControlHighlightMidBrush" Color="#E4DDF0" />
             <SolidColorBrush x:Key="ThemeForegroundBrush" Color="{StaticResource ThemeForegroundColor}" />
             <SolidColorBrush x:Key="ThemeBorderLowBrush" Color="{StaticResource ThemeBorderLowColor}" />
             <SolidColorBrush x:Key="ThemeBorderMidBrush" Color="{StaticResource ThemeBorderLowColor}" />
@@ -30,6 +34,8 @@
             <SolidColorBrush x:Key="AccentForegroundBrush" Color="#FFFFFF" />
             <SolidColorBrush x:Key="NavSelectedBrush" Color="#9146FF" />
             <SolidColorBrush x:Key="NavHoverBrush" Color="#E4DDF0" />
+            <SolidColorBrush x:Key="CardSelectedBrush" Color="#E8DCFF" />
+            <SolidColorBrush x:Key="CardSelectedHoverBrush" Color="#DCC9FF" />
             <SolidColorBrush x:Key="MutedForegroundBrush" Color="#6B6480" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="Dark">
@@ -41,6 +47,10 @@
             <Color x:Key="ThemeControlHighColor">#2E2E36</Color>
             <SolidColorBrush x:Key="ThemeBackgroundBrush" Color="{StaticResource ThemeBackgroundColor}" />
             <SolidColorBrush x:Key="ThemeAccentBrush" Color="{StaticResource ThemeAccentColor}" />
+            <SolidColorBrush x:Key="ThemeAccentBrush2" Color="#CC9146FF" />
+            <SolidColorBrush x:Key="ThemeAccentBrush3" Color="#B39146FF" />
+            <SolidColorBrush x:Key="ThemeAccentBrush4" Color="#809146FF" />
+            <SolidColorBrush x:Key="ThemeControlHighlightMidBrush" Color="#2A2A32" />
             <SolidColorBrush x:Key="ThemeForegroundBrush" Color="{StaticResource ThemeForegroundColor}" />
             <SolidColorBrush x:Key="ThemeBorderLowBrush" Color="{StaticResource ThemeBorderLowColor}" />
             <SolidColorBrush x:Key="ThemeBorderMidBrush" Color="{StaticResource ThemeBorderLowColor}" />
@@ -62,6 +72,8 @@
             <SolidColorBrush x:Key="AccentForegroundBrush" Color="#FFFFFF" />
             <SolidColorBrush x:Key="NavSelectedBrush" Color="#9146FF" />
             <SolidColorBrush x:Key="NavHoverBrush" Color="#2A2A32" />
+            <SolidColorBrush x:Key="CardSelectedBrush" Color="#3A2754" />
+            <SolidColorBrush x:Key="CardSelectedHoverBrush" Color="#4A3380" />
             <SolidColorBrush x:Key="MutedForegroundBrush" Color="#9B9BA8" />
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>

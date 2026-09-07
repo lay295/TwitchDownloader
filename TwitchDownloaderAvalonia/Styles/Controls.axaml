@@ -5,6 +5,16 @@
         <Setter Property="FontSize" Value="14" />
     </Style>
 
+    <!-- ComboBox/ContextMenu popups are separate windows; an opaque host shows square
+         corners behind a rounded Border. Keep the host transparent and clip the card. -->
+    <Style Selector="PopupRoot">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="TransparencyLevelHint" Value="Transparent" />
+    </Style>
+    <Style Selector="OverlayPopupHost">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
     <Style Selector="DrawerPage">
         <Setter Property="Background" Value="{DynamicResource WindowBackgroundBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource WindowForegroundBrush}" />
@@ -147,6 +157,52 @@
 
     <Style Selector="Button.nav.selected TextBlock">
         <Setter Property="Foreground" Value="{DynamicResource AccentForegroundBrush}" />
+    </Style>
+
+    <Style Selector="Button.searchCard">
+        <Setter Property="Padding" Value="8" />
+        <Setter Property="Width" Value="220" />
+        <Setter Property="MinWidth" Value="220" />
+        <Setter Property="MinHeight" Value="0" />
+        <Setter Property="Margin" Value="0,0,8,8" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Top" />
+        <Setter Property="Background" Value="{DynamicResource CardMutedBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="2" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FontWeight" Value="Normal" />
+    </Style>
+
+    <Style Selector="Button.searchCard:pointerover">
+        <Setter Property="Background" Value="{DynamicResource NavHoverBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+    </Style>
+
+    <Style Selector="Button.searchCard:pressed">
+        <Setter Property="Background" Value="{DynamicResource NavHoverBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="2" />
+    </Style>
+
+    <Style Selector="Button.searchCard.selected">
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="BorderThickness" Value="2" />
+        <Setter Property="Background" Value="{DynamicResource CardSelectedBrush}" />
+    </Style>
+
+    <Style Selector="Button.searchCard.selected:pointerover">
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentHoverBrush}" />
+        <Setter Property="BorderThickness" Value="2" />
+        <Setter Property="Background" Value="{DynamicResource CardSelectedHoverBrush}" />
+    </Style>
+
+    <Style Selector="Button.searchCard.selected:pressed">
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="BorderThickness" Value="2" />
+        <Setter Property="Background" Value="{DynamicResource CardSelectedHoverBrush}" />
     </Style>
 
     <Style Selector="Button.chip">

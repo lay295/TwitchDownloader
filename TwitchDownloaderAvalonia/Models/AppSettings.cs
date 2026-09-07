@@ -29,6 +29,7 @@ namespace TwitchDownloaderAvalonia.Models
         public bool VerboseErrors { get; set; }
         public bool UtcVideoTime { get; set; }
         public bool ReduceMotion { get; set; }
+        public List<string> RecentChannels { get; set; } = [];
 
         public string RenderFont { get; set; } = "Inter Embedded";
         public double RenderFontSize { get; set; } = 24;

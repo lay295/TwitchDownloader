@@ -2,43 +2,219 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
+    xmlns:m="using:TwitchDownloaderAvalonia.Models"
+    xmlns:c="using:TwitchDownloaderAvalonia.Converters"
     xmlns:anim="https://github.com/whistyun/AnimatedImage.Avalonia"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    d:DesignWidth="740"
-    d:DesignHeight="480"
+    d:DesignWidth="860"
+    d:DesignHeight="620"
     x:Class="TwitchDownloaderAvalonia.Views.SearchView"
     x:DataType="vm:SearchViewModel">
 
     <Grid RowDefinitions="Auto,*,Auto">
-        <DockPanel Grid.Row="0" Margin="0,0,0,8">
-            <ComboBox DockPanel.Dock="Left" Width="110" Margin="0,0,6,0" IsEnabled="False" PlaceholderText="Channel" />
-            <Button DockPanel.Dock="Right" Content="Search" IsEnabled="False" />
-            <TextBox Margin="0,0,8,0" PlaceholderText="Channel, VOD, or clip" IsEnabled="False" />
-        </DockPanel>
-
-        <Border Grid.Row="1" Classes="card">
+        <WrapPanel Margin="0,0,0,12">
             <StackPanel
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                Spacing="8">
-                <Image
-                    Width="48"
-                    Height="48"
-                    HorizontalAlignment="Center"
-                    Stretch="Uniform"
-                    anim:ImageBehavior.AnimatedSource="avares://TwitchDownloaderAvalonia/Assets/Status/ppHop.gif"
-                    anim:ImageBehavior.RepeatBehavior="Forever"
-                    IsVisible="{Binding AppStatus.ShowStatusImage}" />
-                <TextBlock
-                    Classes="muted"
-                    HorizontalAlignment="Center"
-                    TextAlignment="Center"
-                    Text="Results will list here. Selected items enqueue to Queue." />
+                Orientation="Horizontal"
+                Spacing="14"
+                Margin="0,0,16,8"
+                VerticalAlignment="Center">
+                <RadioButton
+                    Content="VODs"
+                    GroupName="SearchKind"
+                    IsEnabled="{Binding CanEditFilters}"
+                    IsChecked="{Binding Kind, Converter={x:Static c:EnumEqualsConverter.Instance}, ConverterParameter={x:Static m:SearchKind.Videos}, Mode=TwoWay}" />
+                <RadioButton
+                    Content="Clips"
+                    GroupName="SearchKind"
+                    IsEnabled="{Binding CanEditFilters}"
+                    IsChecked="{Binding Kind, Converter={x:Static c:EnumEqualsConverter.Instance}, ConverterParameter={x:Static m:SearchKind.Clips}, Mode=TwoWay}" />
             </StackPanel>
+
+            <ComboBox
+                Width="170"
+                HorizontalAlignment="Left"
+                Margin="0,0,8,8"
+                ItemsSource="{Binding VideoTypes}"
+                SelectedItem="{Binding SelectedVideoType}"
+                IsVisible="{Binding IsVideos}"
+                IsEnabled="{Binding CanEditFilters}" />
+            <ComboBox
+                Width="170"
+                HorizontalAlignment="Left"
+                Margin="0,0,8,8"
+                ItemsSource="{Binding ClipPeriods}"
+                SelectedItem="{Binding SelectedClipPeriod}"
+                IsVisible="{Binding IsClips}"
+                IsEnabled="{Binding CanEditFilters}" />
+            <ComboBox
+                Width="72"
+                HorizontalAlignment="Left"
+                Margin="0,0,8,8"
+                ItemsSource="{Binding PageSizes}"
+                SelectedItem="{Binding SelectedPageSize}"
+                IsEnabled="{Binding CanEditFilters}" />
+
+            <ComboBox
+                Width="220"
+                MinWidth="194"
+                HorizontalAlignment="Left"
+                Margin="0,0,8,8"
+                IsEditable="True"
+                PlaceholderText="Channel"
+                ItemsSource="{Binding ChannelSuggestions}"
+                SelectedItem="{Binding SelectedSuggestion}"
+                Text="{Binding ChannelQuery}"
+                IsEnabled="{Binding CanEditFilters}">
+                <ComboBox.KeyBindings>
+                    <KeyBinding Gesture="Enter" Command="{Binding SearchCommand}" />
+                </ComboBox.KeyBindings>
+            </ComboBox>
+
+            <Button
+                Classes="accent"
+                Margin="0,0,0,8"
+                VerticalAlignment="Center"
+                Content="Search"
+                Command="{Binding SearchCommand}" />
+        </WrapPanel>
+
+        <Border Grid.Row="1" Classes="card" Padding="10">
+            <Grid>
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding Results}" IsVisible="{Binding HasResults}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="m:SearchResultItem">
+                                <Button
+                                    Classes="searchCard"
+                                    Classes.selected="{Binding IsSelected}"
+                                    Command="{Binding ToggleSelectCommand}"
+                                    ToolTip.Tip="{Binding Game}">
+                                    <Button.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem
+                                                Header="Open"
+                                                Command="{Binding OpenCommand}" />
+                                            <MenuItem
+                                                Header="Copy ID"
+                                                Command="{Binding CopyIdToClipboardCommand}" />
+                                            <MenuItem
+                                                Header="Copy URL"
+                                                Command="{Binding CopyUrlToClipboardCommand}" />
+                                            <MenuItem
+                                                Header="Open in browser"
+                                                Command="{Binding OpenBrowserCommand}" />
+                                        </ContextMenu>
+                                    </Button.ContextMenu>
+                                    <StackPanel Spacing="6">
+                                        <Viewbox Stretch="Uniform" HorizontalAlignment="Stretch">
+                                            <Border Classes="preview16x9" CornerRadius="6">
+                                                <Panel>
+                                                    <TextBlock
+                                                        Classes="muted"
+                                                        HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center"
+                                                        Text="No thumbnail"
+                                                        IsVisible="{Binding !HasThumbnail}" />
+                                                    <Image
+                                                        HorizontalAlignment="Stretch"
+                                                        VerticalAlignment="Stretch"
+                                                        Stretch="UniformToFill"
+                                                        Source="{Binding ThumbnailBytes, Converter={x:Static c:ByteArrayToBitmapConverter.Instance}}"
+                                                        IsVisible="{Binding HasThumbnail}" />
+                                                </Panel>
+                                            </Border>
+                                        </Viewbox>
+                                        <TextBlock
+                                            Text="{Binding HeaderText}"
+                                            TextWrapping="Wrap"
+                                            TextTrimming="CharacterEllipsis"
+                                            MaxHeight="40"
+                                            FontSize="13" />
+                                        <DockPanel>
+                                            <TextBlock
+                                                Classes="muted"
+                                                DockPanel.Dock="Left"
+                                                Text="{Binding LengthFormatted, StringFormat='Duration: {0}'}" />
+                                            <TextBlock
+                                                Classes="muted"
+                                                HorizontalAlignment="Right"
+                                                Text="{Binding Views, StringFormat='Views: {0}'}" />
+                                        </DockPanel>
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <StackPanel
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Spacing="8"
+                    IsVisible="{Binding ShowEmptyState}">
+                    <Image
+                        Width="48"
+                        Height="48"
+                        HorizontalAlignment="Center"
+                        Stretch="Uniform"
+                        anim:ImageBehavior.AnimatedSource="avares://TwitchDownloaderAvalonia/Assets/Status/ppOverheat.gif"
+                        anim:ImageBehavior.RepeatBehavior="Forever"
+                        IsVisible="{Binding ShowSearchSpinner}" />
+                    <Image
+                        Width="48"
+                        Height="48"
+                        HorizontalAlignment="Center"
+                        Stretch="Uniform"
+                        anim:ImageBehavior.AnimatedSource="avares://TwitchDownloaderAvalonia/Assets/Status/ppHop.gif"
+                        anim:ImageBehavior.RepeatBehavior="Forever"
+                        IsVisible="{Binding ShowEmptyIdleGif}" />
+                    <TextBlock
+                        Classes="muted"
+                        HorizontalAlignment="Center"
+                        TextAlignment="Center"
+                        MaxWidth="420"
+                        TextWrapping="Wrap"
+                        Text="{Binding EmptyText}" />
+                </StackPanel>
+            </Grid>
         </Border>
 
-        <TextBlock Grid.Row="2" Classes="muted" Margin="0,8,0,0" Text="{Binding Details}" TextWrapping="Wrap" />
+        <Grid Grid.Row="2" ColumnDefinitions="*,Auto,*" Margin="0,12,0,0">
+            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Text="{Binding SelectedCountText}" />
+                <Button
+                    Content="Select all"
+                    Command="{Binding SelectAllCommand}" />
+            </StackPanel>
+            <StackPanel
+                Grid.Column="1"
+                Orientation="Horizontal"
+                Spacing="8">
+                <Button
+                    MinWidth="36"
+                    Content="&lt;"
+                    Command="{Binding PreviousPageCommand}" />
+                <Button
+                    MinWidth="36"
+                    Content="&gt;"
+                    Command="{Binding NextPageCommand}" />
+            </StackPanel>
+            <Button
+                Grid.Column="2"
+                Classes="accent"
+                HorizontalAlignment="Right"
+                Content="Open"
+                Command="{Binding OpenSelectedCommand}"
+                ToolTip.Tip="Opens the selected VOD or clip on the Video or Clip page." />
+        </Grid>
     </Grid>
 </ContentPage>

@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Input.Platform;
 using Avalonia.Threading;
 using TwitchDownloaderAvalonia.ViewModels;
 using TwitchDownloaderAvalonia.Views;
@@ -12,6 +13,20 @@ namespace TwitchDownloaderAvalonia.Services
         public void SetOwner(Window owner) => _owner = owner;
 
         public Task ShowErrorAsync(string title, string message) => ShowMessageAsync(title, message);
+
+        public async Task CopyTextAsync(string text)
+        {
+            if (_owner?.Clipboard is not { } clipboard)
+                return;
+
+            if (Dispatcher.UIThread.CheckAccess())
+            {
+                await clipboard.SetTextAsync(text);
+                return;
+            }
+
+            await Dispatcher.UIThread.InvokeAsync(() => clipboard.SetTextAsync(text));
+        }
 
         public async Task ShowMessageAsync(string title, string message)
         {
