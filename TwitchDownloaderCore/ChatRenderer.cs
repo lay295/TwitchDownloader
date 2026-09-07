@@ -1173,9 +1173,19 @@ namespace TwitchDownloaderCore
 
         private void DrawMessage(Comment comment, List<SectionImage> sectionImages, List<EmotePosition> emotePositionList, bool highlightWords, ref Point drawPos, Point defaultPos)
         {
-            if (_gifCache.Count > 0 && GiphyResolver.TryParseAltText(comment.message.body, out var gifTitle) && _gifCache.TryGetValue(gifTitle, out var gif))
+            // Detection is deliberately not gated on the Gifs option: a posted GIF is its own kind of message, and its
+            // title must never be emote substituted. The option only decides whether the image itself is drawn.
+            if (GiphyResolver.TryParseAltText(comment.message.body, out var gifTitle))
             {
-                DrawChatGif(sectionImages, emotePositionList, ref drawPos, defaultPos, gif);
+                if (renderOptions.Gifs && _gifCache.TryGetValue(gifTitle, out var gif))
+                {
+                    DrawChatGif(sectionImages, emotePositionList, ref drawPos, defaultPos, gif);
+                }
+                else
+                {
+                    DrawChatGifAltText(comment.message.body, sectionImages, emotePositionList, highlightWords, ref drawPos, defaultPos);
+                }
+
                 return;
             }
 
@@ -1206,6 +1216,30 @@ namespace TwitchDownloaderCore
                 {
                     ArrayPool<Range>.Shared.Return(fragmentParts);
                 }
+            }
+        }
+
+        // A GIF that could not be resolved falls back to its title, drawn verbatim. The title comes from Giphy
+        // rather than from chat, so a word in it that happens to match an emote is a coincidence, and substituting
+        // one would render nonsense like "[Horse <emote> GIF by Jan Metternich]". Emoji are still drawn, since
+        // those are characters in the title rather than a lookup.
+        private void DrawChatGifAltText(string body, List<SectionImage> sectionImages, List<EmotePosition> emotePositionList, bool highlightWords, ref Point drawPos, Point defaultPos)
+        {
+            var bodySpan = body.AsSpan();
+            var spaceCount = bodySpan.CountAny(WhiteSpaceChars);
+
+            var bodyParts = ArrayPool<Range>.Shared.Rent(spaceCount + 1);
+            try
+            {
+                var written = SwapRightToLeft(bodySpan.SplitAny(WhiteSpaceChars), bodyParts);
+                foreach (var range in bodyParts.Take(written))
+                {
+                    DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, 0, bodySpan[range], highlightWords, skipThird: true);
+                }
+            }
+            finally
+            {
+                ArrayPool<Range>.Shared.Return(bodyParts);
             }
         }
 
@@ -2090,7 +2124,7 @@ namespace TwitchDownloaderCore
             List<TwitchEmote> gifTask;
             try
             {
-                gifTask = await TwitchHelper.GetGiphyGifs(chatRoot.comments, _cacheDir, _progress, chatRoot.embeddedData, renderOptions.Offline, cancellationToken);
+                gifTask = await TwitchHelper.GetGiphyGifs(chatRoot.comments, _cacheDir, _progress, chatRoot.embeddedData, renderOptions.Offline, cancellationToken: cancellationToken);
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {

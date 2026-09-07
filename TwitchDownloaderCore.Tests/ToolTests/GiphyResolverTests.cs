@@ -30,6 +30,32 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             Assert.Null(title);
         }
 
+        /// <summary>
+        /// Giphy titles are not chat text, so a word in one that happens to match an emote code is a coincidence.
+        /// These must still be detected as posted GIFs, because that is what stops the renderer substituting an emote
+        /// into the middle of a title and producing "[Horse &lt;emote&gt; GIF by Jan Metternich]".
+        /// </summary>
+        [Theory]
+        [InlineData("[Horse Stare GIF by Jan Metternich]", "Horse Stare GIF by Jan Metternich")] // Stare is a real 7TV emote
+        [InlineData("[Kappa GIF by Someone]", "Kappa GIF by Someone")]
+        [InlineData("[PogChamp Reaction GIF]", "PogChamp Reaction GIF")]
+        [InlineData("[LUL GIF by Twitch]", "LUL GIF by Twitch")]
+        public void DetectsTitlesThatCollideWithEmoteCodes(string messageBody, string expectedTitle)
+        {
+            Assert.True(GiphyResolver.TryParseAltText(messageBody, out var title));
+            Assert.Equal(expectedTitle, title);
+        }
+
+        /// <summary>An ordinary message that merely mentions an emote must keep its emotes, so it must not be detected.</summary>
+        [Theory]
+        [InlineData("Kappa that was great")]
+        [InlineData("Kappa [Horse Stare GIF by Jan Metternich]")]
+        [InlineData("[Horse Stare GIF by Jan Metternich] Kappa")]
+        public void DoesNotDetectOrdinaryMessagesContainingEmotes(string messageBody)
+        {
+            Assert.False(GiphyResolver.TryParseAltText(messageBody, out _));
+        }
+
         [Fact]
         public void GetTitlesDeduplicatesAndSkipsPlainMessages()
         {

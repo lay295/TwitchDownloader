@@ -1,3 +1,4 @@
+﻿using System.Collections.Concurrent;
 ﻿using SkiaSharp;
 using System.Diagnostics.CodeAnalysis;
 using System.IO.Compression;
@@ -36,6 +37,9 @@ namespace TwitchDownloaderCore
         };
 
         private static readonly string[] BttvZeroWidth = ["SoSnowy", "IceCold", "SantaHat", "TopHat", "ReinDeer", "CandyCane", "cvMask", "cvHazmat"];
+        // Giphy has no bulk search, so one page fetch per title. Concurrent, but not so many that Giphy throttles us.
+        private const int GIPHY_SEARCH_THREADS = 8;
+
         private const string SEVEN_TV_PROXY_HOST = "7tv-imageproxy.twitcharchives.workers.dev";
 
         public static async Task<GqlVideoResponse> GetVideoInfo(long videoId)
@@ -662,10 +666,86 @@ namespace TwitchDownloaderCore
             }
         }
 
-        /// <summary>Fetches the Giphy GIFs posted across <paramref name="comments"/>, keyed by the Giphy title.</summary>
-        /// <remarks>Prefers embedded data, then the recorded url, then a Giphy search. Unresolved titles are skipped and stay as text.</remarks>
+        /// <summary>Resolves the Giphy titles posted across <paramref name="comments"/> to their GIF, without downloading any images.</summary>
+        /// <remarks>Prefers what is already recorded in <paramref name="embeddedData"/>, then the on disk resolution cache, then a Giphy search.</remarks>
+        public static async Task<Dictionary<string, GiphyResolver.GiphyGif>> ResolveGiphyGifs(List<Comment> comments, string cacheFolder, ITaskLogger logger,
+            EmbeddedData embeddedData = null, bool offline = false, Action<int> reportProgress = null, CancellationToken cancellationToken = default)
+        {
+            var gifFolder = new DirectoryInfo(Path.Combine(cacheFolder, "giphy"));
+            if (!gifFolder.Exists)
+                gifFolder = CreateDirectory(gifFolder.FullName);
+
+            // Which GIF a title refers to does not change, so resolutions are remembered between runs. Failures are
+            // remembered too, as a null, so a re-run does not search again for every title Giphy could not answer.
+            var remembered = LoadResolvedGifs(gifFolder, logger);
+            var resolutions = new Dictionary<string, GiphyResolver.GiphyGif>(StringComparer.OrdinalIgnoreCase);
+            var pending = new List<string>();
+
+            foreach (var title in GiphyResolver.GetTitles(comments))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var known = embeddedData?.gifs?.FirstOrDefault(x => title.Equals(x.name, StringComparison.OrdinalIgnoreCase));
+                var knownUrl = known?.url ?? (known?.id is null ? null : GiphyResolver.MediaUrl(known.id));
+                if (knownUrl is not null)
+                {
+                    resolutions[title] = new GiphyResolver.GiphyGif(known.id, knownUrl, known.width, known.height);
+                }
+                else if (remembered.TryGetValue(title, out var cached))
+                {
+                    if (cached is not null)
+                    {
+                        resolutions[title] = cached.Value;
+                    }
+                }
+                else
+                {
+                    pending.Add(title);
+                }
+            }
+
+            // Searching Giphy is one page fetch per title and is by far the slow part, so they run concurrently.
+            // A busy VOD can post well over a thousand distinct GIFs.
+            if (pending.Count > 0 && !offline)
+            {
+                var searchResults = new ConcurrentDictionary<string, GiphyResolver.GiphyGif?>(StringComparer.OrdinalIgnoreCase);
+                var completed = 0;
+
+                await Parallel.ForEachAsync(pending,
+                    new ParallelOptions { MaxDegreeOfParallelism = GIPHY_SEARCH_THREADS, CancellationToken = cancellationToken },
+                    async (title, token) =>
+                    {
+                        try
+                        {
+                            searchResults[title] = await GiphyResolver.ResolveAsync(title, logger, token);
+                        }
+                        catch (Exception ex) when (ex is not OperationCanceledException)
+                        {
+                            logger.LogVerbose($"An exception occurred while searching Giphy for '{title}': {ex.Message}.");
+                        }
+
+                        reportProgress?.Invoke(Interlocked.Increment(ref completed) * 100 / pending.Count);
+                    });
+
+                foreach (var (title, result) in searchResults)
+                {
+                    remembered[title] = result;
+                    if (result is not null)
+                    {
+                        resolutions[title] = result.Value;
+                    }
+                }
+
+                SaveResolvedGifs(gifFolder, remembered, logger);
+            }
+
+            return resolutions;
+        }
+
+        /// <summary>Fetches the images of the Giphy GIFs posted across <paramref name="comments"/>, keyed by the Giphy title.</summary>
+        /// <remarks>The GIFs come back undecoded, so that a caller only pays for the frames of the ones it actually draws.</remarks>
         public static async Task<List<TwitchEmote>> GetGiphyGifs(List<Comment> comments, string cacheFolder, ITaskLogger logger, EmbeddedData embeddedData = null, bool offline = false,
-            CancellationToken cancellationToken = default)
+            Action<int> reportProgress = null, CancellationToken cancellationToken = default)
         {
             var gifs = new Dictionary<string, TwitchEmote>(StringComparer.OrdinalIgnoreCase);
 
@@ -694,62 +774,53 @@ namespace TwitchDownloaderCore
                 }
             }
 
+            var resolutions = await ResolveGiphyGifs(comments, cacheFolder, logger, embeddedData, offline, reportProgress, cancellationToken);
             var gifFolder = new DirectoryInfo(Path.Combine(cacheFolder, "giphy"));
-            if (!gifFolder.Exists)
-                gifFolder = CreateDirectory(gifFolder.FullName);
 
-            foreach (var title in GiphyResolver.GetTitles(comments))
+            var titles = GiphyResolver.GetTitles(comments).ToList();
+            int fromEmbed = 0, fromCache = 0, fromDownload = 0, unresolved = 0, processed = 0;
+
+            foreach (var title in titles)
             {
                 cancellationToken.ThrowIfCancellationRequested();
+                reportProgress?.Invoke(++processed * 100 / titles.Count);
 
                 if (gifs.ContainsKey(title))
                 {
+                    fromEmbed++;
                     continue;
                 }
 
-                var embedded = embeddedData?.gifs?.FirstOrDefault(x => title.Equals(x.name, StringComparison.OrdinalIgnoreCase));
-                var gifId = embedded?.id;
-                var gifUrl = embedded?.url ?? (embedded?.id is null ? null : GiphyResolver.MediaUrl(embedded.id));
-
-                // The size Giphy claims the image is, used below to tell the real GIF apart from a stand-in.
-                var expectedWidth = embedded?.width ?? 0;
-                var expectedHeight = embedded?.height ?? 0;
+                if (!resolutions.TryGetValue(title, out var resolution))
+                {
+                    unresolved++;
+                    continue;
+                }
 
                 try
                 {
-                    if (gifUrl is null)
-                    {
-                        if (offline)
-                        {
-                            continue;
-                        }
+                    var wasInCache = File.Exists(Path.Combine(gifFolder.FullName, $"{resolution.Id}_1.gif"));
 
-                        var resolved = await GiphyResolver.ResolveAsync(title, logger, cancellationToken);
-                        if (resolved is null)
-                        {
-                            continue;
-                        }
-
-                        (gifId, gifUrl) = (resolved.Value.Id, resolved.Value.Url);
-                        (expectedWidth, expectedHeight) = (resolved.Value.Width, resolved.Value.Height);
-                    }
-
-                    var (bytes, codec) = await GetImage(gifFolder, gifUrl, gifId, 1, "gif", offline, logger, cancellationToken);
+                    var (bytes, codec) = await GetImage(gifFolder, resolution.Url, resolution.Id, 1, "gif", offline, logger, cancellationToken);
                     if (bytes is null)
                     {
+                        unresolved++;
                         continue;
                     }
 
                     // Constructing reads the header only, so this does not pay for the frames
-                    var newGif = new TwitchEmote(bytes, codec, EmoteProvider.ThirdParty, 1, gifId, title) { Url = gifUrl };
+                    var newGif = new TwitchEmote(bytes, codec, EmoteProvider.ThirdParty, 1, resolution.Id, title) { Url = resolution.Url };
 
-                    // Giphy serves a "content is not available" image under a 200, so a size mismatch means we got that
-                    if (expectedWidth > 0 && expectedHeight > 0 && (newGif.Width != expectedWidth || newGif.Height != expectedHeight))
+                    // A url can outlive the GIF it points at: resolutions are cached between runs and archived into
+                    // chat files, so this may be fetching one recorded long ago. Giphy answers those with a
+                    // "content is not available" image under a 200, which only the size gives away.
+                    if (resolution.Width > 0 && resolution.Height > 0 && (newGif.Width != resolution.Width || newGif.Height != resolution.Height))
                     {
                         logger.LogVerbose(
-                            $"Giphy served {newGif.Width}x{newGif.Height} for '{title}' but advertised {expectedWidth}x{expectedHeight}, discarding it.");
+                            $"Giphy served {newGif.Width}x{newGif.Height} for '{title}' but advertised {resolution.Width}x{resolution.Height}, discarding it.");
                         newGif.Dispose();
-                        DeleteCachedImage(gifFolder, gifId, 1, "gif", logger);
+                        DeleteCachedImage(gifFolder, resolution.Id, 1, "gif", logger);
+                        unresolved++;
                         continue;
                     }
 
@@ -757,14 +828,74 @@ namespace TwitchDownloaderCore
                     {
                         newGif.Dispose();
                     }
+                    else if (wasInCache)
+                    {
+                        fromCache++;
+                    }
+                    else
+                    {
+                        fromDownload++;
+                    }
                 }
                 catch (Exception ex) when (ex is not OperationCanceledException)
                 {
+                    unresolved++;
                     logger.LogVerbose($"An exception occurred while fetching GIF '{title}': {ex.Message}.");
                 }
             }
 
+            if (titles.Count > 0)
+            {
+                logger.LogInfo(
+                    $"Loaded {gifs.Count} of {titles.Count} chat GIFs from cache/download - {fromEmbed} embedded, {fromCache} cached, " +
+                    $"{fromDownload} newly downloaded, {unresolved} unresolved.");
+            }
+
             return gifs.Values.ToList();
+        }
+
+        // Remembers which GIF each title resolved to. Searching Giphy is the slow part and the answer does not change,
+        // so a re-render of a chat with no embedded GIF data reuses this instead of searching for every title again.
+        private static Dictionary<string, GiphyResolver.GiphyGif?> LoadResolvedGifs(DirectoryInfo cacheDir, ITaskLogger logger)
+        {
+            var resolved = new Dictionary<string, GiphyResolver.GiphyGif?>(StringComparer.OrdinalIgnoreCase);
+
+            try
+            {
+                var file = new FileInfo(Path.Combine(cacheDir.FullName, "resolved.json.gz"));
+                if (!file.Exists)
+                {
+                    return resolved;
+                }
+
+                using var fs = file.OpenRead();
+                using var gs = new GZipStream(fs, CompressionMode.Decompress);
+                var loaded = JsonSerializer.Deserialize<Dictionary<string, GiphyResolver.GiphyGif?>>(gs, JsonSerializerOptions);
+                foreach (var (title, gif) in loaded ?? [])
+                {
+                    resolved[title] = gif;
+                }
+            }
+            catch (Exception e)
+            {
+                logger.LogVerbose($"Failed to read the Giphy resolution cache: {e.Message}");
+            }
+
+            return resolved;
+        }
+
+        private static void SaveResolvedGifs(DirectoryInfo cacheDir, Dictionary<string, GiphyResolver.GiphyGif?> resolved, ITaskLogger logger)
+        {
+            try
+            {
+                using var fs = File.Create(Path.Combine(cacheDir.FullName, "resolved.json.gz"));
+                using var gs = new GZipStream(fs, CompressionLevel.SmallestSize);
+                JsonSerializer.Serialize(gs, resolved, JsonSerializerOptions);
+            }
+            catch (Exception e)
+            {
+                logger.LogVerbose($"Failed to write the Giphy resolution cache: {e.Message}");
+            }
         }
 
         // Removes a cached image so a rejected download is not reused next run

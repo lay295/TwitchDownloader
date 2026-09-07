@@ -642,36 +642,56 @@ namespace TwitchDownloaderCore
 
         private async Task EmbedGiphyGifs(ChatRoot chatRoot, CancellationToken cancellationToken)
         {
-            _progress.SetStatus("Resolving Chat GIFs");
+            _progress.SetTemplateStatus("Resolving Chat GIFs {0}%", 0);
             chatRoot.embeddedData ??= new EmbeddedData();
 
-            List<TwitchEmote> gifs;
             try
             {
-                gifs = await TwitchHelper.GetGiphyGifs(chatRoot.comments, _cacheDir, _progress, cancellationToken: cancellationToken);
+                if (downloadOptions.GifsEmbed)
+                {
+                    // Archiving, so the images are needed
+                    _progress.SetTemplateStatus("Downloading Embed GIFs {0}%", 0);
+                    foreach (var gif in await TwitchHelper.GetGiphyGifs(chatRoot.comments, _cacheDir, _progress, reportProgress: _progress.ReportProgress, cancellationToken: cancellationToken))
+                    {
+                        chatRoot.embeddedData.gifs.Add(new EmbedEmoteData
+                        {
+                            id = gif.Id,
+                            imageScale = 1,
+                            data = gif.ImageData,
+                            name = gif.Name,
+                            url = gif.Url,
+                            width = gif.Width,
+                            height = gif.Height,
+                        });
+
+                        gif.Dispose();
+                    }
+                }
+                else
+                {
+                    // Only the urls are being recorded, so there is no reason to download the images. A busy VOD posts
+                    // over a thousand distinct GIFs, which is gigabytes of downloads to then throw away.
+                    var resolutions = await TwitchHelper.ResolveGiphyGifs(chatRoot.comments, _cacheDir, _progress, reportProgress: _progress.ReportProgress, cancellationToken: cancellationToken);
+                    foreach (var (title, gif) in resolutions)
+                    {
+                        chatRoot.embeddedData.gifs.Add(new EmbedEmoteData
+                        {
+                            id = gif.Id,
+                            imageScale = 1,
+                            name = title,
+                            url = gif.Url,
+                            width = gif.Width,
+                            height = gif.Height,
+                        });
+                    }
+
+                    _progress.LogInfo($"Resolved {resolutions.Count} chat GIFs. Their images are fetched at render time, or pass --gifs-embed to archive them.");
+                }
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 // A broken Giphy must not cost the user the chat itself
                 _progress.LogWarning($"Unable to resolve chat GIFs: {ex.Message} Continuing without them.");
-                return;
-            }
-
-            foreach (var gif in gifs)
-            {
-                chatRoot.embeddedData.gifs.Add(new EmbedEmoteData
-                {
-                    id = gif.Id,
-                    imageScale = 1,
-                    // Url only unless archiving, in which case the image is re-fetched at render time
-                    data = downloadOptions.GifsEmbed ? gif.ImageData : null,
-                    name = gif.Name,
-                    url = gif.Url,
-                    width = gif.Width,
-                    height = gif.Height,
-                });
-
-                gif.Dispose();
             }
         }
 
