@@ -23,12 +23,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
             Vod = new VodDownloadViewModel(settings, status, ffmpeg, dialogs, fileDialogs, collision, thumbnails);
             Clip = new ClipDownloadViewModel(settings, status, ffmpeg, dialogs, fileDialogs, collision, thumbnails);
             ChatDownload = new ChatDownloadViewModel(settings, status, dialogs, fileDialogs, collision, thumbnails);
-            ChatUpdate = new DownloadPlaceholderViewModel(
-                "Chat Update",
-                "Path to an existing chat JSON / ZIP",
-                "Update",
-                "Chat Update stays in the sidebar. Embed missing emotes and restamp chats here later.",
-                status);
+            ChatUpdate = new ChatUpdateViewModel(settings, status, dialogs, fileDialogs, collision, thumbnails);
             ChatRender = new ChatRenderViewModel(status);
             Search = new SearchViewModel(status);
             Queue = new QueueViewModel(status);
@@ -43,7 +38,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
         public VodDownloadViewModel Vod { get; }
         public ClipDownloadViewModel Clip { get; }
         public ChatDownloadViewModel ChatDownload { get; }
-        public DownloadPlaceholderViewModel ChatUpdate { get; }
+        public ChatUpdateViewModel ChatUpdate { get; }
         public ChatRenderViewModel ChatRender { get; }
         public SearchViewModel Search { get; }
         public QueueViewModel Queue { get; }

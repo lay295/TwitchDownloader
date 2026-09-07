@@ -16,6 +16,8 @@ namespace TwitchDownloaderAvalonia.Models
         public ChatCompression ChatJsonCompression { get; set; } = ChatCompression.None;
         public TimestampFormat ChatTextTimestampStyle { get; set; } = TimestampFormat.Utc;
         public bool ChatEmbedEmotes { get; set; }
+        public bool ChatEmbedMissing { get; set; }
+        public bool ChatReplaceEmbeds { get; set; }
         public bool BttvEmotes { get; set; } = true;
         public bool FfzEmotes { get; set; } = true;
         public bool StvEmotes { get; set; } = true;

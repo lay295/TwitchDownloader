@@ -38,5 +38,30 @@ namespace TwitchDownloaderAvalonia.Services
 
             return file?.TryGetLocalPath();
         }
+
+        public async Task<string?> OpenFileAsync(string title, string filterName, IReadOnlyList<string> patterns)
+        {
+            if (_owner is null)
+                return null;
+
+            var storage = _owner.StorageProvider;
+            if (!storage.CanOpen)
+                return null;
+
+            var files = await storage.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                Title = title,
+                AllowMultiple = false,
+                FileTypeFilter =
+                [
+                    new FilePickerFileType(filterName)
+                    {
+                        Patterns = [.. patterns],
+                    },
+                ],
+            });
+
+            return files.Count > 0 ? files[0].TryGetLocalPath() : null;
+        }
     }
 }

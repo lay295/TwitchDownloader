@@ -15,6 +15,9 @@
         <DataTemplate DataType="vm:ChatDownloadViewModel">
             <views:ChatDownloadView />
         </DataTemplate>
+        <DataTemplate DataType="vm:ChatUpdateViewModel">
+            <views:ChatUpdateView />
+        </DataTemplate>
         <DataTemplate DataType="vm:ChatRenderViewModel">
             <views:ChatRenderView />
         </DataTemplate>
