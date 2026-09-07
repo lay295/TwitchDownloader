@@ -20,30 +20,67 @@
     Height="680">
 
     <DrawerPage
-        Header="{Binding PageTitle}"
         DrawerBehavior="Locked"
         DrawerLayoutBehavior="Split"
         IsOpen="True"
-        DrawerLength="220"
+        DrawerLength="228"
         DrawerBackground="{DynamicResource SidebarBackgroundBrush}">
+        <DrawerPage.DrawerHeader>
+            <StackPanel
+                x:DataType="vm:MainWindowViewModel"
+                DataContext="{Binding $parent[Window].DataContext}"
+                Margin="14,14,14,8"
+                Spacing="2">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <Image
+                        Width="28"
+                        Height="28"
+                        Source="/Assets/icon.ico"
+                        VerticalAlignment="Center" />
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock
+                            Text="{Binding AppName}"
+                            FontWeight="SemiBold"
+                            FontSize="14" />
+                        <TextBlock
+                            Classes="muted"
+                            FontSize="12"
+                            Text="{Binding AppVersion}" />
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+        </DrawerPage.DrawerHeader>
+
         <DrawerPage.DrawerFooter>
             <StackPanel
                 x:DataType="vm:MainWindowViewModel"
                 DataContext="{Binding $parent[Window].DataContext}"
-                Margin="8,6,8,10"
+                Margin="8,4,8,10"
                 Spacing="2">
+                <Rectangle
+                    Height="1"
+                    Margin="10,4,10,8"
+                    Fill="{DynamicResource BorderBrush}" />
                 <Button
                     Classes="nav"
-                    Content="Settings"
                     Command="{Binding NavigateCommand}"
                     CommandParameter="{x:Static m:AppPage.Settings}"
-                    Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=Settings}" />
+                    Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=Settings}">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <PathIcon Data="{StaticResource IconSettings}" />
+                        <TextBlock Text="Settings" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
                 <Button
                     Classes="nav"
-                    Content="About"
                     Command="{Binding NavigateCommand}"
                     CommandParameter="{x:Static m:AppPage.About}"
-                    Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=About}" />
+                    Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=About}">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <PathIcon Data="{StaticResource IconAbout}" />
+                        <TextBlock Text="About" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
             </StackPanel>
         </DrawerPage.DrawerFooter>
 
@@ -51,54 +88,82 @@
             <ScrollViewer
                 x:DataType="vm:MainWindowViewModel"
                 DataContext="{Binding $parent[Window].DataContext}">
-                <StackPanel Margin="8,10,8,8" Spacing="2">
-                    <TextBlock Classes="navHeader" Text="DOWNLOAD" />
+                <StackPanel Margin="8,4,8,8" Spacing="2">
+                    <TextBlock Classes="navHeader first" Text="DOWNLOAD" />
                     <Button
                         Classes="nav"
-                        Content="Video"
                         Command="{Binding NavigateCommand}"
                         CommandParameter="{x:Static m:AppPage.Vod}"
-                        Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=Vod}" />
+                        Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=Vod}">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <PathIcon Data="{StaticResource IconVideo}" />
+                            <TextBlock Text="Video" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
                     <Button
                         Classes="nav"
-                        Content="Clip"
                         Command="{Binding NavigateCommand}"
                         CommandParameter="{x:Static m:AppPage.Clip}"
-                        Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=Clip}" />
+                        Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=Clip}">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <PathIcon Data="{StaticResource IconClip}" />
+                            <TextBlock Text="Clip" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
                     <Button
                         Classes="nav"
-                        Content="Chat"
                         Command="{Binding NavigateCommand}"
                         CommandParameter="{x:Static m:AppPage.ChatDownload}"
-                        Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=ChatDownload}" />
+                        Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=ChatDownload}">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <PathIcon Data="{StaticResource IconChat}" />
+                            <TextBlock Text="Chat" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
 
                     <TextBlock Classes="navHeader" Text="PROCESS" />
                     <Button
                         Classes="nav"
-                        Content="Chat Update"
                         Command="{Binding NavigateCommand}"
                         CommandParameter="{x:Static m:AppPage.ChatUpdate}"
-                        Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=ChatUpdate}" />
+                        Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=ChatUpdate}">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <PathIcon Data="{StaticResource IconChatUpdate}" />
+                            <TextBlock Text="Chat Update" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
                     <Button
                         Classes="nav"
-                        Content="Chat Render"
                         Command="{Binding NavigateCommand}"
                         CommandParameter="{x:Static m:AppPage.ChatRender}"
-                        Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=ChatRender}" />
+                        Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=ChatRender}">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <PathIcon Data="{StaticResource IconChatRender}" />
+                            <TextBlock Text="Chat Render" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
 
                     <TextBlock Classes="navHeader" Text="TOOLS" />
                     <Button
                         Classes="nav"
-                        Content="Search"
                         Command="{Binding NavigateCommand}"
                         CommandParameter="{x:Static m:AppPage.Search}"
-                        Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=Search}" />
+                        Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=Search}">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <PathIcon Data="{StaticResource IconSearch}" />
+                            <TextBlock Text="Search" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
                     <Button
                         Classes="nav"
-                        Content="Queue"
                         Command="{Binding NavigateCommand}"
                         CommandParameter="{x:Static m:AppPage.Queue}"
-                        Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=Queue}" />
+                        Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=Queue}">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <PathIcon Data="{StaticResource IconQueue}" />
+                            <TextBlock Text="Queue" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
             </ScrollViewer>
         </DrawerPage.Drawer>
@@ -106,46 +171,54 @@
         <Grid
             x:DataType="vm:MainWindowViewModel"
             DataContext="{Binding $parent[Window].DataContext}"
-            RowDefinitions="*,Auto"
-            Margin="16,14,16,0">
+            RowDefinitions="Auto,*,Auto"
+            Margin="16,14,16,12">
+            <StackPanel Margin="0,0,0,14" Spacing="2">
+                <TextBlock Classes="pageHeader" Text="{Binding PageTitle}" />
+                <TextBlock Classes="pageSubtitle" Text="{Binding PageSubtitle}" />
+            </StackPanel>
+
             <ContentControl
+                Grid.Row="1"
                 Content="{Binding CurrentPage}"
                 HorizontalContentAlignment="Stretch"
                 VerticalContentAlignment="Stretch" />
 
-            <Border Grid.Row="1" Classes="statusBar" Margin="0,8,0,0">
-                <Grid ColumnDefinitions="Auto,*,Auto,Auto">
-                    <Panel Width="32" Height="32" VerticalAlignment="Center" IsVisible="{Binding Status.ShowStatusImage}">
-                        <Image
-                            Width="32"
-                            Height="32"
-                            Stretch="Uniform"
-                            anim:ImageBehavior.AnimatedSource="{Binding Status.AnimatedSource}"
-                            anim:ImageBehavior.RepeatBehavior="Forever"
-                            IsVisible="{Binding Status.IsAnimatedStatus}" />
-                        <Image
-                            Width="32"
-                            Height="32"
-                            Stretch="Uniform"
-                            Source="/Assets/Status/peepoSad.png"
-                            IsVisible="{Binding Status.ShowErrorStatus}" />
-                    </Panel>
-                    <TextBlock
+            <Border Grid.Row="2" Classes="statusBar" Margin="0,10,0,0">
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <Border Classes="mascotStage" VerticalAlignment="Center" IsVisible="{Binding Status.ShowStatusImage}">
+                        <Panel>
+                            <Image
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Stretch="Uniform"
+                                anim:ImageBehavior.AnimatedSource="{Binding Status.AnimatedSource}"
+                                anim:ImageBehavior.RepeatBehavior="Forever"
+                                IsVisible="{Binding Status.IsAnimatedStatus}" />
+                            <Image
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Stretch="Uniform"
+                                Source="/Assets/Status/peepoSad.png"
+                                IsVisible="{Binding Status.ShowErrorStatus}" />
+                        </Panel>
+                    </Border>
+                    <StackPanel
                         Grid.Column="1"
-                        Margin="8,0,8,0"
+                        Margin="12,0,12,0"
                         VerticalAlignment="Center"
-                        Text="{Binding Status.Message}"
-                        TextTrimming="CharacterEllipsis" />
-                    <ProgressBar
-                        Grid.Column="2"
-                        Width="160"
-                        Minimum="0"
-                        Maximum="100"
-                        Value="{Binding Status.Progress}"
-                        VerticalAlignment="Center"
-                        Margin="0,0,8,0" />
+                        Spacing="4">
+                        <TextBlock
+                            Text="{Binding Status.Message}"
+                            TextTrimming="CharacterEllipsis" />
+                        <ProgressBar
+                            Minimum="0"
+                            Maximum="100"
+                            Value="{Binding Status.Progress}"
+                            IsVisible="{Binding Status.ShowProgress}" />
+                    </StackPanel>
                     <Button
-                        Grid.Column="3"
+                        Grid.Column="2"
                         Classes="chip"
                         VerticalAlignment="Center"
                         Content="{Binding Status.QueueChipText}"

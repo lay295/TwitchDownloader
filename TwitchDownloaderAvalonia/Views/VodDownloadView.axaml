@@ -5,6 +5,7 @@
     xmlns:models="using:TwitchDownloaderAvalonia.Models"
     xmlns:core="using:TwitchDownloaderCore.Models"
     xmlns:c="using:TwitchDownloaderAvalonia.Converters"
+    xmlns:anim="https://github.com/whistyun/AnimatedImage.Avalonia"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
@@ -17,15 +18,10 @@
         <DockPanel Margin="0,0,0,12">
             <Button
                 DockPanel.Dock="Right"
+                Classes="accent"
                 Content="Get Info"
                 Command="{Binding GetInfoCommand}"
                 IsEnabled="{Binding CanGetInfo}" />
-            <TextBlock
-                DockPanel.Dock="Left"
-                Classes="label"
-                Text="VOD link / ID"
-                VerticalAlignment="Center"
-                Margin="0,0,10,0" />
             <TextBox
                 Margin="0,0,8,0"
                 PlaceholderText="https://www.twitch.tv/videos/..."
@@ -39,155 +35,281 @@
         <Grid Grid.Row="1" ColumnDefinitions="300,*">
             <Border Classes="card" Margin="0,0,12,0">
                 <DockPanel>
-                    <Border
+                    <Viewbox
                         DockPanel.Dock="Top"
-                        Height="168"
-                        Background="{DynamicResource CardMutedBrush}"
-                        CornerRadius="3"
-                        ClipToBounds="True"
+                        Stretch="Uniform"
+                        HorizontalAlignment="Stretch"
                         Margin="0,0,0,10">
-                        <Panel>
-                            <TextBlock
-                                Classes="muted"
-                                Text="No thumbnail"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                IsVisible="{Binding !InfoLoaded}" />
-                            <Image
-                                Source="{Binding ThumbnailBytes, Converter={x:Static c:ByteArrayToBitmapConverter.Instance}}"
-                                Stretch="UniformToFill"
-                                IsVisible="{Binding InfoLoaded}" />
-                        </Panel>
-                    </Border>
-                    <StackPanel Spacing="6">
+                        <Border Classes="preview16x9">
+                            <Panel>
+                                <StackPanel
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Spacing="6"
+                                    IsVisible="{Binding !InfoLoaded}">
+                                    <Image
+                                        Width="48"
+                                        Height="48"
+                                        Stretch="Uniform"
+                                        anim:ImageBehavior.AnimatedSource="avares://TwitchDownloaderAvalonia/Assets/Status/ppHop.gif"
+                                        anim:ImageBehavior.RepeatBehavior="Forever"
+                                        IsVisible="{Binding AppStatus.ShowStatusImage}" />
+                                    <TextBlock
+                                        Classes="muted"
+                                        HorizontalAlignment="Center"
+                                        Text="No thumbnail"
+                                        IsVisible="{Binding AppStatus.ReduceMotion}" />
+                                </StackPanel>
+                                <Image
+                                    Source="{Binding ThumbnailBytes, Converter={x:Static c:ByteArrayToBitmapConverter.Instance}}"
+                                    Stretch="UniformToFill"
+                                    IsVisible="{Binding InfoLoaded}" />
+                            </Panel>
+                        </Border>
+                    </Viewbox>
+                    <StackPanel Spacing="10">
                         <TextBlock
                             Classes="title"
                             Text="{Binding InfoTitle}"
                             TextWrapping="Wrap"
                             IsVisible="{Binding InfoLoaded}" />
-                        <TextBlock Classes="muted" Text="Get Info to load title, channel, and length." TextWrapping="Wrap" IsVisible="{Binding !InfoLoaded}" />
-                        <TextBlock Text="{Binding InfoStreamer}" TextWrapping="Wrap" IsVisible="{Binding InfoLoaded}" />
-                        <TextBlock Classes="muted" Text="{Binding LengthText, StringFormat='Length: {0}'}" IsVisible="{Binding InfoLoaded}" />
-                        <TextBlock Classes="muted" Text="{Binding InfoCreatedAt, StringFormat='Created: {0}'}" TextWrapping="Wrap" IsVisible="{Binding InfoLoaded}" />
+                        <TextBlock
+                            Classes="muted"
+                            Text="Get Info to load title, channel, and length."
+                            TextWrapping="Wrap"
+                            IsVisible="{Binding !InfoLoaded}" />
+                        <StackPanel
+                            Orientation="Horizontal"
+                            Spacing="8"
+                            IsVisible="{Binding InfoLoaded}">
+                            <Border
+                                Width="28"
+                                Height="28"
+                                CornerRadius="14"
+                                ClipToBounds="True"
+                                Background="{DynamicResource CardMutedBrush}"
+                                IsVisible="{Binding HasStreamerAvatar}">
+                                <Image
+                                    Source="{Binding StreamerAvatarBytes, Converter={x:Static c:ByteArrayToBitmapConverter.Instance}}"
+                                    Stretch="UniformToFill" />
+                            </Border>
+                            <TextBlock
+                                Text="{Binding InfoStreamer}"
+                                TextWrapping="Wrap"
+                                VerticalAlignment="Center" />
+                        </StackPanel>
+                        <StackPanel Spacing="6" IsVisible="{Binding InfoLoaded}">
+                            <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto">
+                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <PathIcon
+                                        Width="14"
+                                        Height="14"
+                                        Data="{StaticResource IconClock}"
+                                        Foreground="{DynamicResource MutedForegroundBrush}" />
+                                    <TextBlock Classes="muted" Text="Length" VerticalAlignment="Center" />
+                                </StackPanel>
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Classes="muted"
+                                    HorizontalAlignment="Right"
+                                    Text="{Binding LengthText}" />
+                            </Grid>
+                            <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto">
+                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <PathIcon
+                                        Width="14"
+                                        Height="14"
+                                        Data="{StaticResource IconCalendar}"
+                                        Foreground="{DynamicResource MutedForegroundBrush}" />
+                                    <TextBlock Classes="muted" Text="Created" VerticalAlignment="Center" />
+                                </StackPanel>
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Classes="muted"
+                                    HorizontalAlignment="Right"
+                                    Text="{Binding InfoCreatedAt}" />
+                            </Grid>
+                        </StackPanel>
                     </StackPanel>
                 </DockPanel>
             </Border>
 
-            <ScrollViewer Grid.Column="1">
-                <StackPanel Spacing="6">
-                    <TextBlock Classes="label" Text="Quality" />
-                    <ComboBox
-                        ItemsSource="{Binding Qualities}"
-                        SelectedItem="{Binding SelectedQuality}"
-                        IsEnabled="{Binding InfoLoaded}"
-                        PlaceholderText="Get Info first">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate x:DataType="models:QualityOption">
-                                <TextBlock Text="{Binding DisplayName}" />
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
+            <Border Grid.Column="1" Classes="card">
+                <ScrollViewer VerticalAlignment="Top">
+                    <StackPanel Spacing="6" VerticalAlignment="Top">
+                        <TextBlock Classes="label" Text="Quality" />
+                        <ComboBox
+                            ItemsSource="{Binding Qualities}"
+                            SelectedItem="{Binding SelectedQuality}"
+                            IsEnabled="{Binding InfoLoaded}"
+                            PlaceholderText="Get Info first">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="models:QualityOption">
+                                    <TextBlock Text="{Binding DisplayName}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
 
-                    <TextBlock
-                        Classes="muted"
-                        Margin="0,2,0,4"
-                        Text="{Binding SuggestedFileName, StringFormat='Suggested: {0}'}"
-                        TextWrapping="Wrap"
-                        IsVisible="{Binding HasSuggestedFileName}" />
+                        <TextBlock
+                            Classes="muted"
+                            Margin="0,2,0,4"
+                            Text="{Binding SuggestedFileName, StringFormat='Suggested: {0}'}"
+                            TextWrapping="Wrap"
+                            IsVisible="{Binding HasSuggestedFileName}" />
 
-                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,8">
-                        <Button
-                            Classes="accent"
-                            Content="Download"
-                            Command="{Binding DownloadCommand}"
-                            IsVisible="{Binding !IsDownloading}" />
-                        <Button
-                            Content="Cancel"
-                            Command="{Binding CancelCommand}"
-                            IsVisible="{Binding IsDownloading}" />
+                        <Grid ColumnDefinitions="*,8,*" RowDefinitions="Auto" Margin="0,8,0,8">
+                            <Button
+                                Classes="accent"
+                                HorizontalAlignment="Stretch"
+                                Command="{Binding DownloadCommand}"
+                                IsEnabled="{Binding CanDownload}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <PathIcon Data="{StaticResource IconDownload}" />
+                                    <TextBlock Text="Download" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                            <Button
+                                Grid.Column="2"
+                                Classes="secondary"
+                                HorizontalAlignment="Stretch"
+                                Content="Cancel"
+                                Command="{Binding CancelCommand}"
+                                IsEnabled="{Binding IsDownloading}" />
+                        </Grid>
+
+                        <Expander Header="Advanced">
+                            <StackPanel Spacing="10">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Classes="label" Text="Trim mode" Margin="0" />
+                                    <StackPanel Orientation="Horizontal" Spacing="16">
+                                        <RadioButton
+                                            Content="Safe"
+                                            GroupName="VodTrim"
+                                            IsChecked="{Binding TrimMode, Converter={x:Static c:VideoTrimModeEqualsConverter.Instance}, ConverterParameter={x:Static core:VideoTrimMode.Safe}, Mode=TwoWay}"
+                                            IsEnabled="{Binding InfoLoaded}" />
+                                        <RadioButton
+                                            Content="Exact"
+                                            GroupName="VodTrim"
+                                            IsChecked="{Binding TrimMode, Converter={x:Static c:VideoTrimModeEqualsConverter.Instance}, ConverterParameter={x:Static core:VideoTrimMode.Exact}, Mode=TwoWay}"
+                                            IsEnabled="{Binding InfoLoaded}" />
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <DockPanel Height="28" LastChildFill="True">
+                                    <StackPanel
+                                        DockPanel.Dock="Right"
+                                        Orientation="Horizontal"
+                                        Spacing="3"
+                                        VerticalAlignment="Center">
+                                        <NumericUpDown Classes="time" Minimum="0" Maximum="48" FormatString="00" Increment="1"
+                                                       VerticalAlignment="Center"
+                                                       IsEnabled="{Binding CanEditTrimStart}"
+                                                       Value="{Binding StartHour, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                                        <TextBlock Classes="muted" Text=":" VerticalAlignment="Center" />
+                                        <NumericUpDown Classes="time" Minimum="0" Maximum="59" FormatString="00" Increment="1"
+                                                       VerticalAlignment="Center"
+                                                       IsEnabled="{Binding CanEditTrimStart}"
+                                                       Value="{Binding StartMinute, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                                        <TextBlock Classes="muted" Text=":" VerticalAlignment="Center" />
+                                        <NumericUpDown Classes="time" Minimum="0" Maximum="59" FormatString="00" Increment="1"
+                                                       VerticalAlignment="Center"
+                                                       IsEnabled="{Binding CanEditTrimStart}"
+                                                       Value="{Binding StartSecond, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                                    </StackPanel>
+                                    <CheckBox
+                                        Content="Trim start"
+                                        VerticalAlignment="Center"
+                                        IsChecked="{Binding TrimStart}"
+                                        IsEnabled="{Binding InfoLoaded}" />
+                                </DockPanel>
+
+                                <DockPanel Height="28" LastChildFill="True">
+                                    <StackPanel
+                                        DockPanel.Dock="Right"
+                                        Orientation="Horizontal"
+                                        Spacing="3"
+                                        VerticalAlignment="Center">
+                                        <NumericUpDown Classes="time" Minimum="0" Maximum="48" FormatString="00" Increment="1"
+                                                       VerticalAlignment="Center"
+                                                       IsEnabled="{Binding CanEditTrimEnd}"
+                                                       Value="{Binding EndHour, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                                        <TextBlock Classes="muted" Text=":" VerticalAlignment="Center" />
+                                        <NumericUpDown Classes="time" Minimum="0" Maximum="59" FormatString="00" Increment="1"
+                                                       VerticalAlignment="Center"
+                                                       IsEnabled="{Binding CanEditTrimEnd}"
+                                                       Value="{Binding EndMinute, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                                        <TextBlock Classes="muted" Text=":" VerticalAlignment="Center" />
+                                        <NumericUpDown Classes="time" Minimum="0" Maximum="59" FormatString="00" Increment="1"
+                                                       VerticalAlignment="Center"
+                                                       IsEnabled="{Binding CanEditTrimEnd}"
+                                                       Value="{Binding EndSecond, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                                    </StackPanel>
+                                    <CheckBox
+                                        Content="Trim end"
+                                        VerticalAlignment="Center"
+                                        IsChecked="{Binding TrimEnd}"
+                                        IsEnabled="{Binding InfoLoaded}" />
+                                </DockPanel>
+
+                                <DockPanel Height="32" LastChildFill="True">
+                                    <NumericUpDown
+                                        DockPanel.Dock="Right"
+                                        Width="72"
+                                        Minimum="1"
+                                        Maximum="20"
+                                        FormatString="0"
+                                        Increment="1"
+                                        VerticalAlignment="Center"
+                                        Value="{Binding DownloadThreads, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                                    <TextBlock
+                                        Classes="label"
+                                        Text="Download threads"
+                                        VerticalAlignment="Center"
+                                        Margin="0" />
+                                </DockPanel>
+
+                                <StackPanel Spacing="4">
+                                    <TextBlock Classes="label" Text="OAuth" Margin="0" />
+                                    <TextBox Text="{Binding Oauth}" PlaceholderText="Optional" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Expander>
                     </StackPanel>
-
-                    <Expander Header="Advanced">
-                        <StackPanel Spacing="8" Margin="0,8,0,0">
-                            <TextBlock Classes="label" Text="Trim mode" />
-                            <StackPanel Orientation="Horizontal" Spacing="16">
-                                <RadioButton
-                                    Content="Safe"
-                                    GroupName="VodTrim"
-                                    IsChecked="{Binding TrimMode, Converter={x:Static c:VideoTrimModeEqualsConverter.Instance}, ConverterParameter={x:Static core:VideoTrimMode.Safe}, Mode=TwoWay}"
-                                    IsEnabled="{Binding InfoLoaded}" />
-                                <RadioButton
-                                    Content="Exact"
-                                    GroupName="VodTrim"
-                                    IsChecked="{Binding TrimMode, Converter={x:Static c:VideoTrimModeEqualsConverter.Instance}, ConverterParameter={x:Static core:VideoTrimMode.Exact}, Mode=TwoWay}"
-                                    IsEnabled="{Binding InfoLoaded}" />
-                            </StackPanel>
-
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <CheckBox Content="Trim start" Width="108" IsChecked="{Binding TrimStart}" IsEnabled="{Binding InfoLoaded}" />
-                                <NumericUpDown Width="72" Minimum="0" Maximum="48" FormatString="0" Increment="1"
-                                               IsEnabled="{Binding CanEditTrimStart}"
-                                               Value="{Binding StartHour, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
-                                <NumericUpDown Width="72" Minimum="0" Maximum="59" FormatString="0" Increment="1"
-                                               IsEnabled="{Binding CanEditTrimStart}"
-                                               Value="{Binding StartMinute, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
-                                <NumericUpDown Width="72" Minimum="0" Maximum="59" FormatString="0" Increment="1"
-                                               IsEnabled="{Binding CanEditTrimStart}"
-                                               Value="{Binding StartSecond, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <CheckBox Content="Trim end" Width="108" IsChecked="{Binding TrimEnd}" IsEnabled="{Binding InfoLoaded}" />
-                                <NumericUpDown Width="72" Minimum="0" Maximum="48" FormatString="0" Increment="1"
-                                               IsEnabled="{Binding CanEditTrimEnd}"
-                                               Value="{Binding EndHour, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
-                                <NumericUpDown Width="72" Minimum="0" Maximum="59" FormatString="0" Increment="1"
-                                               IsEnabled="{Binding CanEditTrimEnd}"
-                                               Value="{Binding EndMinute, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
-                                <NumericUpDown Width="72" Minimum="0" Maximum="59" FormatString="0" Increment="1"
-                                               IsEnabled="{Binding CanEditTrimEnd}"
-                                               Value="{Binding EndSecond, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
-                            </StackPanel>
-
-                            <TextBlock Classes="label" Text="Download threads" />
-                            <NumericUpDown
-                                Width="96"
-                                HorizontalAlignment="Left"
-                                Minimum="1"
-                                Maximum="20"
-                                FormatString="0"
-                                Increment="1"
-                                Value="{Binding DownloadThreads, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
-
-                            <TextBlock Classes="label" Text="OAuth (subscriber-only VODs)" />
-                            <TextBox Text="{Binding Oauth}" PlaceholderText="Optional" />
-                        </StackPanel>
-                    </Expander>
-                </StackPanel>
-            </ScrollViewer>
+                </ScrollViewer>
+            </Border>
         </Grid>
 
-        <Expander
-            Grid.Row="2"
-            Header="Log"
-            Margin="0,12,0,0"
-            IsExpanded="{Binding IsLogExpanded}">
-            <DockPanel Margin="0,8,0,0">
-                <Button
-                    DockPanel.Dock="Right"
-                    VerticalAlignment="Top"
-                    Margin="8,0,0,0"
-                    Content="Clear"
-                    Command="{Binding ClearLogCommand}" />
+        <Border Grid.Row="2" Classes="card" Margin="0,12,0,0" Padding="12,8">
+            <StackPanel Spacing="8">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4">
+                        <Button
+                            Classes="link"
+                            Content="Clear"
+                            Command="{Binding ClearLogCommand}"
+                            IsVisible="{Binding IsLogExpanded}" />
+                        <Button
+                            Classes="link"
+                            Content="{Binding LogToggleText}"
+                            Command="{Binding ToggleLogCommand}" />
+                    </StackPanel>
+                    <TextBlock
+                        Classes="label"
+                        Text="Log"
+                        VerticalAlignment="Center"
+                        Margin="0" />
+                </DockPanel>
                 <TextBox
                     Height="128"
                     Text="{Binding LogText}"
+                    PlaceholderText="Log output will appear here."
                     IsReadOnly="True"
                     AcceptsReturn="True"
                     TextWrapping="Wrap"
                     FontFamily="Menlo, Consolas, monospace"
                     FontSize="13"
-                    VerticalAlignment="Top" />
-            </DockPanel>
-        </Expander>
+                    IsVisible="{Binding IsLogExpanded}" />
+            </StackPanel>
+        </Border>
     </Grid>
 </ContentPage>

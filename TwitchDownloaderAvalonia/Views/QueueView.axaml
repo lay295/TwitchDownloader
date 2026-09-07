@@ -2,6 +2,7 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
+    xmlns:anim="https://github.com/whistyun/AnimatedImage.Avalonia"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
@@ -27,12 +28,24 @@
                     <TextBlock Grid.Column="2" Classes="muted" Text="Progress" />
                     <TextBlock Grid.Column="3" Classes="muted" Text="Type" />
                 </Grid>
-                <TextBlock
+                <StackPanel
                     Grid.Row="1"
-                    Classes="muted"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    Text="No queued tasks." />
+                    Spacing="8">
+                    <Image
+                        Width="48"
+                        Height="48"
+                        HorizontalAlignment="Center"
+                        Stretch="Uniform"
+                        anim:ImageBehavior.AnimatedSource="avares://TwitchDownloaderAvalonia/Assets/Status/ppHop.gif"
+                        anim:ImageBehavior.RepeatBehavior="Forever"
+                        IsVisible="{Binding AppStatus.ShowStatusImage}" />
+                    <TextBlock
+                        Classes="muted"
+                        HorizontalAlignment="Center"
+                        Text="No queued tasks." />
+                </StackPanel>
             </Grid>
         </Border>
 

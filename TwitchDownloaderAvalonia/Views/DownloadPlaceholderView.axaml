@@ -2,6 +2,7 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
+    xmlns:anim="https://github.com/whistyun/AnimatedImage.Avalonia"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
@@ -12,21 +13,35 @@
 
     <Grid RowDefinitions="Auto,*,Auto">
         <DockPanel Margin="0,0,0,12">
-            <Button DockPanel.Dock="Right" Content="Get Info" IsEnabled="False" />
+            <Button DockPanel.Dock="Right" Classes="accent" Content="Get Info" IsEnabled="False" />
             <TextBox Margin="0,0,8,0" PlaceholderText="{Binding UrlPlaceholder}" IsEnabled="False" />
         </DockPanel>
 
         <Grid Grid.Row="1" ColumnDefinitions="300,*">
             <Border Classes="card" Margin="0,0,12,0">
                 <DockPanel>
-                    <Border
+                    <Viewbox
                         DockPanel.Dock="Top"
-                        Height="168"
-                        Background="{DynamicResource CardMutedBrush}"
-                        CornerRadius="3"
+                        Stretch="Uniform"
+                        HorizontalAlignment="Stretch"
                         Margin="0,0,0,10">
-                        <TextBlock Classes="muted" Text="No info" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                    </Border>
+                        <Border Classes="preview16x9">
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6">
+                                <Image
+                                    Width="48"
+                                    Height="48"
+                                    Stretch="Uniform"
+                                    anim:ImageBehavior.AnimatedSource="avares://TwitchDownloaderAvalonia/Assets/Status/ppHop.gif"
+                                    anim:ImageBehavior.RepeatBehavior="Forever"
+                                    IsVisible="{Binding AppStatus.ShowStatusImage}" />
+                                <TextBlock
+                                    Classes="muted"
+                                    HorizontalAlignment="Center"
+                                    Text="No info"
+                                    IsVisible="{Binding AppStatus.ReduceMotion}" />
+                            </StackPanel>
+                        </Border>
+                    </Viewbox>
                     <StackPanel Spacing="6">
                         <TextBlock Classes="title" Text="{Binding Title}" />
                         <TextBlock Classes="muted" Text="{Binding Details}" TextWrapping="Wrap" />
@@ -34,14 +49,16 @@
                 </DockPanel>
             </Border>
 
-            <StackPanel Grid.Column="1" Spacing="6">
-                <TextBlock Classes="label" Text="Quality" />
-                <ComboBox IsEnabled="False" PlaceholderText="Get Info first" />
-                <Button Classes="accent" Content="{Binding PrimaryAction}" HorizontalAlignment="Left" Margin="0,8,0,8" IsEnabled="False" />
-                <Expander Header="Advanced" IsEnabled="False">
-                    <TextBlock Classes="muted" Margin="0,8,0,0" Text="Trim, threads, and OAuth will appear here." />
-                </Expander>
-            </StackPanel>
+            <Border Grid.Column="1" Classes="card">
+                <StackPanel Spacing="6">
+                    <TextBlock Classes="label" Text="Quality" />
+                    <ComboBox IsEnabled="False" PlaceholderText="Get Info first" />
+                    <Button Classes="accent" Content="{Binding PrimaryAction}" HorizontalAlignment="Left" Margin="0,8,0,8" IsEnabled="False" />
+                    <Expander Header="Advanced" IsEnabled="False">
+                        <TextBlock Classes="muted" Margin="0,8,0,0" Text="Trim, threads, and OAuth will appear here." />
+                    </Expander>
+                </StackPanel>
+            </Border>
         </Grid>
 
         <Expander Grid.Row="2" Header="Log" Margin="0,12,0,0" IsEnabled="False">

@@ -111,10 +111,17 @@ namespace TwitchDownloaderAvalonia.ViewModels
         public partial byte[]? ThumbnailBytes { get; set; }
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasStreamerAvatar))]
+        public partial byte[]? StreamerAvatarBytes { get; set; }
+
+        [ObservableProperty]
         public partial string LogText { get; set; } = string.Empty;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(LogToggleText))]
         public partial bool IsLogExpanded { get; set; }
+
+        public string LogToggleText => IsLogExpanded ? "Hide log" : "Show log";
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(HasSuggestedFileName))]
@@ -129,6 +136,8 @@ namespace TwitchDownloaderAvalonia.ViewModels
         [ObservableProperty]
         public partial bool IsDownloading { get; set; }
 
+        public AppStatus AppStatus => _appStatus;
+
         [ObservableProperty]
         public partial bool InfoLoaded { get; set; }
 
@@ -140,6 +149,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
         public bool CanEditTrimEnd => InfoLoaded && !IsDownloading && TrimEnd;
         public bool CanDownload => InfoLoaded && !IsDownloading && SelectedQuality is not null;
         public bool HasSuggestedFileName => !string.IsNullOrWhiteSpace(SuggestedFileName);
+        public bool HasStreamerAvatar => StreamerAvatarBytes is { Length: > 0 };
 
         [RelayCommand(CanExecute = nameof(CanGetInfo))]
         private async Task GetInfoAsync()
@@ -211,11 +221,13 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 EndSecond = _vodLength.Seconds;
 
                 ThumbnailBytes = await _thumbnails.TryGetAsync(video.thumbnailURLs.FirstOrDefault());
+                StreamerAvatarBytes = await _thumbnails.TryGetAsync(video.owner?.profileImageURL);
 
                 InfoLoaded = true;
                 UpdateVideoSizeEstimates();
                 UpdateSuggestedFileName();
                 NotifyDownloadState();
+                AppendLog($"Loaded {InfoTitle} ({LengthText}) from {_streamerName}.");
             }
             catch (Exception ex)
             {
@@ -263,6 +275,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
             IsDownloading = true;
             NotifyDownloadState();
             Status = "Downloading";
+            AppendLog($"Starting download: {path}");
             _cancellation = new CancellationTokenSource();
             var progress = new AvaloniaTaskProgress(
                 (LogLevel)_settings.Current.LogLevels,
@@ -308,6 +321,12 @@ namespace TwitchDownloaderAvalonia.ViewModels
             catch (ObjectDisposedException)
             {
             }
+        }
+
+        [RelayCommand]
+        private void ToggleLog()
+        {
+            IsLogExpanded = !IsLogExpanded;
         }
 
         [RelayCommand]
@@ -472,8 +491,6 @@ namespace TwitchDownloaderAvalonia.ViewModels
 
             builder.Append(message);
             LogText = builder.ToString();
-            if (!IsLogExpanded)
-                IsLogExpanded = true;
         }
 
         private void PushAppStatus()

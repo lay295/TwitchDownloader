@@ -25,24 +25,28 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 "Clip",
                 "https://www.twitch.tv/user/clip/...",
                 "Download",
-                "Clip download uses the same Get Info → quality → Download flow as Video.");
+                "Clip download uses the same Get Info → quality → Download flow as Video.",
+                status);
             ChatDownload = new DownloadPlaceholderViewModel(
                 "Chat",
                 "https://www.twitch.tv/videos/...",
                 "Download",
-                "Chat download will reuse this layout: URL, Get Info, options, Advanced, log.");
+                "Chat download will reuse this layout: URL, Get Info, options, Advanced, log.",
+                status);
             ChatUpdate = new DownloadPlaceholderViewModel(
                 "Chat Update",
                 "Path to an existing chat JSON / ZIP",
                 "Update",
-                "Chat Update stays in the sidebar. Embed missing emotes and restamp chats here later.");
-            ChatRender = new ChatRenderViewModel();
-            Search = new SearchViewModel();
-            Queue = new QueueViewModel();
+                "Chat Update stays in the sidebar. Embed missing emotes and restamp chats here later.",
+                status);
+            ChatRender = new ChatRenderViewModel(status);
+            Search = new SearchViewModel(status);
+            Queue = new QueueViewModel(status);
             SettingsPage = new SettingsViewModel(settings, status);
             About = new AboutViewModel();
             CurrentPage = Vod;
-            WindowTitle = $"Twitch Downloader v{typeof(MainWindowViewModel).Assembly.GetName().Version?.ToString(3)}";
+            AppVersion = $"v{typeof(MainWindowViewModel).Assembly.GetName().Version?.ToString(3)}";
+            WindowTitle = $"Twitch Downloader {AppVersion}";
         }
 
         public AppStatus Status { get; }
@@ -58,14 +62,20 @@ namespace TwitchDownloaderAvalonia.ViewModels
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(PageTitle))]
+        [NotifyPropertyChangedFor(nameof(PageSubtitle))]
         public partial ViewModelBase CurrentPage { get; set; }
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(PageTitle))]
+        [NotifyPropertyChangedFor(nameof(PageSubtitle))]
         public partial AppPage SelectedPage { get; set; } = AppPage.Vod;
 
         [ObservableProperty]
         public partial string WindowTitle { get; set; }
+
+        public string AppName => "Twitch Downloader";
+
+        public string AppVersion { get; }
 
         public string PageTitle => SelectedPage switch
         {
@@ -79,6 +89,20 @@ namespace TwitchDownloaderAvalonia.ViewModels
             AppPage.Settings => "Settings",
             AppPage.About => "About",
             _ => "Video",
+        };
+
+        public string PageSubtitle => SelectedPage switch
+        {
+            AppPage.Vod => "Download Twitch VODs with ease.",
+            AppPage.Clip => "Download Twitch clips.",
+            AppPage.ChatDownload => "Download VOD or clip chat.",
+            AppPage.ChatUpdate => "Update existing chat files.",
+            AppPage.ChatRender => "Render chat to video.",
+            AppPage.Search => "Find VODs and clips.",
+            AppPage.Queue => "Manage downloads and renders.",
+            AppPage.Settings => "Preferences for this app.",
+            AppPage.About => "About Twitch Downloader.",
+            _ => "Download Twitch VODs with ease.",
         };
 
         [RelayCommand]

@@ -20,6 +20,7 @@ namespace TwitchDownloaderAvalonia.Services
         [NotifyPropertyChangedFor(nameof(IsAnimatedStatus))]
         [NotifyPropertyChangedFor(nameof(ShowErrorStatus))]
         [NotifyPropertyChangedFor(nameof(AnimatedSource))]
+        [NotifyPropertyChangedFor(nameof(ShowProgress))]
         public partial AppStatusKind Kind { get; set; } = AppStatusKind.Idle;
 
         [ObservableProperty]
@@ -37,6 +38,8 @@ namespace TwitchDownloaderAvalonia.Services
         public bool IsAnimatedStatus => ShowStatusImage && Kind != AppStatusKind.Error;
 
         public bool ShowErrorStatus => ShowStatusImage && Kind == AppStatusKind.Error;
+
+        public bool ShowProgress => Kind is AppStatusKind.Running or AppStatusKind.Canceling;
 
         public string? AnimatedSource => Kind switch
         {

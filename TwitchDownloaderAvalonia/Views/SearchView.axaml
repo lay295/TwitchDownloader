@@ -2,6 +2,7 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
+    xmlns:anim="https://github.com/whistyun/AnimatedImage.Avalonia"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
@@ -18,11 +19,24 @@
         </DockPanel>
 
         <Border Grid.Row="1" Classes="card">
-            <TextBlock
-                Classes="muted"
+            <StackPanel
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                Text="Results will list here. Selected items enqueue to Queue." />
+                Spacing="8">
+                <Image
+                    Width="48"
+                    Height="48"
+                    HorizontalAlignment="Center"
+                    Stretch="Uniform"
+                    anim:ImageBehavior.AnimatedSource="avares://TwitchDownloaderAvalonia/Assets/Status/ppHop.gif"
+                    anim:ImageBehavior.RepeatBehavior="Forever"
+                    IsVisible="{Binding AppStatus.ShowStatusImage}" />
+                <TextBlock
+                    Classes="muted"
+                    HorizontalAlignment="Center"
+                    TextAlignment="Center"
+                    Text="Results will list here. Selected items enqueue to Queue." />
+            </StackPanel>
         </Border>
 
         <TextBlock Grid.Row="2" Classes="muted" Margin="0,8,0,0" Text="{Binding Details}" TextWrapping="Wrap" />
