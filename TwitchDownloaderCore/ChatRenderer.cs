@@ -62,12 +62,14 @@ namespace TwitchDownloaderCore
         private DisposableDictionary<string, ChatBadge> _badgeCache = [];
         private DisposableDictionary<string, TwitchEmote> _emoteCache = [];
         private DisposableDictionary<string, TwitchEmote> _emoteThirdCache = [];
+        private readonly DisposableDictionary<string, TwitchEmote> _gifCache = new(StringComparer.OrdinalIgnoreCase);
         private DisposableDictionary<string, CheerEmote> _cheermoteCache = [];
         private DisposableDictionary<string, SKImage> _emojiCache = [];
         private DisposableDictionary<string, SKImage> _avatarCache = [];
         private DisposableDictionary<int, SKPaint> _fallbackFontCache = [];
         private DisposableDictionary<SKColor, SKPaint> _paintCache = [];
         private readonly SectionImageCache _sectionImageCache = new();
+        private readonly ImageMemoryBudget _imageBudget;
         private bool noFallbackFontFound = false;
         private readonly SKFontManager fontManager = SKFontManager.CreateDefault();
         private SKPaint messageFont;
@@ -92,6 +94,7 @@ namespace TwitchDownloaderCore
         public ChatRenderer(ChatRenderOptions chatRenderOptions, ITaskProgress progress)
         {
             renderOptions = chatRenderOptions;
+            _imageBudget = new ImageMemoryBudget(Math.Max(1, renderOptions.ImageCacheMb) * 1024L * 1024L);
             _cacheDir = CacheDirectoryService.GetCacheDirectory(renderOptions.TempFolder);
             renderOptions.BlockArtPreWrapWidth = 29.166 * renderOptions.FontSize - renderOptions.SidePadding * 2;
             renderOptions.BlockArtPreWrap = renderOptions.ChatWidth > renderOptions.BlockArtPreWrapWidth;
@@ -797,6 +800,11 @@ namespace TwitchDownloaderCore
                     commentList[i].Image.Dispose();
                 }
                 commentList.RemoveRange(0, removeCount);
+
+                if (removeCount > 0 && _imageBudget.ReleaseUnused(DecodedImages(), OnScreenImages(commentList)))
+                {
+                    InvalidateAnimCache();
+                }
             }
 
             lastUpdate.Comments = commentList;
@@ -890,6 +898,8 @@ namespace TwitchDownloaderCore
             {
                 DrawNonAccentedMessage(comment, sectionImages, emoteSectionList, false, commentIndex, ref drawPos, ref defaultPos);
             }
+
+            _imageBudget.MarkDrawn(emoteSectionList.Select(static x => x.Emote));
 
             return new CommentSection
             {
@@ -1163,6 +1173,22 @@ namespace TwitchDownloaderCore
 
         private void DrawMessage(Comment comment, List<SectionImage> sectionImages, List<EmotePosition> emotePositionList, bool highlightWords, ref Point drawPos, Point defaultPos)
         {
+            // Detection is deliberately not gated on the GiphyGifs option: a posted GIF is its own kind of message, and its
+            // title must never be emote substituted. The option only decides whether the image itself is drawn.
+            if (GiphyResolver.TryParseAltText(comment.message.body, out var gifTitle))
+            {
+                if (renderOptions.GiphyGifs && _gifCache.TryGetValue(gifTitle, out var gif))
+                {
+                    DrawChatGif(sectionImages, emotePositionList, ref drawPos, defaultPos, gif);
+                }
+                else
+                {
+                    DrawChatGifAltText(comment.message.body, sectionImages, emotePositionList, highlightWords, ref drawPos, defaultPos);
+                }
+
+                return;
+            }
+
             int bitsCount = comment.message.bits_spent;
             foreach (var fragment in comment.message.fragments)
             {
@@ -1191,6 +1217,49 @@ namespace TwitchDownloaderCore
                     ArrayPool<Range>.Shared.Return(fragmentParts);
                 }
             }
+        }
+
+        // A GIF that could not be resolved falls back to its title, drawn verbatim. The title comes from Giphy
+        // rather than from chat, so a word in it that happens to match an emote is a coincidence, and substituting
+        // one would render nonsense like "[Horse <emote> GIF by Jan Metternich]". Emoji are still drawn, since
+        // those are characters in the title rather than a lookup.
+        private void DrawChatGifAltText(string body, List<SectionImage> sectionImages, List<EmotePosition> emotePositionList, bool highlightWords, ref Point drawPos, Point defaultPos)
+        {
+            var bodySpan = body.AsSpan();
+            var spaceCount = bodySpan.CountAny(WhiteSpaceChars);
+
+            var bodyParts = ArrayPool<Range>.Shared.Rent(spaceCount + 1);
+            try
+            {
+                var written = SwapRightToLeft(bodySpan.SplitAny(WhiteSpaceChars), bodyParts);
+                foreach (var range in bodyParts.Take(written))
+                {
+                    DrawFragmentPart(sectionImages, emotePositionList, ref drawPos, defaultPos, 0, bodySpan[range], highlightWords, skipThird: true);
+                }
+            }
+            finally
+            {
+                ArrayPool<Range>.Shared.Return(bodyParts);
+            }
+        }
+
+        // Draws a GIF posted in chat on its own line(s) below the username, as wide as the height cap allows
+        private void DrawChatGif(List<SectionImage> sectionImages, List<EmotePosition> emotePositionList, ref Point drawPos, Point defaultPos, TwitchEmote gif)
+        {
+            var gifInfo = gif.Info;
+
+            // Sections are fixed height, so reserve as many blank ones as the image spans. Like emotes it is
+            // composited in later rather than drawn here, so the animation can play.
+            var sectionsNeeded = Math.Max(1, (int)Math.Ceiling(gifInfo.Height / (double)renderOptions.SectionHeight));
+            for (var i = 0; i < sectionsNeeded; i++)
+            {
+                AddImageSection(sectionImages, ref drawPos, defaultPos);
+            }
+
+            var gifTop = (sectionImages.Count - sectionsNeeded) * renderOptions.SectionHeight;
+            emotePositionList.Add(new EmotePosition(new Point { X = renderOptions.SidePadding, Y = gifTop }, gif));
+
+            drawPos.X = renderOptions.SidePadding + gifInfo.Width;
         }
 
         private void DrawFragmentPart(List<SectionImage> sectionImages, List<EmotePosition> emotePositionList, ref Point drawPos, Point defaultPos, int bitsCount, ReadOnlySpan<char> fragmentPart, bool highlightWords, bool skipThird = false, bool skipEmoji = false, bool skipNonFont = false)
@@ -1976,8 +2045,9 @@ namespace TwitchDownloaderCore
             var cheerTask = GetScaledBits(cancellationToken);
             var emojiTask = GetScaledEmojis(cancellationToken);
             var avatarTask = renderOptions.RenderUserAvatars ? GetScaledAvatars(cancellationToken) : Task.FromResult(new Dictionary<string, SKImage>());
+            var gifTask = renderOptions.GiphyGifs ? GetScaledGiphyGifs(cancellationToken) : Task.FromResult(new List<TwitchEmote>());
 
-            await Task.WhenAll(badgeTask, emoteTask, emoteThirdTask, cheerTask, emojiTask, avatarTask);
+            await Task.WhenAll(badgeTask, emoteTask, emoteThirdTask, cheerTask, emojiTask, avatarTask, gifTask);
 
             // Clear chatRoot.embeddedData and manually call GC to save some memory
             chatRoot.embeddedData = null;
@@ -1991,6 +2061,7 @@ namespace TwitchDownloaderCore
             _cheermoteCache.AddRange(cheerTask.Result, x => x.prefix, x => x);
             _emojiCache.AddRange(emojiTask.Result);
             _avatarCache.AddRange(avatarTask.Result);
+            _gifCache.AddRange(gifTask.Result, x => x.Name, x => x);
         }
 
         private async Task<List<ChatBadge>> GetScaledBadges(CancellationToken cancellationToken)
@@ -2046,6 +2117,65 @@ namespace TwitchDownloaderCore
             }
 
             return emoteThirdTask;
+        }
+
+        private async Task<List<TwitchEmote>> GetScaledGiphyGifs(CancellationToken cancellationToken)
+        {
+            List<TwitchEmote> gifTask;
+            try
+            {
+                gifTask = await TwitchHelper.GetGiphyGifs(chatRoot.comments, _cacheDir, _progress, chatRoot.embeddedData, renderOptions.Offline, cancellationToken: cancellationToken);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                // Chat GIFs must never cost the user their render, the messages just stay as plain text
+                _progress.LogWarning($"Unable to load chat GIFs: {ex.Message} Rendering them as text instead.");
+                return [];
+            }
+
+            var maxWidth = renderOptions.ChatWidth - renderOptions.SidePadding * 2;
+            // Purely a readability choice: an oversized message is clipped at the top of the frame rather than
+            // breaking anything, so this only decides how much of the chat one GIF is allowed to take up.
+            var maxHeight = Math.Max(1, renderOptions.ChatHeight * Math.Max(1, renderOptions.GifMaxHeightPercent) / 100);
+            foreach (var gif in gifTask)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                gif.Scale(Math.Min(maxWidth / (double)gif.Width, maxHeight / (double)gif.Height));
+            }
+
+            return gifTask;
+        }
+
+        // By reference, not name: first party emotes carry a null name, and one could share a GIF's title
+        private static HashSet<TwitchEmote> OnScreenImages(List<CommentSection> onScreen)
+        {
+            var images = new HashSet<TwitchEmote>();
+            foreach (var comment in onScreen)
+            {
+                foreach (var (_, emote) in comment.Emotes)
+                {
+                    images.Add(emote);
+                }
+            }
+
+            return images;
+        }
+
+        private IEnumerable<TwitchEmote> DecodedImages()
+        {
+            foreach (var emote in _emoteCache.Values)
+            {
+                if (emote.FramesMaterialized) yield return emote;
+            }
+            foreach (var emote in _emoteThirdCache.Values)
+            {
+                if (emote.FramesMaterialized) yield return emote;
+            }
+            foreach (var gif in _gifCache.Values)
+            {
+                if (gif.FramesMaterialized) yield return gif;
+            }
         }
 
         private async Task<List<CheerEmote>> GetScaledBits(CancellationToken cancellationToken)
