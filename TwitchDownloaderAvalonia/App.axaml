@@ -12,6 +12,9 @@
         <DataTemplate DataType="vm:ClipDownloadViewModel">
             <views:ClipDownloadView />
         </DataTemplate>
+        <DataTemplate DataType="vm:ChatDownloadViewModel">
+            <views:ChatDownloadView />
+        </DataTemplate>
         <DataTemplate DataType="vm:ChatRenderViewModel">
             <views:ChatRenderView />
         </DataTemplate>

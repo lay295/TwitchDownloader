@@ -9,7 +9,16 @@ namespace TwitchDownloaderAvalonia.Models
         public string TempPath { get; set; } = string.Empty;
         public string TemplateVod { get; set; } = "[{date_custom=\"M-d-yy\"}] {channel} - {title}";
         public string TemplateClip { get; set; } = "[{date_custom=\"M-d-yy\"}] {channel} - {title}";
+        public string TemplateChat { get; set; } = "[{date_custom=\"M-d-yy\"}] {channel} - {title} - Chat";
         public bool EncodeClipMetadata { get; set; } = true;
+        public int ChatDownloadThreads { get; set; } = 4;
+        public ChatFormat ChatDownloadFormat { get; set; } = ChatFormat.Json;
+        public ChatCompression ChatJsonCompression { get; set; } = ChatCompression.None;
+        public TimestampFormat ChatTextTimestampStyle { get; set; } = TimestampFormat.Utc;
+        public bool ChatEmbedEmotes { get; set; }
+        public bool BttvEmotes { get; set; } = true;
+        public bool FfzEmotes { get; set; } = true;
+        public bool StvEmotes { get; set; } = true;
         public bool DownloadThrottleEnabled { get; set; }
         public int MaximumBandwidthKib { get; set; } = 4096;
         public int LogLevels { get; set; } = (int)(LogLevel.Info | LogLevel.Warning | LogLevel.Error | LogLevel.Ffmpeg);
