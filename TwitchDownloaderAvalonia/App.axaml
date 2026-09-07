@@ -9,6 +9,9 @@
         <DataTemplate DataType="vm:VodDownloadViewModel">
             <views:VodDownloadView />
         </DataTemplate>
+        <DataTemplate DataType="vm:ClipDownloadViewModel">
+            <views:ClipDownloadView />
+        </DataTemplate>
         <DataTemplate DataType="vm:ChatRenderViewModel">
             <views:ChatRenderView />
         </DataTemplate>

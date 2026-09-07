@@ -8,6 +8,8 @@ namespace TwitchDownloaderAvalonia.Models
         public string OAuth { get; set; } = string.Empty;
         public string TempPath { get; set; } = string.Empty;
         public string TemplateVod { get; set; } = "[{date_custom=\"M-d-yy\"}] {channel} - {title}";
+        public string TemplateClip { get; set; } = "[{date_custom=\"M-d-yy\"}] {channel} - {title}";
+        public bool EncodeClipMetadata { get; set; } = true;
         public bool DownloadThrottleEnabled { get; set; }
         public int MaximumBandwidthKib { get; set; } = 4096;
         public int LogLevels { get; set; } = (int)(LogLevel.Info | LogLevel.Warning | LogLevel.Error | LogLevel.Ffmpeg);

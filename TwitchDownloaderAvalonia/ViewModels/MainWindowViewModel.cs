@@ -21,12 +21,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
             _ffmpeg = ffmpeg;
             Status = status;
             Vod = new VodDownloadViewModel(settings, status, ffmpeg, dialogs, fileDialogs, collision, thumbnails);
-            Clip = new DownloadPlaceholderViewModel(
-                "Clip",
-                "https://www.twitch.tv/user/clip/...",
-                "Download",
-                "Clip download uses the same Get Info → quality → Download flow as Video.",
-                status);
+            Clip = new ClipDownloadViewModel(settings, status, ffmpeg, dialogs, fileDialogs, collision, thumbnails);
             ChatDownload = new DownloadPlaceholderViewModel(
                 "Chat",
                 "https://www.twitch.tv/videos/...",
@@ -51,7 +46,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
 
         public AppStatus Status { get; }
         public VodDownloadViewModel Vod { get; }
-        public DownloadPlaceholderViewModel Clip { get; }
+        public ClipDownloadViewModel Clip { get; }
         public DownloadPlaceholderViewModel ChatDownload { get; }
         public DownloadPlaceholderViewModel ChatUpdate { get; }
         public ChatRenderViewModel ChatRender { get; }
