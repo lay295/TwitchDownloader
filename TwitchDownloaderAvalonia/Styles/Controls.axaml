@@ -342,17 +342,14 @@
         <Setter Property="HorizontalAlignment" Value="Left" />
     </Style>
 
-    <Style Selector="TabControl">
-        <Setter Property="Padding" Value="0,10,0,0" />
-        <Setter Property="Background" Value="Transparent" />
-        <Setter Property="BorderThickness" Value="0" />
+    <Style Selector="CheckBox /template/ ContentPresenter#PART_ContentPresenter > TextBlock">
+        <Setter Property="TextWrapping" Value="Wrap" />
     </Style>
 
-    <Style Selector="TabItem">
-        <Setter Property="FontSize" Value="13" />
-        <Setter Property="FontWeight" Value="SemiBold" />
-        <Setter Property="MinHeight" Value="32" />
-        <Setter Property="Padding" Value="10,6" />
-        <Setter Property="Foreground" Value="{DynamicResource WindowForegroundBrush}" />
+    <Style Selector="Grid.scaleRow">
+        <Setter Property="MinWidth" Value="236" />
+        <Setter Property="MaxWidth" Value="320" />
+        <Setter Property="Margin" Value="0,0,16,10" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
     </Style>
 </Styles>

@@ -135,7 +135,7 @@
 
             <Border Grid.Column="1" Classes="card">
                 <DockPanel>
-                    <StackPanel DockPanel.Dock="Bottom" Spacing="10" Margin="0,10,0,0">
+                    <StackPanel DockPanel.Dock="Bottom" Spacing="10" Margin="0,12,0,0">
                         <DockPanel Height="28" LastChildFill="True">
                             <StackPanel
                                 DockPanel.Dock="Right"
@@ -219,8 +219,8 @@
                     <TabControl IsEnabled="{Binding CanEditOptions}">
                         <TabItem Header="General">
                             <ScrollViewer>
-                                <StackPanel Spacing="10">
-                                    <Grid ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+                                <StackPanel Spacing="12" Margin="0,4,0,0">
+                                    <Grid ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="8" ColumnSpacing="12">
                                         <TextBlock Classes="label" Text="Width" VerticalAlignment="Center" Margin="0" />
                                         <NumericUpDown
                                             Grid.Row="0"
@@ -291,39 +291,48 @@
 
                         <TabItem Header="Rendering">
                             <ScrollViewer>
-                                <StackPanel Spacing="12">
-                                    <WrapPanel Orientation="Horizontal">
-                                        <StackPanel Width="210" Spacing="8">
-                                            <CheckBox Content="Outline" IsChecked="{Binding Outline}" />
-                                            <CheckBox Content="Timestamps" IsChecked="{Binding Timestamp}" />
-                                            <CheckBox Content="Sub messages" IsChecked="{Binding SubMessages}" />
-                                            <CheckBox Content="Chat badges" IsChecked="{Binding ChatBadges}" />
-                                            <DockPanel LastChildFill="True">
-                                                <TextBlock Classes="label" Text="Update rate" VerticalAlignment="Center" Margin="0,0,8,0" Width="90" />
-                                                <NumericUpDown
-                                                    Classes="compact"
-                                                    Minimum="0"
-                                                    Increment="0.1"
-                                                    FormatString="0.##"
-                                                    Value="{Binding UpdateRate, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
-                                            </DockPanel>
-                                            <CheckBox Content="Dispersion" IsChecked="{Binding DisperseCommentOffsets}" ToolTip.Tip="Uses extra metadata to restore message order after Twitch started rounding chat timestamps to whole seconds." />
-                                            <CheckBox Content="Alternate message backgrounds" IsChecked="{Binding AlternateMessageBackgrounds}" />
-                                            <CheckBox Content="Increase username readability" IsChecked="{Binding AdjustUsernameVisibility}" />
-                                        </StackPanel>
-                                        <StackPanel Width="180" Spacing="8">
-                                            <CheckBox Content="BTTV" IsChecked="{Binding BttvEmotes}" />
-                                            <CheckBox Content="FFZ" IsChecked="{Binding FfzEmotes}" />
-                                            <CheckBox Content="7TV" IsChecked="{Binding StvEmotes}" />
-                                            <CheckBox Content="User avatars" IsChecked="{Binding RenderUserAvatars}" />
-                                            <CheckBox Content="Offline" IsChecked="{Binding Offline}" ToolTip.Tip="Skip downloading new emotes, badges, and avatars. Use only what is already cached or embedded." />
-                                        </StackPanel>
+                                <StackPanel Spacing="14" Margin="0,4,0,0">
+                                    <WrapPanel>
+                                        <CheckBox Content="Outline" Margin="0,0,16,8" IsChecked="{Binding Outline}" />
+                                        <CheckBox Content="Timestamps" Margin="0,0,16,8" IsChecked="{Binding Timestamp}" />
+                                        <CheckBox Content="Sub messages" Margin="0,0,16,8" IsChecked="{Binding SubMessages}" />
+                                        <CheckBox Content="Chat badges" Margin="0,0,16,8" IsChecked="{Binding ChatBadges}" />
+                                        <CheckBox Content="Dispersion" Margin="0,0,16,8" IsChecked="{Binding DisperseCommentOffsets}" ToolTip.Tip="Uses extra metadata to restore message order after Twitch started rounding chat timestamps to whole seconds." />
+                                        <CheckBox Content="BTTV" Margin="0,0,16,8" IsChecked="{Binding BttvEmotes}" />
+                                        <CheckBox Content="FFZ" Margin="0,0,16,8" IsChecked="{Binding FfzEmotes}" />
+                                        <CheckBox Content="7TV" Margin="0,0,16,8" IsChecked="{Binding StvEmotes}" />
+                                        <CheckBox Content="User avatars" Margin="0,0,16,8" IsChecked="{Binding RenderUserAvatars}" />
+                                        <CheckBox Content="Offline" Margin="0,0,16,8" IsChecked="{Binding Offline}" ToolTip.Tip="Skip downloading new emotes, badges, and avatars. Use only what is already cached or embedded." />
                                     </WrapPanel>
 
-                                    <StackPanel Spacing="6">
+                                    <DockPanel LastChildFill="False">
+                                        <TextBlock Classes="label" Text="Update rate" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                        <NumericUpDown
+                                            Classes="compact"
+                                            Minimum="0"
+                                            Increment="0.1"
+                                            FormatString="0.##"
+                                            Value="{Binding UpdateRate, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                    </DockPanel>
+
+                                    <StackPanel Spacing="10">
+                                        <CheckBox
+                                            HorizontalAlignment="Stretch"
+                                            IsChecked="{Binding AlternateMessageBackgrounds}"
+                                            ToolTip.Tip="Use a second background color on every other chat line.">
+                                            <TextBlock Text="Alternate message backgrounds" TextWrapping="Wrap" />
+                                        </CheckBox>
+                                        <CheckBox
+                                            HorizontalAlignment="Stretch"
+                                            IsChecked="{Binding AdjustUsernameVisibility}">
+                                            <TextBlock Text="Increase username readability" TextWrapping="Wrap" />
+                                        </CheckBox>
+                                    </StackPanel>
+
+                                    <StackPanel Spacing="8">
                                         <TextBlock Classes="label" Text="Chat badge filter" Margin="0" />
-                                        <TextBlock Classes="muted" Text="Checked badges are hidden in the render." />
-                                        <WrapPanel Orientation="Horizontal">
+                                        <TextBlock Classes="muted" TextWrapping="Wrap" Text="Checked badges are hidden in the render." />
+                                        <WrapPanel>
                                             <CheckBox Content="Broadcaster" Margin="0,0,12,6" IsChecked="{Binding FilterBroadcaster}" />
                                             <CheckBox Content="Mods" Margin="0,0,12,6" IsChecked="{Binding FilterModerator}" />
                                             <CheckBox Content="VIPs" Margin="0,0,12,6" IsChecked="{Binding FilterVip}" />
@@ -335,7 +344,7 @@
                                         </WrapPanel>
                                     </StackPanel>
 
-                                    <StackPanel Spacing="6">
+                                    <StackPanel Spacing="8">
                                         <TextBlock Classes="label" Text="Ignore users" Margin="0" ToolTip.Tip="Comma-separated logins whose messages are omitted." />
                                         <TextBox Text="{Binding IgnoreUsersList}" PlaceholderText="user1, user2" />
                                         <TextBlock Classes="label" Text="Banned words" Margin="0" ToolTip.Tip="Comma-separated words. Messages containing them are omitted." />
@@ -355,22 +364,25 @@
                                         </Grid>
                                     </StackPanel>
 
-                                    <StackPanel Spacing="6">
+                                    <StackPanel Spacing="8">
                                         <TextBlock Classes="label" Text="Emoji vendor" Margin="0" />
-                                        <StackPanel Orientation="Horizontal" Spacing="16">
+                                        <WrapPanel>
                                             <RadioButton
                                                 Content="Google"
+                                                Margin="0,0,16,6"
                                                 GroupName="ChatRenderEmoji"
                                                 IsChecked="{Binding EmojiVendor, Converter={x:Static c:EnumEqualsConverter.Instance}, ConverterParameter={x:Static chat:EmojiVendor.GoogleNotoColor}, Mode=TwoWay}" />
                                             <RadioButton
                                                 Content="Twitter"
+                                                Margin="0,0,16,6"
                                                 GroupName="ChatRenderEmoji"
                                                 IsChecked="{Binding EmojiVendor, Converter={x:Static c:EnumEqualsConverter.Instance}, ConverterParameter={x:Static chat:EmojiVendor.TwitterTwemoji}, Mode=TwoWay}" />
                                             <RadioButton
                                                 Content="None"
+                                                Margin="0,0,16,6"
                                                 GroupName="ChatRenderEmoji"
                                                 IsChecked="{Binding EmojiVendor, Converter={x:Static c:EnumEqualsConverter.Instance}, ConverterParameter={x:Static chat:EmojiVendor.None}, Mode=TwoWay}" />
-                                        </StackPanel>
+                                        </WrapPanel>
                                     </StackPanel>
                                 </StackPanel>
                             </ScrollViewer>
@@ -378,85 +390,95 @@
 
                         <TabItem Header="Scaling">
                             <ScrollViewer>
-                                <Grid ColumnDefinitions="*,16,*" RowDefinitions="Auto">
-                                    <StackPanel Spacing="8">
-                                        <DockPanel LastChildFill="False">
-                                            <TextBlock Classes="label" Text="Emote" VerticalAlignment="Center" Width="120" Margin="0" />
-                                            <NumericUpDown Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
-                                                           Value="{Binding EmoteScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
-                                        </DockPanel>
-                                        <DockPanel LastChildFill="False">
-                                            <TextBlock Classes="label" Text="Badge" VerticalAlignment="Center" Width="120" Margin="0" />
-                                            <NumericUpDown Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
-                                                           Value="{Binding BadgeScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
-                                        </DockPanel>
-                                        <DockPanel LastChildFill="False">
-                                            <TextBlock Classes="label" Text="Emoji" VerticalAlignment="Center" Width="120" Margin="0" />
-                                            <NumericUpDown Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
-                                                           Value="{Binding EmojiScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
-                                        </DockPanel>
-                                        <DockPanel LastChildFill="False">
-                                            <TextBlock Classes="label" Text="Avatar" VerticalAlignment="Center" Width="120" Margin="0" />
-                                            <NumericUpDown Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
-                                                           Value="{Binding AvatarScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
-                                        </DockPanel>
-                                        <DockPanel LastChildFill="False">
-                                            <TextBlock Classes="label" Text="Outline" VerticalAlignment="Center" Width="120" Margin="0" />
-                                            <NumericUpDown Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
-                                                           Value="{Binding OutlineScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
-                                        </DockPanel>
-                                        <DockPanel LastChildFill="False">
-                                            <TextBlock Classes="label" Text="Username size" VerticalAlignment="Center" Width="120" Margin="0"
-                                                       ToolTip.Tip="Username font size as a multiple of the message font size. 1.0 = same size as the message text." />
-                                            <NumericUpDown Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
-                                                           Value="{Binding UsernameFontScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
-                                        </DockPanel>
-                                        <DockPanel LastChildFill="False">
-                                            <TextBlock Classes="label" Text="Vertical spacing" VerticalAlignment="Center" Width="120" Margin="0" />
-                                            <NumericUpDown Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
-                                                           Value="{Binding VerticalSpacingScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
-                                        </DockPanel>
-                                    </StackPanel>
-                                    <StackPanel Grid.Row="0" Grid.Column="2" Spacing="8">
-                                        <DockPanel LastChildFill="False">
-                                            <TextBlock Classes="label" Text="Section height" VerticalAlignment="Center" Width="120" Margin="0" />
-                                            <NumericUpDown Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
-                                                           Value="{Binding SectionHeightScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
-                                        </DockPanel>
-                                        <DockPanel LastChildFill="False">
-                                            <TextBlock Classes="label" Text="Word spacing" VerticalAlignment="Center" Width="120" Margin="0" />
-                                            <NumericUpDown Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
-                                                           Value="{Binding WordSpacingScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
-                                        </DockPanel>
-                                        <DockPanel LastChildFill="False">
-                                            <TextBlock Classes="label" Text="Emote spacing" VerticalAlignment="Center" Width="120" Margin="0" />
-                                            <NumericUpDown Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
-                                                           Value="{Binding EmoteSpacingScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
-                                        </DockPanel>
-                                        <DockPanel LastChildFill="False">
-                                            <TextBlock Classes="label" Text="Highlight stroke" VerticalAlignment="Center" Width="120" Margin="0" />
-                                            <NumericUpDown Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
-                                                           Value="{Binding AccentStrokeScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
-                                        </DockPanel>
-                                        <DockPanel LastChildFill="False">
-                                            <TextBlock Classes="label" Text="Highlight indent" VerticalAlignment="Center" Width="120" Margin="0" />
-                                            <NumericUpDown Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
-                                                           Value="{Binding AccentIndentScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
-                                        </DockPanel>
-                                        <DockPanel LastChildFill="False">
-                                            <TextBlock Classes="label" Text="Side padding" VerticalAlignment="Center" Width="120" Margin="0" />
-                                            <NumericUpDown Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
-                                                           Value="{Binding SidePaddingScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
-                                        </DockPanel>
-                                    </StackPanel>
-                                </Grid>
+                                <WrapPanel Margin="0,4,0,0">
+                                    <Grid Classes="scaleRow" ColumnDefinitions="*,8,Auto">
+                                        <TextBlock Classes="label" Text="Emote" VerticalAlignment="Center" Margin="0" TextWrapping="Wrap" />
+                                        <NumericUpDown
+                                            Grid.Row="0" Grid.Column="2" Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                            Value="{Binding EmoteScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                    </Grid>
+                                    <Grid Classes="scaleRow" ColumnDefinitions="*,8,Auto">
+                                        <TextBlock Classes="label" Text="Badge" VerticalAlignment="Center" Margin="0" TextWrapping="Wrap" />
+                                        <NumericUpDown
+                                            Grid.Row="0" Grid.Column="2" Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                            Value="{Binding BadgeScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                    </Grid>
+                                    <Grid Classes="scaleRow" ColumnDefinitions="*,8,Auto">
+                                        <TextBlock Classes="label" Text="Emoji" VerticalAlignment="Center" Margin="0" TextWrapping="Wrap" />
+                                        <NumericUpDown
+                                            Grid.Row="0" Grid.Column="2" Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                            Value="{Binding EmojiScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                    </Grid>
+                                    <Grid Classes="scaleRow" ColumnDefinitions="*,8,Auto">
+                                        <TextBlock Classes="label" Text="Avatar" VerticalAlignment="Center" Margin="0" TextWrapping="Wrap" />
+                                        <NumericUpDown
+                                            Grid.Row="0" Grid.Column="2" Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                            Value="{Binding AvatarScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                    </Grid>
+                                    <Grid Classes="scaleRow" ColumnDefinitions="*,8,Auto">
+                                        <TextBlock Classes="label" Text="Outline" VerticalAlignment="Center" Margin="0" TextWrapping="Wrap" />
+                                        <NumericUpDown
+                                            Grid.Row="0" Grid.Column="2" Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                            Value="{Binding OutlineScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                    </Grid>
+                                    <Grid Classes="scaleRow" ColumnDefinitions="*,8,Auto">
+                                        <TextBlock
+                                            Classes="label" Text="Username size" VerticalAlignment="Center" Margin="0" TextWrapping="Wrap"
+                                            ToolTip.Tip="Username font size as a multiple of the message font size. 1.0 = same size as the message text." />
+                                        <NumericUpDown
+                                            Grid.Row="0" Grid.Column="2" Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                            Value="{Binding UsernameFontScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                    </Grid>
+                                    <Grid Classes="scaleRow" ColumnDefinitions="*,8,Auto">
+                                        <TextBlock Classes="label" Text="Vertical spacing" VerticalAlignment="Center" Margin="0" TextWrapping="Wrap" />
+                                        <NumericUpDown
+                                            Grid.Row="0" Grid.Column="2" Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                            Value="{Binding VerticalSpacingScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                    </Grid>
+                                    <Grid Classes="scaleRow" ColumnDefinitions="*,8,Auto">
+                                        <TextBlock Classes="label" Text="Section height" VerticalAlignment="Center" Margin="0" TextWrapping="Wrap" />
+                                        <NumericUpDown
+                                            Grid.Row="0" Grid.Column="2" Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                            Value="{Binding SectionHeightScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                    </Grid>
+                                    <Grid Classes="scaleRow" ColumnDefinitions="*,8,Auto">
+                                        <TextBlock Classes="label" Text="Word spacing" VerticalAlignment="Center" Margin="0" TextWrapping="Wrap" />
+                                        <NumericUpDown
+                                            Grid.Row="0" Grid.Column="2" Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                            Value="{Binding WordSpacingScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                    </Grid>
+                                    <Grid Classes="scaleRow" ColumnDefinitions="*,8,Auto">
+                                        <TextBlock Classes="label" Text="Emote spacing" VerticalAlignment="Center" Margin="0" TextWrapping="Wrap" />
+                                        <NumericUpDown
+                                            Grid.Row="0" Grid.Column="2" Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                            Value="{Binding EmoteSpacingScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                    </Grid>
+                                    <Grid Classes="scaleRow" ColumnDefinitions="*,8,Auto">
+                                        <TextBlock Classes="label" Text="Highlight stroke" VerticalAlignment="Center" Margin="0" TextWrapping="Wrap" />
+                                        <NumericUpDown
+                                            Grid.Row="0" Grid.Column="2" Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                            Value="{Binding AccentStrokeScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                    </Grid>
+                                    <Grid Classes="scaleRow" ColumnDefinitions="*,8,Auto">
+                                        <TextBlock Classes="label" Text="Highlight indent" VerticalAlignment="Center" Margin="0" TextWrapping="Wrap" />
+                                        <NumericUpDown
+                                            Grid.Row="0" Grid.Column="2" Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                            Value="{Binding AccentIndentScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                    </Grid>
+                                    <Grid Classes="scaleRow" ColumnDefinitions="*,8,Auto">
+                                        <TextBlock Classes="label" Text="Side padding" VerticalAlignment="Center" Margin="0" TextWrapping="Wrap" />
+                                        <NumericUpDown
+                                            Grid.Row="0" Grid.Column="2" Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                            Value="{Binding SidePaddingScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                    </Grid>
+                                </WrapPanel>
                             </ScrollViewer>
                         </TabItem>
 
                         <TabItem Header="Encoding">
                             <ScrollViewer>
-                                <StackPanel Spacing="10">
-                                    <Grid ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+                                <StackPanel Spacing="12" Margin="0,4,0,0">
+                                    <Grid ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="8" ColumnSpacing="12">
                                         <TextBlock Classes="label" Text="File format" VerticalAlignment="Center" Margin="0" />
                                         <ComboBox
                                             Grid.Row="0"
@@ -498,7 +520,7 @@
 
                         <TabItem Header="FFmpeg">
                             <ScrollViewer>
-                                <StackPanel Spacing="8">
+                                <StackPanel Spacing="10" Margin="0,4,0,0">
                                     <TextBlock
                                         Classes="muted"
                                         FontWeight="SemiBold"
