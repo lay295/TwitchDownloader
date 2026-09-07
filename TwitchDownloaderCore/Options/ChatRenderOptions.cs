@@ -96,6 +96,6 @@ namespace TwitchDownloaderCore.Options
         /// <remarks>Oversized messages are clipped at the top of the frame, so this is a readability choice rather than a limit.</remarks>
         public int GifMaxHeightPercent { get; set; } = 50;
         /// <summary>Render GIFs posted in chat as a full width image. Unresolvable GIFs stay as their bracketed alt text.</summary>
-        public bool Gifs { get; set; } = true;
+        public bool GiphyGifs { get; set; } = true;
     }
 }

@@ -22,6 +22,8 @@ namespace TwitchDownloaderCore.Chat
             Dictionary<string, EmbedChatBadge> chatBadgeData = new();
             await BuildChatBadgesDictionary(chatRoot, embedData, chatBadgeData, cancellationToken);
 
+            var gifData = BuildGifDictionary(chatRoot);
+
             cancellationToken.ThrowIfCancellationRequested();
 
             using var templateStream = new MemoryStream(Properties.Resources.chat_template);
@@ -47,6 +49,11 @@ namespace TwitchDownloaderCore.Chat
                             {
                                 await sw.WriteLineAsync(".third-" + emote.id + " { content:url(\"data:image/png;base64, " + Convert.ToBase64String(emote.data) + "\"); }");
                             }
+                            foreach (var gif in chatRoot.embeddedData.gifs)
+                            {
+                                if (gif.data is { Length: > 0 })
+                                    await sw.WriteLineAsync(".gif-" + gif.id + " { content:url(\"data:image/gif;base64, " + Convert.ToBase64String(gif.data) + "\"); }");
+                            }
                             foreach (var badge in chatRoot.embeddedData.twitchBadges)
                             {
                                 foreach(var (version, badgeData) in badge.versions)
@@ -62,7 +69,7 @@ namespace TwitchDownloaderCore.Chat
                             var relativeTime = TimeSpan.FromSeconds(comment.content_offset_seconds);
                             var timestamp = TimeSpanHFormat.ReusableInstance.Format(@"H\:mm\:ss", relativeTime);
                             var timeCode = TimeSpanHFormat.ReusableInstance.Format(@"H\hmm\mss\s", relativeTime);
-                            await sw.WriteLineAsync($"<pre class=\"comment-root\">[<a href=\"https://twitch.tv/videos/{chatRoot.video.id}/?t={timeCode}\">{timestamp}</a>] {GetChatBadgesHtml(embedData, chatBadgeData, comment)}<a href=\"https://twitch.tv/{comment.commenter.name}\"><span class=\"comment-author\" {(comment.message.user_color == null ? "" : $"style=\"color: {comment.message.user_color}\"")}>{(comment.commenter.display_name.Any(x => x > 127) ? $"{comment.commenter.display_name} ({comment.commenter.name})" : comment.commenter.display_name)}</span></a><span class=\"comment-message\">: {GetMessageHtml(embedData, thirdEmoteData, chatRoot, comment)}</span></pre>");
+                            await sw.WriteLineAsync($"<pre class=\"comment-root\">[<a href=\"https://twitch.tv/videos/{chatRoot.video.id}/?t={timeCode}\">{timestamp}</a>] {GetChatBadgesHtml(embedData, chatBadgeData, comment)}<a href=\"https://twitch.tv/{comment.commenter.name}\"><span class=\"comment-author\" {(comment.message.user_color == null ? "" : $"style=\"color: {comment.message.user_color}\"")}>{(comment.commenter.display_name.Any(x => x > 127) ? $"{comment.commenter.display_name} ({comment.commenter.name})" : comment.commenter.display_name)}</span></a><span class=\"comment-message\">: {GetMessageHtml(embedData, thirdEmoteData, gifData, chatRoot, comment)}</span></pre>");
                         }
                         break;
                     default:
@@ -98,6 +105,19 @@ namespace TwitchDownloaderCore.Chat
                     thirdEmoteData[item.Code] = embedEmoteData;
                 }
             }
+        }
+
+        private static Dictionary<string, EmbedEmoteData> BuildGifDictionary(ChatRoot chatRoot)
+        {
+            var gifData = new Dictionary<string, EmbedEmoteData>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var gif in chatRoot.embeddedData?.gifs ?? [])
+            {
+                if (gif.name is not null)
+                    gifData[gif.name] = gif;
+            }
+
+            return gifData;
         }
 
         private static async Task BuildChatBadgesDictionary(ChatRoot chatRoot, bool embedData, Dictionary<string, EmbedChatBadge> chatBadgeData, CancellationToken cancellationToken)
@@ -143,9 +163,22 @@ namespace TwitchDownloaderCore.Chat
             return string.Join(' ', badgesHtml);
         }
 
-        private static string GetMessageHtml(bool embedEmotes, IReadOnlyDictionary<string, EmbedEmoteData> thirdEmoteData, ChatRoot chatRoot, Comment comment)
+        private static string GetMessageHtml(bool embedEmotes, IReadOnlyDictionary<string, EmbedEmoteData> thirdEmoteData, IReadOnlyDictionary<string, EmbedEmoteData> gifData,
+            ChatRoot chatRoot, Comment comment)
         {
             var message = new StringBuilder(comment.message.body.Length);
+
+            // A posted GIF is the whole message, so it replaces the body rather than a word within it
+            if (GiphyResolver.TryParseAltText(comment.message.body, out var gifTitle) && gifData.TryGetValue(gifTitle, out var gif))
+            {
+                if (gif.data is { Length: > 0 })
+                {
+                    return $"<img class=\"gif-image gif-{gif.id}\" title=\"{HttpUtility.HtmlEncode(gifTitle)}\"><span class=\"text-hide\">{HttpUtility.HtmlEncode(comment.message.body)}</span>";
+                }
+
+                var gifUrl = gif.url ?? GiphyResolver.MediaUrl(gif.id);
+                return $"<img class=\"gif-image\" src=\"{gifUrl}\" title=\"{HttpUtility.HtmlEncode(gifTitle)}\"><span class=\"text-hide\">{HttpUtility.HtmlEncode(comment.message.body)}</span>";
+            }
 
             comment.message.fragments ??= [new Fragment { text = comment.message.body }];
 

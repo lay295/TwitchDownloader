@@ -42,7 +42,7 @@ namespace TwitchDownloaderCLI.Modes
                 BttvEmotes = (bool)inputOptions.BttvEmotes!,
                 FfzEmotes = (bool)inputOptions.FfzEmotes!,
                 StvEmotes = (bool)inputOptions.StvEmotes!,
-                Gifs = (bool)inputOptions.Gifs!,
+                GiphyGifs = (bool)inputOptions.GiphyGifs!,
                 GifMaxHeightPercent = inputOptions.GifMaxHeightPercent,
                 ImageCacheMb = inputOptions.ImageCacheMb,
                 AllowUnlistedEmotes = (bool)inputOptions.AllowUnlistedEmotes!,

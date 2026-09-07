@@ -281,7 +281,7 @@ namespace TwitchDownloaderCore
                 }
 
                 var stvDir = new DirectoryInfo(Path.Combine(cacheFolder, "stv"));
-                await RefreshOrLoadProviderMetadata(emoteResponse.FFZ, stvDir, "7TV", streamerId, offline, logger, cancellationToken);
+                await RefreshOrLoadProviderMetadata(emoteResponse.STV, stvDir, "7TV", streamerId, offline, logger, cancellationToken);
             }
 
             return emoteResponse;
@@ -761,7 +761,7 @@ namespace TwitchDownloaderCore
 
                 try
                 {
-                    var embeddedGif = new TwitchEmote(gifData.data, null, EmoteProvider.ThirdParty, 1, gifData.id, gifData.name) { Url = gifData.url };
+                    var embeddedGif = new TwitchEmote(gifData.data, null, EmoteProvider.Giphy, 1, gifData.id, gifData.name) { Url = gifData.url };
                     if (!gifs.TryAdd(gifData.name, embeddedGif))
                     {
                         embeddedGif.Dispose();
@@ -774,7 +774,8 @@ namespace TwitchDownloaderCore
                 }
             }
 
-            var resolutions = await ResolveGiphyGifs(comments, cacheFolder, logger, embeddedData, offline, reportProgress, cancellationToken);
+            // The loop below reports over every title, so letting the resolve report too would run the bar twice
+            var resolutions = await ResolveGiphyGifs(comments, cacheFolder, logger, embeddedData, offline, null, cancellationToken);
             var gifFolder = new DirectoryInfo(Path.Combine(cacheFolder, "giphy"));
 
             var titles = GiphyResolver.GetTitles(comments).ToList();
@@ -809,7 +810,7 @@ namespace TwitchDownloaderCore
                     }
 
                     // Constructing reads the header only, so this does not pay for the frames
-                    var newGif = new TwitchEmote(bytes, codec, EmoteProvider.ThirdParty, 1, resolution.Id, title) { Url = resolution.Url };
+                    var newGif = new TwitchEmote(bytes, codec, EmoteProvider.Giphy, 1, resolution.Id, title) { Url = resolution.Url };
 
                     // A url can outlive the GIF it points at: resolutions are cached between runs and archived into
                     // chat files, so this may be fetching one recorded long ago. Giphy answers those with a

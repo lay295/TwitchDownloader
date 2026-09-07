@@ -7,7 +7,8 @@ namespace TwitchDownloaderCore.TwitchObjects
     public enum EmoteProvider
     {
         FirstParty,
-        ThirdParty
+        ThirdParty,
+        Giphy
     }
 
     // Frames are decoded lazily and can be released again: a long animated 7TV emote is a few hundred KB compressed

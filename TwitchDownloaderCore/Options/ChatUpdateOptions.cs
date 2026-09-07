@@ -17,6 +17,8 @@ namespace TwitchDownloaderCore.Options
         public bool BttvEmotes { get; set; }
         public bool FfzEmotes { get; set; }
         public bool StvEmotes { get; set; }
+        /// <summary>Resolve chat GIF messages to Giphy urls and record them in the chat file. Their images are archived when <see cref="EmbedMissing"/> or <see cref="ReplaceEmbeds"/> is also set.</summary>
+        public bool GiphyGifs { get; set; }
         public TimestampFormat TextTimestampFormat { get; set; }
         public string FileExtension
         {

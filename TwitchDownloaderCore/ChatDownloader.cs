@@ -311,11 +311,6 @@ namespace TwitchDownloaderCore
                 await EmbedImages(chatRoot, cancellationToken);
             }
 
-            if (downloadOptions.Gifs && (downloadOptions.DownloadFormat is ChatFormat.Json or ChatFormat.Html))
-            {
-                await EmbedGiphyGifs(chatRoot, cancellationToken);
-            }
-
             cancellationToken.ThrowIfCancellationRequested();
 
             if (downloadOptions.DownloadFormat is ChatFormat.Json)
@@ -550,17 +545,22 @@ namespace TwitchDownloaderCore
             // This is the exact same process as in ChatUpdater.cs but not in a task oriented manner
             // TODO: Combine this with ChatUpdater in a different file
             List<TwitchEmote> thirdPartyEmotes = await TwitchHelper.GetThirdPartyEmotes(chatRoot.comments, chatRoot.streamer.id, _cacheDir, _progress, bttv: downloadOptions.BttvEmotes, ffz: downloadOptions.FfzEmotes, stv: downloadOptions.StvEmotes, cancellationToken: cancellationToken);
-            _progress.ReportProgress(25);
+            _progress.ReportProgress(20);
             List<TwitchEmote> firstPartyEmotes = await TwitchHelper.GetEmotes(chatRoot.comments, _cacheDir, _progress, cancellationToken: cancellationToken);
-            _progress.ReportProgress(50);
+            _progress.ReportProgress(40);
             List<ChatBadge> twitchBadges = await TwitchHelper.GetChatBadges(chatRoot.comments, chatRoot.streamer.id, _cacheDir, _progress, cancellationToken: cancellationToken);
-            _progress.ReportProgress(75);
+            _progress.ReportProgress(60);
             List<CheerEmote> twitchBits = await TwitchHelper.GetBits(chatRoot.comments, _cacheDir, chatRoot.streamer.id.ToString(), _progress, cancellationToken: cancellationToken);
+            _progress.ReportProgress(80);
+            // Only json carries embedded GIFs, so an html download must not pay to fetch images it cannot keep
+            List<TwitchEmote> chatGifs = downloadOptions.GiphyGifs && downloadOptions.DownloadFormat is ChatFormat.Json
+                ? await DownloadGiphyGifs(chatRoot, cancellationToken)
+                : [];
             _progress.ReportProgress(100);
 
             _progress.SetTemplateStatus("Embedding Images {0}%", 0);
 
-            var totalImageCount = thirdPartyEmotes.Count + firstPartyEmotes.Count + twitchBadges.Count + twitchBits.Count;
+            var totalImageCount = thirdPartyEmotes.Count + firstPartyEmotes.Count + twitchBadges.Count + twitchBits.Count + chatGifs.Count;
             var imagesProcessed = 0;
 
             foreach (TwitchEmote emote in thirdPartyEmotes)
@@ -638,60 +638,39 @@ namespace TwitchDownloaderCore
                 chatRoot.embeddedData.twitchBits.Add(newBit);
                 _progress.ReportProgress(++imagesProcessed * 100 / totalImageCount);
             }
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            foreach (TwitchEmote gif in chatGifs)
+            {
+                var newGif = new EmbedEmoteData
+                {
+                    id = gif.Id,
+                    imageScale = 1,
+                    data = gif.ImageData,
+                    name = gif.Name,
+                    url = gif.Url,
+                    width = gif.Width,
+                    height = gif.Height,
+                };
+
+                chatRoot.embeddedData.gifs.Add(newGif);
+                gif.Dispose();
+                _progress.ReportProgress(++imagesProcessed * 100 / totalImageCount);
+            }
         }
 
-        private async Task EmbedGiphyGifs(ChatRoot chatRoot, CancellationToken cancellationToken)
+        private async Task<List<TwitchEmote>> DownloadGiphyGifs(ChatRoot chatRoot, CancellationToken cancellationToken)
         {
-            _progress.SetTemplateStatus("Resolving Chat GIFs {0}%", 0);
-            chatRoot.embeddedData ??= new EmbeddedData();
-
             try
             {
-                if (downloadOptions.GifsEmbed)
-                {
-                    // Archiving, so the images are needed
-                    _progress.SetTemplateStatus("Downloading Embed GIFs {0}%", 0);
-                    foreach (var gif in await TwitchHelper.GetGiphyGifs(chatRoot.comments, _cacheDir, _progress, reportProgress: _progress.ReportProgress, cancellationToken: cancellationToken))
-                    {
-                        chatRoot.embeddedData.gifs.Add(new EmbedEmoteData
-                        {
-                            id = gif.Id,
-                            imageScale = 1,
-                            data = gif.ImageData,
-                            name = gif.Name,
-                            url = gif.Url,
-                            width = gif.Width,
-                            height = gif.Height,
-                        });
-
-                        gif.Dispose();
-                    }
-                }
-                else
-                {
-                    // Only the urls are being recorded, so there is no reason to download the images. A busy VOD posts
-                    // over a thousand distinct GIFs, which is gigabytes of downloads to then throw away.
-                    var resolutions = await TwitchHelper.ResolveGiphyGifs(chatRoot.comments, _cacheDir, _progress, reportProgress: _progress.ReportProgress, cancellationToken: cancellationToken);
-                    foreach (var (title, gif) in resolutions)
-                    {
-                        chatRoot.embeddedData.gifs.Add(new EmbedEmoteData
-                        {
-                            id = gif.Id,
-                            imageScale = 1,
-                            name = title,
-                            url = gif.Url,
-                            width = gif.Width,
-                            height = gif.Height,
-                        });
-                    }
-
-                    _progress.LogInfo($"Resolved {resolutions.Count} chat GIFs. Their images are fetched at render time, or pass --gifs-embed to archive them.");
-                }
+                return await TwitchHelper.GetGiphyGifs(chatRoot.comments, _cacheDir, _progress, reportProgress: p => _progress.ReportProgress(80 + p / 5), cancellationToken: cancellationToken);
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 // A broken Giphy must not cost the user the chat itself
                 _progress.LogWarning($"Unable to resolve chat GIFs: {ex.Message} Continuing without them.");
+                return [];
             }
         }
 

@@ -50,6 +50,7 @@ namespace TwitchDownloaderWPF
             checkBttvEmbed.IsChecked = Settings.Default.BTTVEmotes;
             checkFfzEmbed.IsChecked = Settings.Default.FFZEmotes;
             checkStvEmbed.IsChecked = Settings.Default.STVEmotes;
+            checkGiphyGifs.IsChecked = Settings.Default.GiphyGifs;
             NumChatDownloadThreads.Value = Settings.Default.ChatDownloadThreads;
             _ = (ChatFormat)Settings.Default.ChatDownloadType switch
             {
@@ -86,6 +87,7 @@ namespace TwitchDownloaderWPF
             checkBttvEmbed.IsEnabled = isEnabled;
             checkFfzEmbed.IsEnabled = isEnabled;
             checkStvEmbed.IsEnabled = isEnabled;
+            checkGiphyGifs.IsEnabled = isEnabled;
             SplitBtnDownload.IsEnabled = isEnabled;
             MenuItemEnqueue.IsEnabled = isEnabled;
             radioJson.IsEnabled = isEnabled;
@@ -330,6 +332,7 @@ namespace TwitchDownloaderWPF
             options.BttvEmotes = checkBttvEmbed.IsChecked.GetValueOrDefault();
             options.FfzEmotes = checkFfzEmbed.IsChecked.GetValueOrDefault();
             options.StvEmotes = checkStvEmbed.IsChecked.GetValueOrDefault();
+            options.GiphyGifs = checkGiphyGifs.IsChecked.GetValueOrDefault();
             options.Filename = filename;
             options.DownloadThreads = (int)NumChatDownloadThreads.Value;
             return options;
@@ -394,6 +397,7 @@ namespace TwitchDownloaderWPF
                 checkBttvEmbed.IsEnabled = true;
                 checkFfzEmbed.IsEnabled = true;
                 checkStvEmbed.IsEnabled = true;
+                checkGiphyGifs.IsEnabled = true;
             }
         }
 
@@ -406,6 +410,7 @@ namespace TwitchDownloaderWPF
                 checkBttvEmbed.IsEnabled = false;
                 checkFfzEmbed.IsEnabled = false;
                 checkStvEmbed.IsEnabled = false;
+                checkGiphyGifs.IsEnabled = false;
             }
         }
 
@@ -459,6 +464,24 @@ namespace TwitchDownloaderWPF
             if (this.IsInitialized)
             {
                 Settings.Default.STVEmotes = false;
+                Settings.Default.Save();
+            }
+        }
+
+        private void checkGiphyGifs_Checked(object sender, RoutedEventArgs e)
+        {
+            if (this.IsInitialized)
+            {
+                Settings.Default.GiphyGifs = true;
+                Settings.Default.Save();
+            }
+        }
+
+        private void checkGiphyGifs_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (this.IsInitialized)
+            {
+                Settings.Default.GiphyGifs = false;
                 Settings.Default.Save();
             }
         }

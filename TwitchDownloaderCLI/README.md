@@ -131,6 +131,9 @@ Time to trim ending. See [Time durations](#time-durations) for a more detailed e
 **--stv**
 (Default: `true`) 7TV emote embedding. Requires `-E / --embed-images`.
 
+**--giphy**
+(Default: `true`) Giphy GIF embedding. Requires `-E / --embed-images`.
+
 **--timestamp-format**
 (Default: `Relative`) Sets the timestamp format for .txt chat logs. Valid values are: `Utc`, `UtcFull`, `Relative`, and `None`.
 
@@ -175,6 +178,9 @@ Path to output file. File extension will be used to determine new chat type. Val
 
 **--stv**
 (Default: `true`) Enable embedding 7TV emotes.
+
+**--giphy**
+(Default: `true`) Giphy GIF embedding. Urls are always recorded, images require `-E / --embed-missing` or `-R / --replace-embeds`.
 
 **--timestamp-format**
 (Default: `Relative`) Sets the timestamp format for .txt chat logs. Valid values are: `Utc`, `Relative`, and `None`.
@@ -226,6 +232,9 @@ File the program will output to.
 
 **--stv**
 (Default: `true`) Enable 7TV emotes.
+
+**--giphy**
+(Default: `true`) Enable Giphy GIFs posted in chat, fetched from Giphy when not embedded in the input json.
 
 **--allow-unlisted-emotes**
 (Default: `true`) Allow unlisted 7TV emotes in the render.

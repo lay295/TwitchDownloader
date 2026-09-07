@@ -225,6 +225,7 @@ namespace TwitchDownloaderWPF
             checkBttvEmbed.IsChecked = Settings.Default.BTTVEmotes;
             checkFfzEmbed.IsChecked = Settings.Default.FFZEmotes;
             checkStvEmbed.IsChecked = Settings.Default.STVEmotes;
+            checkGiphyGifs.IsChecked = Settings.Default.GiphyGifs;
             _ = (ChatFormat)Settings.Default.ChatDownloadType switch
             {
                 ChatFormat.Text => radioText.IsChecked = true,
@@ -270,6 +271,7 @@ namespace TwitchDownloaderWPF
             checkBttvEmbed.IsEnabled = isEnabled;
             checkFfzEmbed.IsEnabled = isEnabled;
             checkStvEmbed.IsEnabled = isEnabled;
+            checkGiphyGifs.IsEnabled = isEnabled;
         }
 
         private void SetEnabledTrimStart(bool isEnabled)
@@ -327,6 +329,7 @@ namespace TwitchDownloaderWPF
                 BttvEmotes = checkBttvEmbed.IsChecked.GetValueOrDefault(),
                 FfzEmotes = checkFfzEmbed.IsChecked.GetValueOrDefault(),
                 StvEmotes = checkStvEmbed.IsChecked.GetValueOrDefault(),
+                GiphyGifs = checkGiphyGifs.IsChecked.GetValueOrDefault(),
                 InputFile = textJson.Text,
                 OutputFile = outputFile,
                 TrimBeginningTime = -1,
@@ -511,6 +514,24 @@ namespace TwitchDownloaderWPF
             if (this.IsInitialized)
             {
                 Settings.Default.STVEmotes = false;
+                Settings.Default.Save();
+            }
+        }
+
+        private void checkGiphyGifs_Checked(object sender, RoutedEventArgs e)
+        {
+            if (this.IsInitialized)
+            {
+                Settings.Default.GiphyGifs = true;
+                Settings.Default.Save();
+            }
+        }
+
+        private void checkGiphyGifs_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (this.IsInitialized)
+            {
+                Settings.Default.GiphyGifs = false;
                 Settings.Default.Save();
             }
         }

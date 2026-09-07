@@ -34,11 +34,8 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("stv", Default = true, HelpText = "Enable 7TV embedding in chat download. Requires -E / --embed-images!")]
         public bool? StvEmotes { get; set; }
 
-        [Option("gifs", Default = false, HelpText = "Resolve GIFs posted in chat (e.g. \"[Horse Stare GIF by Jan Metternich]\") to Giphy urls and record them in the chat download.")]
-        public bool Gifs { get; set; }
-
-        [Option("gifs-embed", Default = false, HelpText = "Archive the images of GIFs posted in chat into the chat download for offline rendering. Implies --gifs.")]
-        public bool GifsEmbed { get; set; }
+        [Option("giphy", Default = true, HelpText = "Enable Giphy GIF embedding in chat download. Requires -E / --embed-images!")]
+        public bool? GiphyGifs { get; set; }
 
         [Option("timestamp-format", Default = TimestampFormat.Relative, HelpText = "Sets the timestamp format for .txt chat logs. Valid values are: Utc, UtcFull, Relative, and None")]
         public TimestampFormat TimeFormat { get; set; }

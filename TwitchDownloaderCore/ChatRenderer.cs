@@ -1173,11 +1173,11 @@ namespace TwitchDownloaderCore
 
         private void DrawMessage(Comment comment, List<SectionImage> sectionImages, List<EmotePosition> emotePositionList, bool highlightWords, ref Point drawPos, Point defaultPos)
         {
-            // Detection is deliberately not gated on the Gifs option: a posted GIF is its own kind of message, and its
+            // Detection is deliberately not gated on the GiphyGifs option: a posted GIF is its own kind of message, and its
             // title must never be emote substituted. The option only decides whether the image itself is drawn.
             if (GiphyResolver.TryParseAltText(comment.message.body, out var gifTitle))
             {
-                if (renderOptions.Gifs && _gifCache.TryGetValue(gifTitle, out var gif))
+                if (renderOptions.GiphyGifs && _gifCache.TryGetValue(gifTitle, out var gif))
                 {
                     DrawChatGif(sectionImages, emotePositionList, ref drawPos, defaultPos, gif);
                 }
@@ -2045,7 +2045,7 @@ namespace TwitchDownloaderCore
             var cheerTask = GetScaledBits(cancellationToken);
             var emojiTask = GetScaledEmojis(cancellationToken);
             var avatarTask = renderOptions.RenderUserAvatars ? GetScaledAvatars(cancellationToken) : Task.FromResult(new Dictionary<string, SKImage>());
-            var gifTask = renderOptions.Gifs ? GetScaledGiphyGifs(cancellationToken) : Task.FromResult(new List<TwitchEmote>());
+            var gifTask = renderOptions.GiphyGifs ? GetScaledGiphyGifs(cancellationToken) : Task.FromResult(new List<TwitchEmote>());
 
             await Task.WhenAll(badgeTask, emoteTask, emoteThirdTask, cheerTask, emojiTask, avatarTask, gifTask);
 
