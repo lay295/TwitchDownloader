@@ -1,4 +1,4 @@
-<UserControl
+<ContentPage
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
@@ -15,4 +15,4 @@
         <TextBlock Text="{Binding Details}" TextWrapping="Wrap" />
         <TextBlock Classes="muted" Text="MIT License. Original project by lay295 and contributors." TextWrapping="Wrap" />
     </StackPanel>
-</UserControl>
+</ContentPage>

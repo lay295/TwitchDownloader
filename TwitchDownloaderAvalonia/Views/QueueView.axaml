@@ -1,4 +1,4 @@
-<UserControl
+<ContentPage
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
@@ -38,4 +38,4 @@
 
         <TextBlock Grid.Row="2" Classes="muted" Margin="0,8,0,0" Text="{Binding Details}" TextWrapping="Wrap" />
     </Grid>
-</UserControl>
+</ContentPage>

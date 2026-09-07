@@ -2,10 +2,31 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     x:Class="TwitchDownloaderAvalonia.App"
-    xmlns:local="using:TwitchDownloaderAvalonia"
+    xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
+    xmlns:views="using:TwitchDownloaderAvalonia.Views"
     RequestedThemeVariant="Default">
     <Application.DataTemplates>
-        <local:ViewLocator />
+        <DataTemplate DataType="vm:VodDownloadViewModel">
+            <views:VodDownloadView />
+        </DataTemplate>
+        <DataTemplate DataType="vm:ChatRenderViewModel">
+            <views:ChatRenderView />
+        </DataTemplate>
+        <DataTemplate DataType="vm:SearchViewModel">
+            <views:SearchView />
+        </DataTemplate>
+        <DataTemplate DataType="vm:QueueViewModel">
+            <views:QueueView />
+        </DataTemplate>
+        <DataTemplate DataType="vm:SettingsViewModel">
+            <views:SettingsView />
+        </DataTemplate>
+        <DataTemplate DataType="vm:AboutViewModel">
+            <views:AboutView />
+        </DataTemplate>
+        <DataTemplate DataType="vm:DownloadPlaceholderViewModel">
+            <views:DownloadPlaceholderView />
+        </DataTemplate>
     </Application.DataTemplates>
 
     <Application.Resources>

@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Text;
-using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using TwitchDownloaderAvalonia.Models;
@@ -109,7 +108,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
         public partial string InfoTitle { get; set; } = string.Empty;
 
         [ObservableProperty]
-        public partial Bitmap? Thumbnail { get; set; }
+        public partial byte[]? ThumbnailBytes { get; set; }
 
         [ObservableProperty]
         public partial string LogText { get; set; } = string.Empty;
@@ -211,8 +210,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 EndMinute = _vodLength.Minutes;
                 EndSecond = _vodLength.Seconds;
 
-                Thumbnail?.Dispose();
-                Thumbnail = await _thumbnails.TryGetAsync(video.thumbnailURLs.FirstOrDefault());
+                ThumbnailBytes = await _thumbnails.TryGetAsync(video.thumbnailURLs.FirstOrDefault());
 
                 InfoLoaded = true;
                 UpdateVideoSizeEstimates();
@@ -230,13 +228,6 @@ namespace TwitchDownloaderAvalonia.ViewModels
             {
                 IsBusy = false;
             }
-        }
-
-        [RelayCommand]
-        private void SetTrimMode(string mode)
-        {
-            if (Enum.TryParse<VideoTrimMode>(mode, out var parsed))
-                TrimMode = parsed;
         }
 
         [RelayCommand(CanExecute = nameof(CanDownload))]
@@ -282,7 +273,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
             try
             {
                 var downloader = new VideoDownloader(options, progress);
-                await downloader.DownloadAsync(_cancellation.Token);
+                await Task.Run(() => downloader.DownloadAsync(_cancellation.Token));
                 progress.SetStatus("Done");
             }
             catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException && _cancellation.IsCancellationRequested)

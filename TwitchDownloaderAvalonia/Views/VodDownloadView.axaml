@@ -1,8 +1,9 @@
-<UserControl
+<ContentPage
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
     xmlns:models="using:TwitchDownloaderAvalonia.Models"
+    xmlns:core="using:TwitchDownloaderCore.Models"
     xmlns:c="using:TwitchDownloaderAvalonia.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -52,7 +53,10 @@
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
                                 IsVisible="{Binding !InfoLoaded}" />
-                            <Image Source="{Binding Thumbnail}" Stretch="UniformToFill" IsVisible="{Binding InfoLoaded}" />
+                            <Image
+                                Source="{Binding ThumbnailBytes, Converter={x:Static c:ByteArrayToBitmapConverter.Instance}}"
+                                Stretch="UniformToFill"
+                                IsVisible="{Binding InfoLoaded}" />
                         </Panel>
                     </Border>
                     <StackPanel Spacing="6">
@@ -110,36 +114,38 @@
                                 <RadioButton
                                     Content="Safe"
                                     GroupName="VodTrim"
-                                    Command="{Binding SetTrimModeCommand}"
-                                    CommandParameter="Safe"
-                                    IsChecked="{Binding TrimMode, Converter={x:Static c:VideoTrimModeEqualsConverter.Instance}, ConverterParameter=Safe, Mode=OneWay}"
+                                    IsChecked="{Binding TrimMode, Converter={x:Static c:VideoTrimModeEqualsConverter.Instance}, ConverterParameter={x:Static core:VideoTrimMode.Safe}, Mode=TwoWay}"
                                     IsEnabled="{Binding InfoLoaded}" />
                                 <RadioButton
                                     Content="Exact"
                                     GroupName="VodTrim"
-                                    Command="{Binding SetTrimModeCommand}"
-                                    CommandParameter="Exact"
-                                    IsChecked="{Binding TrimMode, Converter={x:Static c:VideoTrimModeEqualsConverter.Instance}, ConverterParameter=Exact, Mode=OneWay}"
+                                    IsChecked="{Binding TrimMode, Converter={x:Static c:VideoTrimModeEqualsConverter.Instance}, ConverterParameter={x:Static core:VideoTrimMode.Exact}, Mode=TwoWay}"
                                     IsEnabled="{Binding InfoLoaded}" />
                             </StackPanel>
 
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <CheckBox Content="Trim start" Width="108" IsChecked="{Binding TrimStart}" IsEnabled="{Binding InfoLoaded}" />
-                                <NumericUpDown Width="72" Minimum="0" Maximum="48" FormatString="0" Value="{Binding StartHour}"
-                                               IsEnabled="{Binding CanEditTrimStart}" />
-                                <NumericUpDown Width="72" Minimum="0" Maximum="59" FormatString="0" Value="{Binding StartMinute}"
-                                               IsEnabled="{Binding CanEditTrimStart}" />
-                                <NumericUpDown Width="72" Minimum="0" Maximum="59" FormatString="0" Value="{Binding StartSecond}"
-                                               IsEnabled="{Binding CanEditTrimStart}" />
+                                <NumericUpDown Width="72" Minimum="0" Maximum="48" FormatString="0" Increment="1"
+                                               IsEnabled="{Binding CanEditTrimStart}"
+                                               Value="{Binding StartHour, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                                <NumericUpDown Width="72" Minimum="0" Maximum="59" FormatString="0" Increment="1"
+                                               IsEnabled="{Binding CanEditTrimStart}"
+                                               Value="{Binding StartMinute, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                                <NumericUpDown Width="72" Minimum="0" Maximum="59" FormatString="0" Increment="1"
+                                               IsEnabled="{Binding CanEditTrimStart}"
+                                               Value="{Binding StartSecond, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <CheckBox Content="Trim end" Width="108" IsChecked="{Binding TrimEnd}" IsEnabled="{Binding InfoLoaded}" />
-                                <NumericUpDown Width="72" Minimum="0" Maximum="48" FormatString="0" Value="{Binding EndHour}"
-                                               IsEnabled="{Binding CanEditTrimEnd}" />
-                                <NumericUpDown Width="72" Minimum="0" Maximum="59" FormatString="0" Value="{Binding EndMinute}"
-                                               IsEnabled="{Binding CanEditTrimEnd}" />
-                                <NumericUpDown Width="72" Minimum="0" Maximum="59" FormatString="0" Value="{Binding EndSecond}"
-                                               IsEnabled="{Binding CanEditTrimEnd}" />
+                                <NumericUpDown Width="72" Minimum="0" Maximum="48" FormatString="0" Increment="1"
+                                               IsEnabled="{Binding CanEditTrimEnd}"
+                                               Value="{Binding EndHour, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                                <NumericUpDown Width="72" Minimum="0" Maximum="59" FormatString="0" Increment="1"
+                                               IsEnabled="{Binding CanEditTrimEnd}"
+                                               Value="{Binding EndMinute, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                                <NumericUpDown Width="72" Minimum="0" Maximum="59" FormatString="0" Increment="1"
+                                               IsEnabled="{Binding CanEditTrimEnd}"
+                                               Value="{Binding EndSecond, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
                             </StackPanel>
 
                             <TextBlock Classes="label" Text="Download threads" />
@@ -149,7 +155,8 @@
                                 Minimum="1"
                                 Maximum="20"
                                 FormatString="0"
-                                Value="{Binding DownloadThreads}" />
+                                Increment="1"
+                                Value="{Binding DownloadThreads, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
 
                             <TextBlock Classes="label" Text="OAuth (subscriber-only VODs)" />
                             <TextBox Text="{Binding Oauth}" PlaceholderText="Optional" />
@@ -183,4 +190,4 @@
             </DockPanel>
         </Expander>
     </Grid>
-</UserControl>
+</ContentPage>

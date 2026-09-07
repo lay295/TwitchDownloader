@@ -1,0 +1,21 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
+    x:Class="TwitchDownloaderAvalonia.Views.MessageDialog"
+    x:DataType="vm:MessageDialogViewModel"
+    Title="{Binding Title}"
+    Width="460"
+    SizeToContent="Height"
+    WindowStartupLocation="CenterOwner"
+    CanResize="False"
+    ShowInTaskbar="False">
+    <StackPanel Margin="16" Spacing="12">
+        <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
+        <Button
+            Content="OK"
+            MinWidth="80"
+            HorizontalAlignment="Right"
+            Command="{Binding OkCommand}" />
+    </StackPanel>
+</Window>

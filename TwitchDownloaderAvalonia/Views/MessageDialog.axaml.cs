@@ -2,9 +2,9 @@ using Avalonia.Controls;
 
 namespace TwitchDownloaderAvalonia.Views
 {
-    public partial class QueueView : ContentPage
+    public partial class MessageDialog : Window
     {
-        public QueueView()
+        public MessageDialog()
         {
             InitializeComponent();
         }

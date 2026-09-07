@@ -5,9 +5,11 @@
         <Setter Property="FontSize" Value="14" />
     </Style>
 
-    <Style Selector="TextBlock">
-        <Setter Property="Foreground" Value="{DynamicResource WindowForegroundBrush}" />
-        <Setter Property="FontSize" Value="14" />
+    <Style Selector="ContentPage">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="VerticalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Stretch" />
     </Style>
 
     <Style Selector="Button">

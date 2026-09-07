@@ -2,7 +2,7 @@ using Avalonia.Controls;
 
 namespace TwitchDownloaderAvalonia.Views
 {
-    public partial class AboutView : UserControl
+    public partial class AboutView : ContentPage
     {
         public AboutView()
         {

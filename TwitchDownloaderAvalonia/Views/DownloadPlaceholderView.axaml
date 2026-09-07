@@ -1,4 +1,4 @@
-<UserControl
+<ContentPage
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
@@ -48,4 +48,4 @@
             <TextBlock Classes="muted" Margin="0,8,0,0" Text="Log output will appear here." />
         </Expander>
     </Grid>
-</UserControl>
+</ContentPage>

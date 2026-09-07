@@ -1,7 +1,7 @@
 using Avalonia.Controls;
-using Avalonia.Layout;
-using Avalonia.Media;
 using Avalonia.Threading;
+using TwitchDownloaderAvalonia.ViewModels;
+using TwitchDownloaderAvalonia.Views;
 
 namespace TwitchDownloaderAvalonia.Services
 {
@@ -18,123 +18,56 @@ namespace TwitchDownloaderAvalonia.Services
             if (_owner is null)
                 return;
 
-            await Dispatcher.UIThread.InvokeAsync(async () =>
+            if (Dispatcher.UIThread.CheckAccess())
             {
-                var dialog = CreateMessageWindow(title, message, okOnly: true);
-                await dialog.ShowDialog(_owner!);
-            });
+                await ShowMessageCoreAsync(title, message);
+                return;
+            }
+
+            await Dispatcher.UIThread.InvokeAsync(() => ShowMessageCoreAsync(title, message));
         }
 
+        /// <summary>
+        /// Shows a modal file-collision prompt and returns the user's choice.
+        /// </summary>
+        /// <remarks>
+        /// Core download APIs expose a synchronous collision callback, while Avalonia dialogs are async.
+        /// Call this from a background thread (the VOD download path uses <c>Task.Run</c>).
+        /// Invoking it on the UI thread would deadlock on <c>GetResult</c>.
+        /// </remarks>
         public CollisionPromptResult PromptCollision(string fileName, string fullPath)
         {
             if (_owner is null)
                 return new CollisionPromptResult(CollisionChoice.Cancel, false);
 
-            return Dispatcher.UIThread.InvokeAsync(() => ShowCollisionDialogAsync(fileName, fullPath)).GetAwaiter()
+            if (Dispatcher.UIThread.CheckAccess())
+                throw new InvalidOperationException("File collision prompts cannot block the UI thread. Call from a background thread.");
+
+            return Dispatcher.UIThread.InvokeAsync(() => ShowCollisionCoreAsync(fileName, fullPath))
+                .GetAwaiter()
                 .GetResult();
         }
 
-        private async Task<CollisionPromptResult> ShowCollisionDialogAsync(string fileName, string fullPath)
+        private async Task ShowMessageCoreAsync(string title, string message)
         {
-            var remember = false;
-            var choice = CollisionChoice.Cancel;
-
-            var rememberBox = new CheckBox { Content = "Remember this choice for this session" };
-            var overwrite = new Button { Content = "Overwrite", MinWidth = 100 };
-            var rename = new Button { Content = "Rename", MinWidth = 100 };
-            var cancel = new Button { Content = "Cancel", MinWidth = 100 };
-
-            var dialog = new Window
-            {
-                Title = "File already exists",
-                Width = 460,
-                SizeToContent = SizeToContent.Height,
-                WindowStartupLocation = WindowStartupLocation.CenterOwner,
-                CanResize = false,
-                Content = new StackPanel
-                {
-                    Margin = new Avalonia.Thickness(16),
-                    Spacing = 12,
-                    Children =
-                    {
-                        new TextBlock
-                        {
-                            Text = $"{fileName} already exists.",
-                            TextWrapping = TextWrapping.Wrap,
-                            FontWeight = FontWeight.SemiBold,
-                        },
-                        new TextBlock
-                        {
-                            Text = fullPath,
-                            TextWrapping = TextWrapping.Wrap,
-                        },
-                        rememberBox,
-                        new StackPanel
-                        {
-                            Orientation = Orientation.Horizontal,
-                            HorizontalAlignment = HorizontalAlignment.Right,
-                            Spacing = 8,
-                            Children = { overwrite, rename, cancel },
-                        },
-                    },
-                },
-            };
-
-            overwrite.Click += (_, _) =>
-            {
-                choice = CollisionChoice.Overwrite;
-                remember = rememberBox.IsChecked == true;
-                dialog.Close();
-            };
-            rename.Click += (_, _) =>
-            {
-                choice = CollisionChoice.Rename;
-                remember = rememberBox.IsChecked == true;
-                dialog.Close();
-            };
-            cancel.Click += (_, _) =>
-            {
-                choice = CollisionChoice.Cancel;
-                remember = rememberBox.IsChecked == true;
-                dialog.Close();
-            };
-
+            var dialog = new MessageDialog();
+            dialog.DataContext = new MessageDialogViewModel(title, message, dialog.Close);
             await dialog.ShowDialog(_owner!);
-            return new CollisionPromptResult(choice, remember);
         }
 
-        private static Window CreateMessageWindow(string title, string message, bool okOnly)
+        private async Task<CollisionPromptResult> ShowCollisionCoreAsync(string fileName, string fullPath)
         {
-            var close = new Button { Content = "OK", MinWidth = 80, HorizontalAlignment = HorizontalAlignment.Right };
-            var window = new Window
-            {
-                Title = title,
-                Width = 460,
-                SizeToContent = SizeToContent.Height,
-                WindowStartupLocation = WindowStartupLocation.CenterOwner,
-                CanResize = false,
-                Content = new StackPanel
-                {
-                    Margin = new Avalonia.Thickness(16),
-                    Spacing = 12,
-                    Children =
-                    {
-                        new TextBlock { Text = message, TextWrapping = TextWrapping.Wrap },
-                        close,
-                    },
-                },
-            };
-            close.Click += (_, _) => window.Close();
-            _ = okOnly;
-            return window;
+            var dialog = new CollisionDialog();
+            dialog.DataContext = new CollisionDialogViewModel(fileName, fullPath, promptResult => dialog.Close(promptResult));
+            return await dialog.ShowDialog<CollisionPromptResult>(_owner!);
         }
     }
 
     public enum CollisionChoice
     {
+        Cancel = 0,
         Overwrite,
         Rename,
-        Cancel,
     }
 
     public readonly record struct CollisionPromptResult(CollisionChoice Choice, bool Remember);

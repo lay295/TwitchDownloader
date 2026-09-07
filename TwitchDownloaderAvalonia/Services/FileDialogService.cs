@@ -17,9 +17,14 @@ namespace TwitchDownloaderAvalonia.Services
             if (_owner is null)
                 return null;
 
+            var storage = _owner.StorageProvider;
+            if (!storage.CanSave)
+                return null;
+
             var normalizedExtension = extension.TrimStart('.');
-            var file = await _owner.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+            var file = await storage.SaveFilePickerAsync(new FilePickerSaveOptions
             {
+                Title = "Save file",
                 SuggestedFileName = suggestedFileName,
                 DefaultExtension = normalizedExtension,
                 FileTypeChoices =

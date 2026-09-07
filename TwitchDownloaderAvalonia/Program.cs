@@ -2,7 +2,7 @@ using Avalonia;
 
 namespace TwitchDownloaderAvalonia
 {
-    sealed class Program
+    internal sealed class Program
     {
         [STAThread]
         public static void Main(string[] args) => BuildAvaloniaApp()
@@ -12,9 +12,6 @@ namespace TwitchDownloaderAvalonia
         {
             return AppBuilder.Configure<App>()
                 .UsePlatformDetect()
-#if DEBUG
-                .WithDeveloperTools()
-#endif
                 .WithInterFont()
                 .LogToTrace();
         }

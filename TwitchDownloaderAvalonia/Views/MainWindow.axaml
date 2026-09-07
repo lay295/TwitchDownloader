@@ -19,126 +19,140 @@
     Width="1020"
     Height="680">
 
-    <Grid ColumnDefinitions="220,*" RowDefinitions="*,Auto">
-        <Border
-            Grid.RowSpan="2"
-            Background="{DynamicResource SidebarBackgroundBrush}"
-            BorderBrush="{DynamicResource BorderBrush}"
-            BorderThickness="0,0,1,0">
-            <DockPanel>
-                <StackPanel DockPanel.Dock="Bottom" Margin="8,6,8,10" Spacing="2">
-                    <Button
-                        Classes="nav"
-                        Content="Settings"
-                        Command="{Binding NavigateCommand}"
-                        CommandParameter="{x:Static m:AppPage.Settings}"
-                        Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=Settings}" />
-                    <Button
-                        Classes="nav"
-                        Content="About"
-                        Command="{Binding NavigateCommand}"
-                        CommandParameter="{x:Static m:AppPage.About}"
-                        Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=About}" />
-                </StackPanel>
-
-                <ScrollViewer>
-                    <StackPanel Margin="8,10,8,8" Spacing="2">
-                        <TextBlock Classes="navHeader" Text="DOWNLOAD" />
-                        <Button
-                            Classes="nav"
-                            Content="Video"
-                            Command="{Binding NavigateCommand}"
-                            CommandParameter="{x:Static m:AppPage.Vod}"
-                            Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=Vod}" />
-                        <Button
-                            Classes="nav"
-                            Content="Clip"
-                            Command="{Binding NavigateCommand}"
-                            CommandParameter="{x:Static m:AppPage.Clip}"
-                            Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=Clip}" />
-                        <Button
-                            Classes="nav"
-                            Content="Chat"
-                            Command="{Binding NavigateCommand}"
-                            CommandParameter="{x:Static m:AppPage.ChatDownload}"
-                            Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=ChatDownload}" />
-
-                        <TextBlock Classes="navHeader" Text="PROCESS" />
-                        <Button
-                            Classes="nav"
-                            Content="Chat Update"
-                            Command="{Binding NavigateCommand}"
-                            CommandParameter="{x:Static m:AppPage.ChatUpdate}"
-                            Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=ChatUpdate}" />
-                        <Button
-                            Classes="nav"
-                            Content="Chat Render"
-                            Command="{Binding NavigateCommand}"
-                            CommandParameter="{x:Static m:AppPage.ChatRender}"
-                            Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=ChatRender}" />
-
-                        <TextBlock Classes="navHeader" Text="TOOLS" />
-                        <Button
-                            Classes="nav"
-                            Content="Search"
-                            Command="{Binding NavigateCommand}"
-                            CommandParameter="{x:Static m:AppPage.Search}"
-                            Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=Search}" />
-                        <Button
-                            Classes="nav"
-                            Content="Queue"
-                            Command="{Binding NavigateCommand}"
-                            CommandParameter="{x:Static m:AppPage.Queue}"
-                            Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=Queue}" />
-                    </StackPanel>
-                </ScrollViewer>
-            </DockPanel>
-        </Border>
-
-        <DockPanel Grid.Row="0" Grid.Column="1" Margin="16,14,16,8">
-            <TextBlock DockPanel.Dock="Top" Classes="pageHeader" Text="{Binding PageTitle}" />
-            <ContentControl Content="{Binding CurrentPage}" />
-        </DockPanel>
-
-        <Border Grid.Row="1" Grid.Column="1" Classes="statusBar">
-            <Grid ColumnDefinitions="Auto,*,Auto,Auto">
-                <Panel Width="32" Height="32" VerticalAlignment="Center" IsVisible="{Binding Status.ShowStatusImage}">
-                    <Image
-                        Width="32"
-                        Height="32"
-                        Stretch="Uniform"
-                        anim:ImageBehavior.AnimatedSource="{Binding Status.AnimatedSource}"
-                        anim:ImageBehavior.RepeatBehavior="Forever"
-                        IsVisible="{Binding Status.IsAnimatedStatus}" />
-                    <Image
-                        Width="32"
-                        Height="32"
-                        Stretch="Uniform"
-                        Source="/Assets/Status/peepoSad.png"
-                        IsVisible="{Binding Status.ShowErrorStatus}" />
-                </Panel>
-                <TextBlock
-                    Grid.Column="1"
-                    Margin="8,0,8,0"
-                    VerticalAlignment="Center"
-                    Text="{Binding Status.Message}"
-                    TextTrimming="CharacterEllipsis" />
-                <ProgressBar
-                    Grid.Column="2"
-                    Width="160"
-                    Minimum="0"
-                    Maximum="100"
-                    Value="{Binding Status.Progress}"
-                    VerticalAlignment="Center"
-                    Margin="0,0,8,0" />
+    <DrawerPage
+        Header="{Binding PageTitle}"
+        DrawerBehavior="Locked"
+        DrawerLayoutBehavior="Split"
+        IsOpen="True"
+        DrawerLength="220"
+        DrawerBackground="{DynamicResource SidebarBackgroundBrush}">
+        <DrawerPage.DrawerFooter>
+            <StackPanel
+                x:DataType="vm:MainWindowViewModel"
+                DataContext="{Binding $parent[Window].DataContext}"
+                Margin="8,6,8,10"
+                Spacing="2">
                 <Button
-                    Grid.Column="3"
-                    Classes="chip"
-                    VerticalAlignment="Center"
-                    Content="{Binding Status.QueueChipText}"
+                    Classes="nav"
+                    Content="Settings"
                     Command="{Binding NavigateCommand}"
-                    CommandParameter="{x:Static m:AppPage.Queue}" />
-            </Grid>
-        </Border>
-    </Grid>
+                    CommandParameter="{x:Static m:AppPage.Settings}"
+                    Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=Settings}" />
+                <Button
+                    Classes="nav"
+                    Content="About"
+                    Command="{Binding NavigateCommand}"
+                    CommandParameter="{x:Static m:AppPage.About}"
+                    Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=About}" />
+            </StackPanel>
+        </DrawerPage.DrawerFooter>
+
+        <DrawerPage.Drawer>
+            <ScrollViewer
+                x:DataType="vm:MainWindowViewModel"
+                DataContext="{Binding $parent[Window].DataContext}">
+                <StackPanel Margin="8,10,8,8" Spacing="2">
+                    <TextBlock Classes="navHeader" Text="DOWNLOAD" />
+                    <Button
+                        Classes="nav"
+                        Content="Video"
+                        Command="{Binding NavigateCommand}"
+                        CommandParameter="{x:Static m:AppPage.Vod}"
+                        Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=Vod}" />
+                    <Button
+                        Classes="nav"
+                        Content="Clip"
+                        Command="{Binding NavigateCommand}"
+                        CommandParameter="{x:Static m:AppPage.Clip}"
+                        Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=Clip}" />
+                    <Button
+                        Classes="nav"
+                        Content="Chat"
+                        Command="{Binding NavigateCommand}"
+                        CommandParameter="{x:Static m:AppPage.ChatDownload}"
+                        Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=ChatDownload}" />
+
+                    <TextBlock Classes="navHeader" Text="PROCESS" />
+                    <Button
+                        Classes="nav"
+                        Content="Chat Update"
+                        Command="{Binding NavigateCommand}"
+                        CommandParameter="{x:Static m:AppPage.ChatUpdate}"
+                        Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=ChatUpdate}" />
+                    <Button
+                        Classes="nav"
+                        Content="Chat Render"
+                        Command="{Binding NavigateCommand}"
+                        CommandParameter="{x:Static m:AppPage.ChatRender}"
+                        Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=ChatRender}" />
+
+                    <TextBlock Classes="navHeader" Text="TOOLS" />
+                    <Button
+                        Classes="nav"
+                        Content="Search"
+                        Command="{Binding NavigateCommand}"
+                        CommandParameter="{x:Static m:AppPage.Search}"
+                        Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=Search}" />
+                    <Button
+                        Classes="nav"
+                        Content="Queue"
+                        Command="{Binding NavigateCommand}"
+                        CommandParameter="{x:Static m:AppPage.Queue}"
+                        Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=Queue}" />
+                </StackPanel>
+            </ScrollViewer>
+        </DrawerPage.Drawer>
+
+        <Grid
+            x:DataType="vm:MainWindowViewModel"
+            DataContext="{Binding $parent[Window].DataContext}"
+            RowDefinitions="*,Auto"
+            Margin="16,14,16,0">
+            <ContentControl
+                Content="{Binding CurrentPage}"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch" />
+
+            <Border Grid.Row="1" Classes="statusBar" Margin="0,8,0,0">
+                <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                    <Panel Width="32" Height="32" VerticalAlignment="Center" IsVisible="{Binding Status.ShowStatusImage}">
+                        <Image
+                            Width="32"
+                            Height="32"
+                            Stretch="Uniform"
+                            anim:ImageBehavior.AnimatedSource="{Binding Status.AnimatedSource}"
+                            anim:ImageBehavior.RepeatBehavior="Forever"
+                            IsVisible="{Binding Status.IsAnimatedStatus}" />
+                        <Image
+                            Width="32"
+                            Height="32"
+                            Stretch="Uniform"
+                            Source="/Assets/Status/peepoSad.png"
+                            IsVisible="{Binding Status.ShowErrorStatus}" />
+                    </Panel>
+                    <TextBlock
+                        Grid.Column="1"
+                        Margin="8,0,8,0"
+                        VerticalAlignment="Center"
+                        Text="{Binding Status.Message}"
+                        TextTrimming="CharacterEllipsis" />
+                    <ProgressBar
+                        Grid.Column="2"
+                        Width="160"
+                        Minimum="0"
+                        Maximum="100"
+                        Value="{Binding Status.Progress}"
+                        VerticalAlignment="Center"
+                        Margin="0,0,8,0" />
+                    <Button
+                        Grid.Column="3"
+                        Classes="chip"
+                        VerticalAlignment="Center"
+                        Content="{Binding Status.QueueChipText}"
+                        Command="{Binding NavigateCommand}"
+                        CommandParameter="{x:Static m:AppPage.Queue}" />
+                </Grid>
+            </Border>
+        </Grid>
+    </DrawerPage>
 </Window>
