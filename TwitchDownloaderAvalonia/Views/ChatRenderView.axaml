@@ -2,58 +2,571 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
+    xmlns:chat="using:TwitchDownloaderCore.Chat"
+    xmlns:c="using:TwitchDownloaderAvalonia.Converters"
     xmlns:anim="https://github.com/whistyun/AnimatedImage.Avalonia"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    d:DesignWidth="740"
-    d:DesignHeight="480"
+    d:DesignWidth="860"
+    d:DesignHeight="720"
     x:Class="TwitchDownloaderAvalonia.Views.ChatRenderView"
     x:DataType="vm:ChatRenderViewModel">
 
-    <Grid ColumnDefinitions="*,260" RowDefinitions="*,Auto">
-        <Border Grid.Row="0" Grid.Column="0" Classes="card" Margin="0,0,8,0">
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
-                <Image
-                    Width="48"
-                    Height="48"
-                    HorizontalAlignment="Center"
-                    Stretch="Uniform"
-                    anim:ImageBehavior.AnimatedSource="avares://TwitchDownloaderAvalonia/Assets/Status/ppHop.gif"
-                    anim:ImageBehavior.RepeatBehavior="Forever"
-                    IsVisible="{Binding AppStatus.ShowStatusImage}" />
-                <TextBlock
-                    Classes="muted"
-                    HorizontalAlignment="Center"
-                    TextAlignment="Center"
-                    Text="Render preview&#x0a;A live preview will appear here." />
+    <Grid RowDefinitions="Auto,*,Auto">
+        <DockPanel Margin="0,0,0,12">
+            <Button
+                DockPanel.Dock="Right"
+                Classes="accent"
+                Content="Browse"
+                Command="{Binding BrowseCommand}"
+                IsEnabled="{Binding CanBrowse}" />
+            <TextBox
+                Margin="0,0,8,0"
+                PlaceholderText="Path to an existing chat JSON / JSON.GZ"
+                Text="{Binding InputFile}">
+                <TextBox.KeyBindings>
+                    <KeyBinding Gesture="Enter" Command="{Binding LoadTypedFileCommand}" />
+                </TextBox.KeyBindings>
+            </TextBox>
+        </DockPanel>
+
+        <Grid Grid.Row="1" ColumnDefinitions="300,*">
+            <Border Classes="card" Margin="0,0,12,0">
+                <DockPanel>
+                    <Viewbox
+                        DockPanel.Dock="Top"
+                        Stretch="Uniform"
+                        HorizontalAlignment="Stretch"
+                        Margin="0,0,0,10">
+                        <Border Classes="preview16x9">
+                            <Panel>
+                                <StackPanel
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Spacing="6"
+                                    IsVisible="{Binding !InfoLoaded}">
+                                    <Image
+                                        Width="48"
+                                        Height="48"
+                                        Stretch="Uniform"
+                                        anim:ImageBehavior.AnimatedSource="avares://TwitchDownloaderAvalonia/Assets/Status/ppHop.gif"
+                                        anim:ImageBehavior.RepeatBehavior="Forever"
+                                        IsVisible="{Binding AppStatus.ShowStatusImage}" />
+                                    <TextBlock
+                                        Classes="muted"
+                                        HorizontalAlignment="Center"
+                                        Text="No thumbnail"
+                                        IsVisible="{Binding AppStatus.ReduceMotion}" />
+                                </StackPanel>
+                                <Image
+                                    Source="{Binding ThumbnailBytes, Converter={x:Static c:ByteArrayToBitmapConverter.Instance}}"
+                                    Stretch="UniformToFill"
+                                    IsVisible="{Binding InfoLoaded}" />
+                            </Panel>
+                        </Border>
+                    </Viewbox>
+                    <StackPanel Spacing="10">
+                        <TextBlock
+                            Classes="title"
+                            Text="{Binding InfoTitle}"
+                            TextWrapping="Wrap"
+                            IsVisible="{Binding InfoLoaded}" />
+                        <TextBlock
+                            Classes="muted"
+                            Text="Browse a chat JSON to load title, channel, and length."
+                            TextWrapping="Wrap"
+                            IsVisible="{Binding !InfoLoaded}" />
+                        <StackPanel
+                            Orientation="Horizontal"
+                            Spacing="8"
+                            IsVisible="{Binding InfoLoaded}">
+                            <Border
+                                Width="28"
+                                Height="28"
+                                CornerRadius="14"
+                                ClipToBounds="True"
+                                Background="{DynamicResource CardMutedBrush}"
+                                IsVisible="{Binding HasStreamerAvatar}">
+                                <Image
+                                    Source="{Binding StreamerAvatarBytes, Converter={x:Static c:ByteArrayToBitmapConverter.Instance}}"
+                                    Stretch="UniformToFill" />
+                            </Border>
+                            <TextBlock
+                                Text="{Binding InfoStreamer}"
+                                TextWrapping="Wrap"
+                                VerticalAlignment="Center" />
+                        </StackPanel>
+                        <StackPanel Spacing="6" IsVisible="{Binding InfoLoaded}">
+                            <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto">
+                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <PathIcon
+                                        Width="14"
+                                        Height="14"
+                                        Data="{StaticResource IconClock}"
+                                        Foreground="{DynamicResource MutedForegroundBrush}" />
+                                    <TextBlock Classes="muted" Text="Length" VerticalAlignment="Center" />
+                                </StackPanel>
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Classes="muted"
+                                    HorizontalAlignment="Right"
+                                    Text="{Binding LengthText}" />
+                            </Grid>
+                            <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto">
+                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <PathIcon
+                                        Width="14"
+                                        Height="14"
+                                        Data="{StaticResource IconCalendar}"
+                                        Foreground="{DynamicResource MutedForegroundBrush}" />
+                                    <TextBlock Classes="muted" Text="Created" VerticalAlignment="Center" />
+                                </StackPanel>
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Classes="muted"
+                                    HorizontalAlignment="Right"
+                                    Text="{Binding InfoCreatedAt}" />
+                            </Grid>
+                        </StackPanel>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <Border Grid.Column="1" Classes="card">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Bottom" Spacing="10" Margin="0,10,0,0">
+                        <DockPanel Height="28" LastChildFill="True">
+                            <StackPanel
+                                DockPanel.Dock="Right"
+                                Orientation="Horizontal"
+                                Spacing="3"
+                                VerticalAlignment="Center">
+                                <NumericUpDown Classes="time" Minimum="0" Maximum="{Binding TrimHourMaximum}" FormatString="00" Increment="1"
+                                               VerticalAlignment="Center"
+                                               IsEnabled="{Binding CanEditTrimStart}"
+                                               Value="{Binding StartHour, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                                <TextBlock Classes="muted" Text=":" VerticalAlignment="Center" />
+                                <NumericUpDown Classes="time" Minimum="0" Maximum="59" FormatString="00" Increment="1"
+                                               VerticalAlignment="Center"
+                                               IsEnabled="{Binding CanEditTrimStart}"
+                                               Value="{Binding StartMinute, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                                <TextBlock Classes="muted" Text=":" VerticalAlignment="Center" />
+                                <NumericUpDown Classes="time" Minimum="0" Maximum="59" FormatString="00" Increment="1"
+                                               VerticalAlignment="Center"
+                                               IsEnabled="{Binding CanEditTrimStart}"
+                                               Value="{Binding StartSecond, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                            </StackPanel>
+                            <CheckBox
+                                Content="Trim start"
+                                VerticalAlignment="Center"
+                                IsChecked="{Binding TrimStart}"
+                                IsEnabled="{Binding CanEditOptions}" />
+                        </DockPanel>
+
+                        <DockPanel Height="28" LastChildFill="True">
+                            <StackPanel
+                                DockPanel.Dock="Right"
+                                Orientation="Horizontal"
+                                Spacing="3"
+                                VerticalAlignment="Center">
+                                <NumericUpDown Classes="time" Minimum="0" Maximum="{Binding TrimHourMaximum}" FormatString="00" Increment="1"
+                                               VerticalAlignment="Center"
+                                               IsEnabled="{Binding CanEditTrimEnd}"
+                                               Value="{Binding EndHour, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                                <TextBlock Classes="muted" Text=":" VerticalAlignment="Center" />
+                                <NumericUpDown Classes="time" Minimum="0" Maximum="59" FormatString="00" Increment="1"
+                                               VerticalAlignment="Center"
+                                               IsEnabled="{Binding CanEditTrimEnd}"
+                                               Value="{Binding EndMinute, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                                <TextBlock Classes="muted" Text=":" VerticalAlignment="Center" />
+                                <NumericUpDown Classes="time" Minimum="0" Maximum="59" FormatString="00" Increment="1"
+                                               VerticalAlignment="Center"
+                                               IsEnabled="{Binding CanEditTrimEnd}"
+                                               Value="{Binding EndSecond, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                            </StackPanel>
+                            <CheckBox
+                                Content="Trim end"
+                                VerticalAlignment="Center"
+                                IsChecked="{Binding TrimEnd}"
+                                IsEnabled="{Binding CanEditOptions}" />
+                        </DockPanel>
+
+                        <TextBlock
+                            Classes="muted"
+                            Text="{Binding SuggestedFileName, StringFormat='Suggested: {0}'}"
+                            TextWrapping="Wrap"
+                            IsVisible="{Binding HasSuggestedFileName}" />
+
+                        <Grid ColumnDefinitions="*,8,*" RowDefinitions="Auto">
+                            <Button
+                                Classes="accent"
+                                HorizontalAlignment="Stretch"
+                                Command="{Binding RenderCommand}"
+                                IsEnabled="{Binding CanRender}">
+                                <TextBlock Text="Render" HorizontalAlignment="Center" />
+                            </Button>
+                            <Button
+                                Grid.Column="2"
+                                Classes="secondary"
+                                HorizontalAlignment="Stretch"
+                                Content="Cancel"
+                                Command="{Binding CancelCommand}"
+                                IsEnabled="{Binding IsRendering}" />
+                        </Grid>
+                    </StackPanel>
+
+                    <TabControl IsEnabled="{Binding CanEditOptions}">
+                        <TabItem Header="General">
+                            <ScrollViewer>
+                                <StackPanel Spacing="10">
+                                    <Grid ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+                                        <TextBlock Classes="label" Text="Width" VerticalAlignment="Center" Margin="0" />
+                                        <NumericUpDown
+                                            Grid.Row="0"
+                                            Grid.Column="1"
+                                            Classes="compact"
+                                            Minimum="2"
+                                            Increment="2"
+                                            FormatString="0"
+                                            Value="{Binding ChatWidth, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Classes="label" Text="Height" VerticalAlignment="Center" Margin="0" />
+                                        <NumericUpDown
+                                            Grid.Row="1"
+                                            Grid.Column="1"
+                                            Classes="compact"
+                                            Minimum="2"
+                                            Increment="2"
+                                            FormatString="0"
+                                            Value="{Binding ChatHeight, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Classes="label" Text="Font" VerticalAlignment="Center" Margin="0" />
+                                        <ComboBox
+                                            Grid.Row="2"
+                                            Grid.Column="1"
+                                            ItemsSource="{Binding Fonts}"
+                                            SelectedItem="{Binding SelectedFont}" />
+
+                                        <TextBlock Grid.Row="3" Grid.Column="0" Classes="label" Text="Font size" VerticalAlignment="Center" Margin="0" />
+                                        <NumericUpDown
+                                            Grid.Row="3"
+                                            Grid.Column="1"
+                                            Classes="compact"
+                                            Minimum="1"
+                                            Increment="1"
+                                            FormatString="0"
+                                            Value="{Binding FontSize, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+
+                                        <TextBlock Grid.Row="4" Grid.Column="0" Classes="label" Text="Font color" VerticalAlignment="Center" Margin="0" />
+                                        <Grid Grid.Row="4" Grid.Column="1" ColumnDefinitions="*,8,Auto">
+                                            <TextBox Text="{Binding FontColorHex}" PlaceholderText="#FFFFFFFF" />
+                                            <Border
+                                                Grid.Column="2"
+                                                Classes="swatch"
+                                                Background="{Binding FontColorHex, Converter={x:Static c:HexToBrushConverter.Instance}}" />
+                                        </Grid>
+
+                                        <TextBlock Grid.Row="5" Grid.Column="0" Classes="label" Text="Background" VerticalAlignment="Center" Margin="0" />
+                                        <Grid Grid.Row="5" Grid.Column="1" ColumnDefinitions="*,8,Auto">
+                                            <TextBox Text="{Binding BackgroundColorHex}" PlaceholderText="#FF111111" />
+                                            <Border
+                                                Grid.Column="2"
+                                                Classes="swatch"
+                                                Background="{Binding BackgroundColorHex, Converter={x:Static c:HexToBrushConverter.Instance}}" />
+                                        </Grid>
+
+                                        <TextBlock Grid.Row="6" Grid.Column="0" Classes="label" Text="Alternate background" VerticalAlignment="Center" Margin="0" />
+                                        <Grid Grid.Row="6" Grid.Column="1" ColumnDefinitions="*,8,Auto">
+                                            <TextBox Text="{Binding AlternateBackgroundColorHex}" PlaceholderText="#FF191919" />
+                                            <Border
+                                                Grid.Column="2"
+                                                Classes="swatch"
+                                                Background="{Binding AlternateBackgroundColorHex, Converter={x:Static c:HexToBrushConverter.Instance}}" />
+                                        </Grid>
+                                    </Grid>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </TabItem>
+
+                        <TabItem Header="Rendering">
+                            <ScrollViewer>
+                                <StackPanel Spacing="12">
+                                    <WrapPanel Orientation="Horizontal">
+                                        <StackPanel Width="210" Spacing="8">
+                                            <CheckBox Content="Outline" IsChecked="{Binding Outline}" />
+                                            <CheckBox Content="Timestamps" IsChecked="{Binding Timestamp}" />
+                                            <CheckBox Content="Sub messages" IsChecked="{Binding SubMessages}" />
+                                            <CheckBox Content="Chat badges" IsChecked="{Binding ChatBadges}" />
+                                            <DockPanel LastChildFill="True">
+                                                <TextBlock Classes="label" Text="Update rate" VerticalAlignment="Center" Margin="0,0,8,0" Width="90" />
+                                                <NumericUpDown
+                                                    Classes="compact"
+                                                    Minimum="0"
+                                                    Increment="0.1"
+                                                    FormatString="0.##"
+                                                    Value="{Binding UpdateRate, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                            </DockPanel>
+                                            <CheckBox Content="Dispersion" IsChecked="{Binding DisperseCommentOffsets}" ToolTip.Tip="Uses extra metadata to restore message order after Twitch started rounding chat timestamps to whole seconds." />
+                                            <CheckBox Content="Alternate message backgrounds" IsChecked="{Binding AlternateMessageBackgrounds}" />
+                                            <CheckBox Content="Increase username readability" IsChecked="{Binding AdjustUsernameVisibility}" />
+                                        </StackPanel>
+                                        <StackPanel Width="180" Spacing="8">
+                                            <CheckBox Content="BTTV" IsChecked="{Binding BttvEmotes}" />
+                                            <CheckBox Content="FFZ" IsChecked="{Binding FfzEmotes}" />
+                                            <CheckBox Content="7TV" IsChecked="{Binding StvEmotes}" />
+                                            <CheckBox Content="User avatars" IsChecked="{Binding RenderUserAvatars}" />
+                                            <CheckBox Content="Offline" IsChecked="{Binding Offline}" ToolTip.Tip="Skip downloading new emotes, badges, and avatars. Use only what is already cached or embedded." />
+                                        </StackPanel>
+                                    </WrapPanel>
+
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Classes="label" Text="Chat badge filter" Margin="0" />
+                                        <TextBlock Classes="muted" Text="Checked badges are hidden in the render." />
+                                        <WrapPanel Orientation="Horizontal">
+                                            <CheckBox Content="Broadcaster" Margin="0,0,12,6" IsChecked="{Binding FilterBroadcaster}" />
+                                            <CheckBox Content="Mods" Margin="0,0,12,6" IsChecked="{Binding FilterModerator}" />
+                                            <CheckBox Content="VIPs" Margin="0,0,12,6" IsChecked="{Binding FilterVip}" />
+                                            <CheckBox Content="Subs" Margin="0,0,12,6" IsChecked="{Binding FilterSubscriber}" />
+                                            <CheckBox Content="Predictions" Margin="0,0,12,6" IsChecked="{Binding FilterPredictions}" />
+                                            <CheckBox Content="No Audio/No Video" Margin="0,0,12,6" IsChecked="{Binding FilterNoAudioVisual}" />
+                                            <CheckBox Content="Prime" Margin="0,0,12,6" IsChecked="{Binding FilterPrimeGaming}" />
+                                            <CheckBox Content="Others" Margin="0,0,12,6" IsChecked="{Binding FilterOther}" />
+                                        </WrapPanel>
+                                    </StackPanel>
+
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Classes="label" Text="Ignore users" Margin="0" ToolTip.Tip="Comma-separated logins whose messages are omitted." />
+                                        <TextBox Text="{Binding IgnoreUsersList}" PlaceholderText="user1, user2" />
+                                        <TextBlock Classes="label" Text="Banned words" Margin="0" ToolTip.Tip="Comma-separated words. Messages containing them are omitted." />
+                                        <TextBox Text="{Binding BannedWordsList}" PlaceholderText="word1, word2" />
+                                        <TextBlock Classes="label" Text="Highlight users" Margin="0" ToolTip.Tip="Comma-separated logins rendered with the highlight color." />
+                                        <Grid ColumnDefinitions="*,8,Auto,8,Auto">
+                                            <TextBox Text="{Binding HighlightUsersList}" PlaceholderText="user1, user2" />
+                                            <TextBox
+                                                Grid.Column="2"
+                                                Width="110"
+                                                Text="{Binding HighlightUsersColorHex}"
+                                                PlaceholderText="#C8FF0064" />
+                                            <Border
+                                                Grid.Column="4"
+                                                Classes="swatch"
+                                                Background="{Binding HighlightUsersColorHex, Converter={x:Static c:HexToBrushConverter.Instance}}" />
+                                        </Grid>
+                                    </StackPanel>
+
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Classes="label" Text="Emoji vendor" Margin="0" />
+                                        <StackPanel Orientation="Horizontal" Spacing="16">
+                                            <RadioButton
+                                                Content="Google"
+                                                GroupName="ChatRenderEmoji"
+                                                IsChecked="{Binding EmojiVendor, Converter={x:Static c:EnumEqualsConverter.Instance}, ConverterParameter={x:Static chat:EmojiVendor.GoogleNotoColor}, Mode=TwoWay}" />
+                                            <RadioButton
+                                                Content="Twitter"
+                                                GroupName="ChatRenderEmoji"
+                                                IsChecked="{Binding EmojiVendor, Converter={x:Static c:EnumEqualsConverter.Instance}, ConverterParameter={x:Static chat:EmojiVendor.TwitterTwemoji}, Mode=TwoWay}" />
+                                            <RadioButton
+                                                Content="None"
+                                                GroupName="ChatRenderEmoji"
+                                                IsChecked="{Binding EmojiVendor, Converter={x:Static c:EnumEqualsConverter.Instance}, ConverterParameter={x:Static chat:EmojiVendor.None}, Mode=TwoWay}" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </TabItem>
+
+                        <TabItem Header="Scaling">
+                            <ScrollViewer>
+                                <Grid ColumnDefinitions="*,16,*" RowDefinitions="Auto">
+                                    <StackPanel Spacing="8">
+                                        <DockPanel LastChildFill="False">
+                                            <TextBlock Classes="label" Text="Emote" VerticalAlignment="Center" Width="120" Margin="0" />
+                                            <NumericUpDown Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                                           Value="{Binding EmoteScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                        </DockPanel>
+                                        <DockPanel LastChildFill="False">
+                                            <TextBlock Classes="label" Text="Badge" VerticalAlignment="Center" Width="120" Margin="0" />
+                                            <NumericUpDown Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                                           Value="{Binding BadgeScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                        </DockPanel>
+                                        <DockPanel LastChildFill="False">
+                                            <TextBlock Classes="label" Text="Emoji" VerticalAlignment="Center" Width="120" Margin="0" />
+                                            <NumericUpDown Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                                           Value="{Binding EmojiScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                        </DockPanel>
+                                        <DockPanel LastChildFill="False">
+                                            <TextBlock Classes="label" Text="Avatar" VerticalAlignment="Center" Width="120" Margin="0" />
+                                            <NumericUpDown Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                                           Value="{Binding AvatarScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                        </DockPanel>
+                                        <DockPanel LastChildFill="False">
+                                            <TextBlock Classes="label" Text="Outline" VerticalAlignment="Center" Width="120" Margin="0" />
+                                            <NumericUpDown Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                                           Value="{Binding OutlineScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                        </DockPanel>
+                                        <DockPanel LastChildFill="False">
+                                            <TextBlock Classes="label" Text="Username size" VerticalAlignment="Center" Width="120" Margin="0"
+                                                       ToolTip.Tip="Username font size as a multiple of the message font size. 1.0 = same size as the message text." />
+                                            <NumericUpDown Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                                           Value="{Binding UsernameFontScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                        </DockPanel>
+                                        <DockPanel LastChildFill="False">
+                                            <TextBlock Classes="label" Text="Vertical spacing" VerticalAlignment="Center" Width="120" Margin="0" />
+                                            <NumericUpDown Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                                           Value="{Binding VerticalSpacingScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                        </DockPanel>
+                                    </StackPanel>
+                                    <StackPanel Grid.Row="0" Grid.Column="2" Spacing="8">
+                                        <DockPanel LastChildFill="False">
+                                            <TextBlock Classes="label" Text="Section height" VerticalAlignment="Center" Width="120" Margin="0" />
+                                            <NumericUpDown Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                                           Value="{Binding SectionHeightScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                        </DockPanel>
+                                        <DockPanel LastChildFill="False">
+                                            <TextBlock Classes="label" Text="Word spacing" VerticalAlignment="Center" Width="120" Margin="0" />
+                                            <NumericUpDown Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                                           Value="{Binding WordSpacingScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                        </DockPanel>
+                                        <DockPanel LastChildFill="False">
+                                            <TextBlock Classes="label" Text="Emote spacing" VerticalAlignment="Center" Width="120" Margin="0" />
+                                            <NumericUpDown Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                                           Value="{Binding EmoteSpacingScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                        </DockPanel>
+                                        <DockPanel LastChildFill="False">
+                                            <TextBlock Classes="label" Text="Highlight stroke" VerticalAlignment="Center" Width="120" Margin="0" />
+                                            <NumericUpDown Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                                           Value="{Binding AccentStrokeScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                        </DockPanel>
+                                        <DockPanel LastChildFill="False">
+                                            <TextBlock Classes="label" Text="Highlight indent" VerticalAlignment="Center" Width="120" Margin="0" />
+                                            <NumericUpDown Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                                           Value="{Binding AccentIndentScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                        </DockPanel>
+                                        <DockPanel LastChildFill="False">
+                                            <TextBlock Classes="label" Text="Side padding" VerticalAlignment="Center" Width="120" Margin="0" />
+                                            <NumericUpDown Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                                           Value="{Binding SidePaddingScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                        </DockPanel>
+                                    </StackPanel>
+                                </Grid>
+                            </ScrollViewer>
+                        </TabItem>
+
+                        <TabItem Header="Encoding">
+                            <ScrollViewer>
+                                <StackPanel Spacing="10">
+                                    <Grid ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+                                        <TextBlock Classes="label" Text="File format" VerticalAlignment="Center" Margin="0" />
+                                        <ComboBox
+                                            Grid.Row="0"
+                                            Grid.Column="1"
+                                            ItemsSource="{Binding Containers}"
+                                            SelectedItem="{Binding SelectedContainer}" />
+
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Classes="label" Text="Codec" VerticalAlignment="Center" Margin="0" />
+                                        <ComboBox
+                                            Grid.Row="1"
+                                            Grid.Column="1"
+                                            ItemsSource="{Binding Codecs}"
+                                            SelectedItem="{Binding SelectedCodec}" />
+
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Classes="label" Text="Framerate" VerticalAlignment="Center" Margin="0" />
+                                        <NumericUpDown
+                                            Grid.Row="2"
+                                            Grid.Column="1"
+                                            Classes="compact"
+                                            Minimum="1"
+                                            Increment="1"
+                                            FormatString="0"
+                                            Value="{Binding Framerate, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+
+                                        <CheckBox
+                                            Grid.Row="3"
+                                            Grid.Column="1"
+                                            Content="Generate mask"
+                                            IsChecked="{Binding GenerateMask}" />
+                                        <CheckBox
+                                            Grid.Row="4"
+                                            Grid.Column="1"
+                                            Content="Image sharpening"
+                                            IsChecked="{Binding Sharpening}" />
+                                    </Grid>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </TabItem>
+
+                        <TabItem Header="FFmpeg">
+                            <ScrollViewer>
+                                <StackPanel Spacing="8">
+                                    <TextBlock
+                                        Classes="muted"
+                                        FontWeight="SemiBold"
+                                        TextWrapping="Wrap"
+                                        Text="This is for advanced users only. If you get a pipe ended error this is probably why." />
+                                    <TextBlock Classes="label" Text="Input arguments" Margin="0" />
+                                    <TextBox
+                                        Text="{Binding FfmpegInputArgs}"
+                                        AcceptsReturn="False"
+                                        TextWrapping="Wrap" />
+                                    <TextBlock Classes="label" Text="Output arguments" Margin="0" />
+                                    <TextBox
+                                        Text="{Binding FfmpegOutputArgs}"
+                                        AcceptsReturn="False"
+                                        TextWrapping="Wrap" />
+                                    <Button
+                                        Classes="secondary"
+                                        HorizontalAlignment="Left"
+                                        Content="Reset"
+                                        Command="{Binding ResetFfmpegArgsCommand}" />
+                                    <TextBlock
+                                        Classes="muted"
+                                        TextWrapping="Wrap"
+                                        Text="Available parameters: {fps} {height} {width} {max_int} {save_path} {pix_fmt}" />
+                                    <Button
+                                        Classes="link"
+                                        HorizontalAlignment="Left"
+                                        Content="FFmpeg documentation"
+                                        Command="{Binding OpenFfmpegDocsCommand}" />
+                                </StackPanel>
+                            </ScrollViewer>
+                        </TabItem>
+                    </TabControl>
+                </DockPanel>
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="2" Classes="card" Margin="0,12,0,0" Padding="12,8">
+            <StackPanel Spacing="8">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4">
+                        <Button
+                            Classes="link"
+                            Content="Clear"
+                            Command="{Binding ClearLogCommand}"
+                            IsVisible="{Binding IsLogExpanded}" />
+                        <Button
+                            Classes="link"
+                            Content="{Binding LogToggleText}"
+                            Command="{Binding ToggleLogCommand}" />
+                    </StackPanel>
+                    <TextBlock
+                        Classes="label"
+                        Text="Log"
+                        VerticalAlignment="Center"
+                        Margin="0" />
+                </DockPanel>
+                <TextBox
+                    Height="128"
+                    Text="{Binding LogText}"
+                    PlaceholderText="Log output will appear here."
+                    IsReadOnly="True"
+                    AcceptsReturn="True"
+                    TextWrapping="Wrap"
+                    FontFamily="Menlo, Consolas, monospace"
+                    FontSize="13"
+                    IsVisible="{Binding IsLogExpanded}" />
             </StackPanel>
         </Border>
-
-        <ScrollViewer Grid.Row="0" Grid.Column="1">
-            <Border Classes="card">
-                <StackPanel Spacing="8">
-                    <TextBlock Classes="label" Text="Output" />
-                    <ComboBox IsEnabled="False" PlaceholderText="MP4" />
-                    <TextBlock Classes="label" Text="Framerate" />
-                    <NumericUpDown Value="30" IsEnabled="False" />
-                    <TextBlock Classes="label" Text="Codec" />
-                    <ComboBox IsEnabled="False" PlaceholderText="H.264" />
-                    <Button Classes="accent" Content="Render" HorizontalAlignment="Left" IsEnabled="False" />
-                    <Expander Header="Advanced" IsEnabled="False">
-                        <TextBlock Classes="muted" Margin="0,6,0,0" Text="Font, emote scale, mask, and FFmpeg args." />
-                    </Expander>
-                </StackPanel>
-            </Border>
-        </ScrollViewer>
-
-        <TextBlock
-            Grid.Row="1"
-            Grid.Column="0"
-            Grid.ColumnSpan="2"
-            Classes="muted"
-            Margin="0,8,0,0"
-            Text="{Binding Details}"
-            TextWrapping="Wrap" />
     </Grid>
 </ContentPage>

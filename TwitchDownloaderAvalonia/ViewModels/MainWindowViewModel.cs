@@ -24,7 +24,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
             Clip = new ClipDownloadViewModel(settings, status, ffmpeg, dialogs, fileDialogs, collision, thumbnails);
             ChatDownload = new ChatDownloadViewModel(settings, status, dialogs, fileDialogs, collision, thumbnails);
             ChatUpdate = new ChatUpdateViewModel(settings, status, dialogs, fileDialogs, collision, thumbnails);
-            ChatRender = new ChatRenderViewModel(status);
+            ChatRender = new ChatRenderViewModel(settings, status, ffmpeg, dialogs, fileDialogs, collision, thumbnails);
             Search = new SearchViewModel(status);
             Queue = new QueueViewModel(status);
             SettingsPage = new SettingsViewModel(settings, status);

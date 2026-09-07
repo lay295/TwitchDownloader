@@ -326,4 +326,33 @@
         <Setter Property="Width" Value="320" />
         <Setter Property="Height" Value="180" />
     </Style>
+
+    <Style Selector="Border.swatch">
+        <Setter Property="Width" Value="28" />
+        <Setter Property="Height" Value="28" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="ClipToBounds" Value="True" />
+    </Style>
+
+    <Style Selector="NumericUpDown.compact">
+        <Setter Property="MinWidth" Value="0" />
+        <Setter Property="Width" Value="96" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+
+    <Style Selector="TabControl">
+        <Setter Property="Padding" Value="0,10,0,0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <Style Selector="TabItem">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="Padding" Value="10,6" />
+        <Setter Property="Foreground" Value="{DynamicResource WindowForegroundBrush}" />
+    </Style>
 </Styles>

@@ -29,5 +29,48 @@ namespace TwitchDownloaderAvalonia.Models
         public bool VerboseErrors { get; set; }
         public bool UtcVideoTime { get; set; }
         public bool ReduceMotion { get; set; }
+
+        public string RenderFont { get; set; } = "Inter Embedded";
+        public double RenderFontSize { get; set; } = 24;
+        public int RenderWidth { get; set; } = 700;
+        public int RenderHeight { get; set; } = 1200;
+        public bool RenderOutline { get; set; }
+        public bool RenderTimestamp { get; set; }
+        public string RenderBackgroundColor { get; set; } = "#FF111111";
+        public string RenderAlternateBackgroundColor { get; set; } = "#FF191919";
+        public string RenderFontColor { get; set; } = "#FFFFFFFF";
+        public string RenderHighlightUsersColor { get; set; } = "#C8FF0064";
+        public double RenderUpdateTime { get; set; } = 0.2;
+        public int RenderFramerate { get; set; } = 60;
+        public bool RenderGenerateMask { get; set; }
+        public bool RenderSharpening { get; set; }
+        public bool RenderSubMessages { get; set; } = true;
+        public bool RenderChatBadges { get; set; } = true;
+        public bool RenderOffline { get; set; }
+        public bool RenderUserAvatars { get; set; }
+        public bool RenderDisperseCommentOffsets { get; set; } = true;
+        public bool RenderAlternateMessageBackgrounds { get; set; }
+        public bool RenderAdjustUsernameVisibility { get; set; } = true;
+        public string RenderVideoContainer { get; set; } = "MP4";
+        public string RenderVideoCodec { get; set; } = "H264";
+        public string RenderIgnoreUsersList { get; set; } = string.Empty;
+        public string RenderHighlightUsersList { get; set; } = string.Empty;
+        public string RenderBannedWordsList { get; set; } = string.Empty;
+        public int RenderEmojiVendor { get; set; } = (int)TwitchDownloaderCore.Chat.EmojiVendor.GoogleNotoColor;
+        public int RenderChatBadgeMask { get; set; }
+        public double RenderEmoteScale { get; set; } = 1;
+        public double RenderEmojiScale { get; set; } = 1;
+        public double RenderBadgeScale { get; set; } = 1;
+        public double RenderAvatarScale { get; set; } = 1;
+        public double RenderVerticalSpacingScale { get; set; } = 1;
+        public double RenderUsernameFontScale { get; set; } = 1;
+        public double RenderSidePaddingScale { get; set; } = 1;
+        public double RenderSectionHeightScale { get; set; } = 1;
+        public double RenderWordSpacingScale { get; set; } = 1;
+        public double RenderEmoteSpacingScale { get; set; } = 1;
+        public double RenderAccentStrokeScale { get; set; } = 1;
+        public double RenderAccentIndentScale { get; set; } = 1;
+        public double RenderOutlineScale { get; set; } = 1;
+        public string RenderFfmpegArguments { get; set; } = "[]";
     }
 }
