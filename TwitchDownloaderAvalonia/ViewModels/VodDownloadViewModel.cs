@@ -52,7 +52,6 @@ namespace TwitchDownloaderAvalonia.ViewModels
             _thumbnails = thumbnails;
             _queue = queue;
             DownloadThreads = Math.Clamp(_settings.Current.VodDownloadThreads, 1, 20);
-            Oauth = _settings.Current.OAuth;
             TrimMode = _settings.Current.VodTrimMode;
             Status = "Idle";
         }
@@ -61,9 +60,6 @@ namespace TwitchDownloaderAvalonia.ViewModels
 
         [ObservableProperty]
         public partial string VideoUrl { get; set; } = string.Empty;
-
-        [ObservableProperty]
-        public partial string Oauth { get; set; }
 
         [ObservableProperty]
         public partial int DownloadThreads { get; set; }
@@ -168,7 +164,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
             {
                 _videoId = videoId;
                 var videoInfoTask = TwitchHelper.GetVideoInfo(videoId);
-                var tokenTask = TwitchHelper.GetVideoToken(videoId, Oauth);
+                var tokenTask = TwitchHelper.GetVideoToken(videoId, _settings.Current.OAuth);
                 await Task.WhenAll(videoInfoTask, tokenTask);
 
                 var token = tokenTask.Result.data.videoPlaybackAccessToken;
@@ -177,7 +173,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
 
                 var playlistString = await TwitchHelper.GetVideoPlaylist(videoId, token.value, token.signature);
                 if (playlistString.Contains("vod_manifest_restricted") || playlistString.Contains("unauthorized_entitlements"))
-                    throw new NullReferenceException("Insufficient access. The VOD may be subscriber-only; try providing an OAuth token.");
+                    throw new NullReferenceException("Insufficient access. The VOD may be subscriber-only; try providing an OAuth token in Settings.");
 
                 var video = videoInfoTask.Result.data.video;
                 var playlist = M3U8.Parse(playlistString);
@@ -298,12 +294,6 @@ namespace TwitchDownloaderAvalonia.ViewModels
             IsLogExpanded = false;
         }
 
-        partial void OnOauthChanged(string value)
-        {
-            _settings.Current.OAuth = value;
-            _settings.Save();
-        }
-
         partial void OnDownloadThreadsChanged(int value)
         {
             _settings.Current.VodDownloadThreads = Math.Clamp(value, 1, 20);
@@ -352,7 +342,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 DownloadThreads = DownloadThreads,
                 ThrottleKib = _settings.Current.DownloadThrottleEnabled ? _settings.Current.MaximumBandwidthKib : -1,
                 Filename = filename,
-                Oauth = Oauth,
+                Oauth = _settings.Current.OAuth,
                 Quality = SelectedQuality!.Quality.ToString(),
                 Id = _videoId,
                 TrimBeginning = TrimStart,

@@ -17,10 +17,7 @@ namespace TwitchDownloaderAvalonia.Services
 
         public SettingsService()
         {
-            var directory = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "TwitchDownloader");
-
+            var directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TwitchDownloader");
             Directory.CreateDirectory(directory);
             _filePath = Path.Combine(directory, "avalonia-settings.json");
             Current = Load();
@@ -35,6 +32,12 @@ namespace TwitchDownloaderAvalonia.Services
                 var json = JsonSerializer.Serialize(Current, JsonOptions);
                 File.WriteAllText(_filePath, json);
             }
+        }
+
+        public void ResetToDefaults()
+        {
+            Current.CopyFrom(new AppSettings());
+            Save();
         }
 
         private AppSettings Load()

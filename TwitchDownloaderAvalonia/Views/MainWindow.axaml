@@ -81,6 +81,25 @@
                         <TextBlock Text="About" VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
+                <Button
+                    Classes="nav"
+                    Command="{Binding DonateCommand}"
+                    HorizontalContentAlignment="Stretch"
+                    IsVisible="{Binding SettingsPage.ShowDonateButton}">
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                        <PathIcon Data="{StaticResource IconDonate}" VerticalAlignment="Center" />
+                        <TextBlock
+                            Grid.Column="1"
+                            Margin="10,0,0,0"
+                            Text="Donate"
+                            VerticalAlignment="Center" />
+                        <PathIcon
+                            Grid.Column="2"
+                            Classes="external"
+                            Data="{StaticResource IconExternal}"
+                            VerticalAlignment="Center" />
+                    </Grid>
+                </Button>
             </StackPanel>
         </DrawerPage.DrawerFooter>
 

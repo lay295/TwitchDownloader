@@ -7,6 +7,8 @@ namespace TwitchDownloaderAvalonia.Services
     {
         private CollisionBehavior? _sessionBehavior;
 
+        public void ResetSessionBehavior() => _sessionBehavior = null;
+
         public FileInfo? HandleCollision(FileInfo fileInfo)
         {
             var behavior = _sessionBehavior ?? settings.Current.FileCollisionBehavior;

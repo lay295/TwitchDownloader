@@ -2,88 +2,288 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
+    xmlns:models="using:TwitchDownloaderAvalonia.Models"
     xmlns:c="using:TwitchDownloaderAvalonia.Converters"
+    xmlns:b="using:TwitchDownloaderAvalonia.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     d:DesignWidth="740"
-    d:DesignHeight="480"
+    d:DesignHeight="720"
     x:Class="TwitchDownloaderAvalonia.Views.SettingsView"
     x:DataType="vm:SettingsViewModel">
 
-    <StackPanel Spacing="10" MaxWidth="520" HorizontalAlignment="Left">
-        <Border Classes="card">
-            <StackPanel Spacing="6">
-                <TextBlock Classes="label" Text="Motion" />
-                <CheckBox Content="Reduce motion (hide status GIF)" IsChecked="{Binding ReduceMotion}" />
-            </StackPanel>
-        </Border>
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+        <StackPanel Spacing="12">
+            <Border Classes="card">
+                <StackPanel Spacing="12">
+                    <TextBlock Classes="title" Text="Appearance" />
 
-        <Border Classes="card">
-            <StackPanel Spacing="10">
-                <TextBlock Classes="label" Text="Queue" />
-                <TextBlock Classes="muted" Text="Default folder and quality for tasks added from Search." TextWrapping="Wrap" />
-                <Grid ColumnDefinitions="*,8,Auto">
+                    <StackPanel Spacing="6">
+                        <TextBlock Classes="label" Text="Theme" Margin="0" />
+                        <ComboBox
+                            HorizontalAlignment="Stretch"
+                            ItemsSource="{Binding Themes}"
+                            SelectedItem="{Binding SelectedTheme}" />
+                    </StackPanel>
+
+                    <CheckBox Content="Reduce motion (hide status GIF)" IsChecked="{Binding ReduceMotion}" />
+                    <CheckBox Content="Hide donation button" IsChecked="{Binding HideDonation}" />
+
+                    <StackPanel Spacing="6">
+                        <TextBlock Classes="label" Text="Video timestamps" Margin="0" />
+                        <StackPanel Orientation="Horizontal" Spacing="16">
+                            <RadioButton
+                                Content="UTC"
+                                GroupName="TimeFormat"
+                                IsChecked="{Binding UtcVideoTime}" />
+                            <RadioButton
+                                Content="Local"
+                                GroupName="TimeFormat"
+                                IsChecked="{Binding UtcVideoTime, Converter={x:Static c:InverseBoolConverter.Instance}}" />
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+                <StackPanel Spacing="12">
+                    <TextBlock Classes="title" Text="Account" />
+                    <TextBlock Classes="label" Text="OAuth token" Margin="0" />
                     <TextBox
-                        PlaceholderText="Download folder"
-                        Text="{Binding QueueFolder}" />
+                        PlaceholderText="Optional"
+                        Text="{Binding OAuth}" />
+                    <TextBlock
+                        Classes="muted"
+                        Text="Required for subscriber-only VODs. Third-party tokens will not work."
+                        TextWrapping="Wrap" />
                     <Button
-                        Grid.Column="2"
-                        Content="Browse"
-                        Command="{Binding BrowseQueueFolderCommand}" />
-                </Grid>
-                <TextBlock Classes="label" Text="Preferred quality" Margin="0,4,0,0" />
-                <ComboBox
-                    HorizontalAlignment="Stretch"
-                    ItemsSource="{Binding Qualities}"
-                    SelectedItem="{Binding SelectedQuality}" />
+                        Classes="link"
+                        HorizontalAlignment="Left"
+                        Content="How to get a token"
+                        Command="{Binding OpenUrlCommand}"
+                        CommandParameter="https://www.youtube.com/watch?v=1MBsUoFGuls" />
+                </StackPanel>
+            </Border>
 
-                <TextBlock Classes="label" Text="Parallel limits" Margin="0,4,0,0" />
-                <WrapPanel>
-                    <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,8">
-                        <TextBlock Classes="muted" VerticalAlignment="Center" Width="56" Text="VOD" />
-                        <NumericUpDown
-                            Classes="compact"
-                            Width="72"
-                            Minimum="1"
-                            Maximum="50"
-                            Increment="1"
-                            Value="{Binding Queue.LimitVod, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,8">
-                        <TextBlock Classes="muted" VerticalAlignment="Center" Width="56" Text="Clip" />
-                        <NumericUpDown
-                            Classes="compact"
-                            Width="72"
-                            Minimum="1"
-                            Maximum="50"
-                            Increment="1"
-                            Value="{Binding Queue.LimitClip, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,8">
-                        <TextBlock Classes="muted" VerticalAlignment="Center" Width="56" Text="Chat" />
-                        <NumericUpDown
-                            Classes="compact"
-                            Width="72"
-                            Minimum="1"
-                            Maximum="50"
-                            Increment="1"
-                            Value="{Binding Queue.LimitChat, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,8">
-                        <TextBlock Classes="muted" VerticalAlignment="Center" Width="56" Text="Render" />
-                        <NumericUpDown
-                            Classes="compact"
-                            Width="72"
-                            Minimum="1"
-                            Maximum="50"
-                            Increment="1"
-                            Value="{Binding Queue.LimitRender, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
-                    </StackPanel>
-                </WrapPanel>
-            </StackPanel>
-        </Border>
+            <Border Classes="card">
+                <StackPanel Spacing="12">
+                    <TextBlock Classes="title" Text="Files and downloads" />
 
-        <TextBlock Classes="muted" Text="{Binding Details}" TextWrapping="Wrap" />
-    </StackPanel>
+                    <StackPanel Spacing="6">
+                        <TextBlock Classes="label" Text="Cache folder" Margin="0" />
+                        <Grid ColumnDefinitions="*,8,Auto,8,Auto">
+                            <TextBox
+                                PlaceholderText="{Binding TempPathPlaceholder}"
+                                Text="{Binding TempPath}" />
+                            <Button
+                                Grid.Column="2"
+                                Content="Browse"
+                                Command="{Binding BrowseTempPathCommand}" />
+                            <Button
+                                Grid.Column="4"
+                                Classes="secondary"
+                                Content="Clear cache"
+                                Command="{Binding ClearCacheCommand}" />
+                        </Grid>
+                    </StackPanel>
+
+                    <StackPanel Spacing="6">
+                        <TextBlock Classes="label" Text="File collision" Margin="0" />
+                        <ComboBox
+                            HorizontalAlignment="Stretch"
+                            ItemsSource="{Binding CollisionLabels}"
+                            SelectedItem="{Binding SelectedCollision}" />
+                        <TextBlock
+                            Classes="muted"
+                            Text="Default handling when a download would overwrite an existing file."
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="6">
+                        <TextBlock Classes="label" Text="Bandwidth" Margin="0" />
+                        <DockPanel>
+                            <NumericUpDown
+                                DockPanel.Dock="Right"
+                                Classes="compact"
+                                Width="96"
+                                Minimum="1"
+                                Maximum="122070"
+                                Increment="256"
+                                IsEnabled="{Binding DownloadThrottleEnabled}"
+                                Value="{Binding MaximumBandwidthKib, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                            <TextBlock
+                                DockPanel.Dock="Right"
+                                Classes="muted"
+                                Text="KiB/s"
+                                VerticalAlignment="Center"
+                                Margin="0,0,8,0" />
+                            <CheckBox
+                                Content="Limit download bandwidth"
+                                IsChecked="{Binding DownloadThrottleEnabled}" />
+                        </DockPanel>
+                    </StackPanel>
+
+                    <CheckBox Content="Verbose errors" IsChecked="{Binding VerboseErrors}" />
+
+                    <StackPanel Spacing="6">
+                        <TextBlock Classes="label" Text="Log levels" Margin="0" />
+                        <WrapPanel>
+                            <CheckBox Content="Verbose" Margin="0,0,16,6" IsChecked="{Binding LogVerbose}" />
+                            <CheckBox Content="Info" Margin="0,0,16,6" IsChecked="{Binding LogInfo}" />
+                            <CheckBox Content="Warning" Margin="0,0,16,6" IsChecked="{Binding LogWarning}" />
+                            <CheckBox Content="Error" Margin="0,0,16,6" IsChecked="{Binding LogError}" />
+                            <CheckBox Content="FFmpeg" Margin="0,0,0,6" IsChecked="{Binding LogFfmpeg}" />
+                        </WrapPanel>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+                <StackPanel Spacing="12">
+                    <TextBlock Classes="title" Text="Filename templates" />
+
+                    <Grid ColumnDefinitions="72,*" RowDefinitions="Auto,8,Auto,8,Auto">
+                        <TextBlock Classes="muted" Text="VOD" VerticalAlignment="Center" />
+                        <TextBox
+                            Grid.Column="1"
+                            Text="{Binding TemplateVod}"
+                            b:DragText.AcceptDrop="True" />
+                        <TextBlock
+                            Grid.Row="2"
+                            Classes="muted"
+                            Text="Clip"
+                            VerticalAlignment="Center" />
+                        <TextBox
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            Text="{Binding TemplateClip}"
+                            b:DragText.AcceptDrop="True" />
+                        <TextBlock
+                            Grid.Row="4"
+                            Classes="muted"
+                            Text="Chat"
+                            VerticalAlignment="Center" />
+                        <TextBox
+                            Grid.Row="4"
+                            Grid.Column="1"
+                            Text="{Binding TemplateChat}"
+                            b:DragText.AcceptDrop="True" />
+                    </Grid>
+
+                    <TextBlock Classes="muted" Text="Drag a parameter onto a template to insert it." TextWrapping="Wrap" />
+                    <ItemsControl ItemsSource="{Binding FilenameParameters}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="models:FilenameParameter">
+                                <Button
+                                    Classes="chip"
+                                    Margin="0,0,6,6"
+                                    Content="{Binding Token}"
+                                    ToolTip.Tip="{Binding Tooltip}"
+                                    Cursor="SizeAll"
+                                    b:DragText.Payload="{Binding Token}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <WrapPanel>
+                        <TextBlock Classes="muted" Text="Date custom formatting:" VerticalAlignment="Center" />
+                        <Button
+                            Classes="link"
+                            Content="docs"
+                            Command="{Binding OpenUrlCommand}"
+                            CommandParameter="https://learn.microsoft.com/dotnet/standard/base-types/custom-date-and-time-format-strings" />
+                    </WrapPanel>
+                    <WrapPanel>
+                        <TextBlock Classes="muted" Text="Time span custom formatting:" VerticalAlignment="Center" />
+                        <Button
+                            Classes="link"
+                            Content="docs"
+                            Command="{Binding OpenUrlCommand}"
+                            CommandParameter="https://learn.microsoft.com/dotnet/standard/base-types/custom-timespan-format-strings" />
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+                <StackPanel Spacing="12">
+                    <TextBlock Classes="title" Text="Queue" />
+                    <TextBlock
+                        Classes="muted"
+                        Text="Default folder and quality for tasks added from Search."
+                        TextWrapping="Wrap" />
+                    <Grid ColumnDefinitions="*,8,Auto">
+                        <TextBox
+                            PlaceholderText="Download folder"
+                            Text="{Binding QueueFolder}" />
+                        <Button
+                            Grid.Column="2"
+                            Content="Browse"
+                            Command="{Binding BrowseQueueFolderCommand}" />
+                    </Grid>
+
+                    <TextBlock Classes="label" Text="Preferred quality" Margin="0" />
+                    <ComboBox
+                        HorizontalAlignment="Stretch"
+                        ItemsSource="{Binding Qualities}"
+                        SelectedItem="{Binding SelectedQuality}" />
+
+                    <TextBlock Classes="label" Text="Parallel limits" Margin="0" />
+                    <WrapPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,8">
+                            <TextBlock Classes="muted" VerticalAlignment="Center" Width="56" Text="VOD" />
+                            <NumericUpDown
+                                Classes="compact"
+                                Width="72"
+                                Minimum="1"
+                                Maximum="50"
+                                Increment="1"
+                                Value="{Binding Queue.LimitVod, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,8">
+                            <TextBlock Classes="muted" VerticalAlignment="Center" Width="56" Text="Clip" />
+                            <NumericUpDown
+                                Classes="compact"
+                                Width="72"
+                                Minimum="1"
+                                Maximum="50"
+                                Increment="1"
+                                Value="{Binding Queue.LimitClip, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,8">
+                            <TextBlock Classes="muted" VerticalAlignment="Center" Width="56" Text="Chat" />
+                            <NumericUpDown
+                                Classes="compact"
+                                Width="72"
+                                Minimum="1"
+                                Maximum="50"
+                                Increment="1"
+                                Value="{Binding Queue.LimitChat, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,8">
+                            <TextBlock Classes="muted" VerticalAlignment="Center" Width="56" Text="Render" />
+                            <NumericUpDown
+                                Classes="compact"
+                                Width="72"
+                                Minimum="1"
+                                Maximum="50"
+                                Increment="1"
+                                Value="{Binding Queue.LimitRender, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                        </StackPanel>
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
+
+            <Button
+                Classes="secondary"
+                HorizontalAlignment="Left"
+                Content="Restore defaults"
+                Command="{Binding RestoreDefaultsCommand}" />
+        </StackPanel>
+    </ScrollViewer>
 </ContentPage>

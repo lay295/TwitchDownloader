@@ -67,8 +67,26 @@ namespace TwitchDownloaderAvalonia.Services
         private async Task ShowMessageCoreAsync(string title, string message)
         {
             var dialog = new MessageDialog();
-            dialog.DataContext = new MessageDialogViewModel(title, message, dialog.Close);
+            dialog.DataContext = new MessageDialogViewModel(title, message, result => dialog.Close(result));
             await dialog.ShowDialog(_owner!);
+        }
+
+        public async Task<bool> ShowConfirmAsync(string title, string message)
+        {
+            if (_owner is null)
+                return false;
+
+            if (Dispatcher.UIThread.CheckAccess())
+                return await ShowConfirmCoreAsync(title, message);
+
+            return await Dispatcher.UIThread.InvokeAsync(() => ShowConfirmCoreAsync(title, message));
+        }
+
+        private async Task<bool> ShowConfirmCoreAsync(string title, string message)
+        {
+            var dialog = new MessageDialog();
+            dialog.DataContext = new MessageDialogViewModel(title, message, result => dialog.Close(result), showCancel: true);
+            return await dialog.ShowDialog<bool>(_owner!);
         }
 
         private async Task<CollisionPromptResult> ShowCollisionCoreAsync(string fileName, string fullPath)

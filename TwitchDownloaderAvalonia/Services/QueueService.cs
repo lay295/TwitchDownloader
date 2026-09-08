@@ -102,6 +102,15 @@ namespace TwitchDownloaderAvalonia.Services
 
         public LogLevel LogLevel => (LogLevel)_settings.Current.LogLevels;
 
+        public void NotifyLimitsChanged()
+        {
+            OnPropertyChanged(nameof(LimitVod));
+            OnPropertyChanged(nameof(LimitClip));
+            OnPropertyChanged(nameof(LimitChat));
+            OnPropertyChanged(nameof(LimitRender));
+            RequestPump();
+        }
+
         public QueueItemViewModel EnqueueVod(VideoDownloadOptions options, string title, byte[]? thumbnail)
         {
             var item = QueueItemViewModel.CreateVod(options, title, thumbnail, LogLevel);

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using TwitchDownloaderAvalonia.Models;
@@ -28,7 +29,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
             ChatRender = new ChatRenderViewModel(settings, status, ffmpeg, dialogs, fileDialogs, collision, thumbnails, queue);
             Search = new SearchViewModel(settings, status, dialogs, thumbnails, OpenSearchResultAsync, queue, ffmpeg, collision);
             Queue = new QueueViewModel(status, queue);
-            SettingsPage = new SettingsViewModel(settings, status, fileDialogs, queue);
+            SettingsPage = new SettingsViewModel(settings, status, fileDialogs, dialogs, collision, queue);
             About = new AboutViewModel();
             CurrentPage = Vod;
             AppVersion = $"v{typeof(MainWindowViewModel).Assembly.GetName().Version?.ToString(3)}";
@@ -86,13 +87,19 @@ namespace TwitchDownloaderAvalonia.ViewModels
             AppPage.ChatRender => "Render chat to video.",
             AppPage.Search => "Find VODs and clips, then open one or add a selection to the queue.",
             AppPage.Queue => "Every download and render lives here.",
-            AppPage.Settings => "Preferences for this app.",
+            AppPage.Settings => "Theme, files, filenames, and queue defaults.",
             AppPage.About => "About Twitch Downloader.",
             _ => "Download Twitch VODs with ease.",
         };
 
         [RelayCommand]
         private void Navigate(AppPage page) => SelectedPage = page;
+
+        [RelayCommand]
+        private void Donate()
+        {
+            Process.Start(new ProcessStartInfo("https://www.buymeacoffee.com/lay295") { UseShellExecute = true });
+        }
 
         private async Task OpenSearchResultAsync(SearchResultItem item)
         {

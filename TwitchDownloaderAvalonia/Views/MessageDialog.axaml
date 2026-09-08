@@ -12,10 +12,17 @@
     ShowInTaskbar="False">
     <StackPanel Margin="16" Spacing="12">
         <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
-        <Button
-            Content="OK"
-            MinWidth="80"
-            HorizontalAlignment="Right"
-            Command="{Binding OkCommand}" />
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button
+                Content="Cancel"
+                MinWidth="80"
+                IsVisible="{Binding ShowCancel}"
+                Command="{Binding CancelCommand}" />
+            <Button
+                Classes="accent"
+                Content="OK"
+                MinWidth="80"
+                Command="{Binding OkCommand}" />
+        </StackPanel>
     </StackPanel>
 </Window>

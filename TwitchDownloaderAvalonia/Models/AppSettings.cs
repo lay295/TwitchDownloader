@@ -1,3 +1,4 @@
+using System.Reflection;
 using TwitchDownloaderCore.Models;
 
 namespace TwitchDownloaderAvalonia.Models
@@ -29,6 +30,8 @@ namespace TwitchDownloaderAvalonia.Models
         public bool VerboseErrors { get; set; }
         public bool UtcVideoTime { get; set; }
         public bool ReduceMotion { get; set; }
+        public bool HideDonation { get; set; }
+        public string GuiTheme { get; set; } = "System";
         public List<string> RecentChannels { get; set; } = [];
 
         public string QueueFolder { get; set; } = string.Empty;
@@ -80,5 +83,20 @@ namespace TwitchDownloaderAvalonia.Models
         public double RenderAccentIndentScale { get; set; } = 1;
         public double RenderOutlineScale { get; set; } = 1;
         public string RenderFfmpegArguments { get; set; } = "[]";
+
+        public void CopyFrom(AppSettings other)
+        {
+            foreach (var prop in typeof(AppSettings).GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            {
+                if (!prop.CanWrite)
+                    continue;
+
+                var value = prop.GetValue(other);
+                if (value is List<string> list)
+                    value = new List<string>(list);
+
+                prop.SetValue(this, value);
+            }
+        }
     }
 }

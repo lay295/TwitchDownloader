@@ -268,10 +268,20 @@
                                         Margin="0" />
                                 </DockPanel>
 
-                                <StackPanel Spacing="4">
-                                    <TextBlock Classes="label" Text="OAuth" Margin="0" />
-                                    <TextBox Text="{Binding Oauth}" PlaceholderText="Optional" />
-                                </StackPanel>
+                                <WrapPanel>
+                                    <TextBlock
+                                        Classes="muted"
+                                        Text="Looking for the OAuth token?"
+                                        VerticalAlignment="Center" />
+                                    <Button
+                                        Classes="link"
+                                        Margin="4,0,0,0"
+                                        Content="Go to Settings"
+                                        x:DataType="vm:MainWindowViewModel"
+                                        DataContext="{Binding $parent[Window].DataContext}"
+                                        Command="{Binding NavigateCommand}"
+                                        CommandParameter="{x:Static models:AppPage.Settings}" />
+                                </WrapPanel>
                             </StackPanel>
                         </Expander>
                     </StackPanel>
