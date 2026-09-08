@@ -2,6 +2,7 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
+    xmlns:c="using:TwitchDownloaderAvalonia.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
@@ -19,9 +20,67 @@
         </Border>
 
         <Border Classes="card">
-            <StackPanel Spacing="6">
-                <TextBlock Classes="label" Text="Downloads" />
-                <TextBlock Classes="muted" Text="Temp folder, filename templates, bandwidth limit, and file collision behavior will be added here." TextWrapping="Wrap" />
+            <StackPanel Spacing="10">
+                <TextBlock Classes="label" Text="Queue" />
+                <TextBlock Classes="muted" Text="Default folder and quality for tasks added from Search." TextWrapping="Wrap" />
+                <Grid ColumnDefinitions="*,8,Auto">
+                    <TextBox
+                        PlaceholderText="Download folder"
+                        Text="{Binding QueueFolder}" />
+                    <Button
+                        Grid.Column="2"
+                        Content="Browse"
+                        Command="{Binding BrowseQueueFolderCommand}" />
+                </Grid>
+                <TextBlock Classes="label" Text="Preferred quality" Margin="0,4,0,0" />
+                <ComboBox
+                    HorizontalAlignment="Stretch"
+                    ItemsSource="{Binding Qualities}"
+                    SelectedItem="{Binding SelectedQuality}" />
+
+                <TextBlock Classes="label" Text="Parallel limits" Margin="0,4,0,0" />
+                <WrapPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,8">
+                        <TextBlock Classes="muted" VerticalAlignment="Center" Width="56" Text="VOD" />
+                        <NumericUpDown
+                            Classes="compact"
+                            Width="72"
+                            Minimum="1"
+                            Maximum="50"
+                            Increment="1"
+                            Value="{Binding Queue.LimitVod, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,8">
+                        <TextBlock Classes="muted" VerticalAlignment="Center" Width="56" Text="Clip" />
+                        <NumericUpDown
+                            Classes="compact"
+                            Width="72"
+                            Minimum="1"
+                            Maximum="50"
+                            Increment="1"
+                            Value="{Binding Queue.LimitClip, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,8">
+                        <TextBlock Classes="muted" VerticalAlignment="Center" Width="56" Text="Chat" />
+                        <NumericUpDown
+                            Classes="compact"
+                            Width="72"
+                            Minimum="1"
+                            Maximum="50"
+                            Increment="1"
+                            Value="{Binding Queue.LimitChat, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,8">
+                        <TextBlock Classes="muted" VerticalAlignment="Center" Width="56" Text="Render" />
+                        <NumericUpDown
+                            Classes="compact"
+                            Width="72"
+                            Minimum="1"
+                            Maximum="50"
+                            Increment="1"
+                            Value="{Binding Queue.LimitRender, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                    </StackPanel>
+                </WrapPanel>
             </StackPanel>
         </Border>
 

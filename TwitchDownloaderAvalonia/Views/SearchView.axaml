@@ -102,6 +102,9 @@
                                                 Header="Open"
                                                 Command="{Binding OpenCommand}" />
                                             <MenuItem
+                                                Header="Add to Queue"
+                                                Command="{Binding AddToQueueCommand}" />
+                                            <MenuItem
                                                 Header="Copy ID"
                                                 Command="{Binding CopyIdToClipboardCommand}" />
                                             <MenuItem
@@ -208,13 +211,21 @@
                     Content="&gt;"
                     Command="{Binding NextPageCommand}" />
             </StackPanel>
-            <Button
+            <StackPanel
                 Grid.Column="2"
-                Classes="accent"
-                HorizontalAlignment="Right"
-                Content="Open"
-                Command="{Binding OpenSelectedCommand}"
-                ToolTip.Tip="Opens the selected VOD or clip on the Video or Clip page." />
+                Orientation="Horizontal"
+                Spacing="8"
+                HorizontalAlignment="Right">
+                <Button
+                    Content="Open"
+                    Command="{Binding OpenSelectedCommand}"
+                    ToolTip.Tip="Opens the selected VOD or clip on the Video or Clip page." />
+                <Button
+                    Classes="accent"
+                    Content="{Binding AddToQueueText}"
+                    Command="{Binding EnqueueSelectedCommand}"
+                    ToolTip.Tip="Adds the selected VODs or clips to the queue." />
+            </StackPanel>
         </Grid>
     </Grid>
 </ContentPage>

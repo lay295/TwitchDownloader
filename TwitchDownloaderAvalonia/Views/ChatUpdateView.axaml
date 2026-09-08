@@ -294,7 +294,7 @@
                                 HorizontalAlignment="Stretch"
                                 Content="Cancel"
                                 Command="{Binding CancelCommand}"
-                                IsEnabled="{Binding IsUpdating}" />
+                                IsEnabled="{Binding CanCancelQueued}" />
                         </Grid>
                     </StackPanel>
                 </ScrollViewer>

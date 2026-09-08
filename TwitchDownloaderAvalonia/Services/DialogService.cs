@@ -1,12 +1,13 @@
 using Avalonia.Controls;
 using Avalonia.Input.Platform;
 using Avalonia.Threading;
+using TwitchDownloaderAvalonia.Models;
 using TwitchDownloaderAvalonia.ViewModels;
 using TwitchDownloaderAvalonia.Views;
 
 namespace TwitchDownloaderAvalonia.Services
 {
-    public sealed class DialogService
+    public sealed class DialogService(SettingsService settings, FileDialogService files)
     {
         private Window? _owner;
 
@@ -75,6 +76,24 @@ namespace TwitchDownloaderAvalonia.Services
             var dialog = new CollisionDialog();
             dialog.DataContext = new CollisionDialogViewModel(fileName, fullPath, promptResult => dialog.Close(promptResult));
             return await dialog.ShowDialog<CollisionPromptResult>(_owner!);
+        }
+
+        public async Task<EnqueueOptions?> ShowEnqueueOptionsAsync(bool includeAudioOnly)
+        {
+            if (_owner is null)
+                return null;
+
+            if (Dispatcher.UIThread.CheckAccess())
+                return await ShowEnqueueOptionsCoreAsync(includeAudioOnly);
+
+            return await Dispatcher.UIThread.InvokeAsync(() => ShowEnqueueOptionsCoreAsync(includeAudioOnly));
+        }
+
+        private async Task<EnqueueOptions?> ShowEnqueueOptionsCoreAsync(bool includeAudioOnly)
+        {
+            var dialog = new EnqueueOptionsDialog();
+            dialog.DataContext = new EnqueueOptionsViewModel(settings, files, includeAudioOnly, dialog.Close);
+            return await dialog.ShowDialog<EnqueueOptions?>(_owner!);
         }
     }
 

@@ -7,10 +7,7 @@ namespace TwitchDownloaderAvalonia.Services
     {
         private Window? _owner;
 
-        public void SetOwner(Window owner)
-        {
-            _owner = owner;
-        }
+        public void SetOwner(Window owner) => _owner = owner;
 
         public async Task<string?> SaveFileAsync(string suggestedFileName, string filterName, string extension)
         {
@@ -62,6 +59,29 @@ namespace TwitchDownloaderAvalonia.Services
             });
 
             return files.Count > 0 ? files[0].TryGetLocalPath() : null;
+        }
+
+        public async Task<string?> PickFolderAsync(string title, string? startPath = null)
+        {
+            if (_owner is null)
+                return null;
+
+            var storage = _owner.StorageProvider;
+            if (!storage.CanPickFolder)
+                return null;
+
+            IStorageFolder? start = null;
+            if (!string.IsNullOrWhiteSpace(startPath) && Directory.Exists(startPath))
+                start = await storage.TryGetFolderFromPathAsync(startPath);
+
+            var folders = await storage.OpenFolderPickerAsync(new FolderPickerOpenOptions
+            {
+                Title = title,
+                AllowMultiple = false,
+                SuggestedStartLocation = start,
+            });
+
+            return folders.Count > 0 ? folders[0].TryGetLocalPath() : null;
         }
     }
 }

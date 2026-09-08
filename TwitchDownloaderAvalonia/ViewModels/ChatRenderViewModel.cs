@@ -74,13 +74,13 @@ namespace TwitchDownloaderAvalonia.ViewModels
         ];
 
         private readonly SettingsService _settings;
-        private readonly AppStatus _appStatus;
         private readonly FfmpegService _ffmpeg;
         private readonly DialogService _dialogs;
         private readonly FileDialogService _fileDialogs;
         private readonly FileCollisionService _collision;
         private readonly ThumbnailService _thumbnails;
-        private CancellationTokenSource? _cancellation;
+        private readonly QueueService _queue;
+        private QueueItemViewModel? _queued;
         private ChatRoot? _chatJson;
         private string _videoId = "-1";
         private DateTime _videoTime;
@@ -103,15 +103,17 @@ namespace TwitchDownloaderAvalonia.ViewModels
             DialogService dialogs,
             FileDialogService fileDialogs,
             FileCollisionService collision,
-            ThumbnailService thumbnails)
+            ThumbnailService thumbnails,
+            QueueService queue)
         {
             _settings = settings;
-            _appStatus = appStatus;
+            AppStatus = appStatus;
             _ffmpeg = ffmpeg;
             _dialogs = dialogs;
             _fileDialogs = fileDialogs;
             _collision = collision;
             _thumbnails = thumbnails;
+            _queue = queue;
 
             foreach (var font in LoadFonts())
                 Fonts.Add(font);
@@ -356,10 +358,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
         [ObservableProperty]
         public partial double Progress { get; set; }
 
-        [ObservableProperty]
-        public partial bool IsRendering { get; set; }
-
-        public AppStatus AppStatus => _appStatus;
+        public AppStatus AppStatus { get; }
 
         [ObservableProperty]
         public partial bool InfoLoaded { get; set; }
@@ -367,11 +366,12 @@ namespace TwitchDownloaderAvalonia.ViewModels
         [ObservableProperty]
         public partial bool IsBusy { get; private set; }
 
-        public bool CanBrowse => !IsBusy && !IsRendering;
-        public bool CanEditOptions => !IsRendering;
+        public bool CanBrowse => !IsBusy;
+        public bool CanEditOptions => true;
         public bool CanEditTrimStart => CanEditOptions && InfoLoaded && TrimStart;
         public bool CanEditTrimEnd => CanEditOptions && InfoLoaded && TrimEnd;
-        public bool CanRender => InfoLoaded && !IsRendering && !string.IsNullOrWhiteSpace(InputFile);
+        public bool CanRender => InfoLoaded && !string.IsNullOrWhiteSpace(InputFile);
+        public bool CanCancelQueued => _queued?.CanCancel == true;
         public bool HasSuggestedFileName => !string.IsNullOrWhiteSpace(SuggestedFileName);
         public bool HasStreamerAvatar => StreamerAvatarBytes is { Length: > 0 };
 
@@ -422,80 +422,16 @@ namespace TwitchDownloaderAvalonia.ViewModels
             SaveFfmpegArgs();
 
             var options = BuildOptions(path);
-            var ffmpegLog = new List<string>();
-            var progress = new AvaloniaTaskProgress(
-                (LogLevel)_settings.Current.LogLevels,
-                percent => Progress = percent,
-                status => Status = status,
-                message =>
-                {
-                    ffmpegLog.Add(message);
-                    AppendLog(message);
-                });
-
-            var renderer = new ChatRenderer(options, progress);
-            try
-            {
-                await renderer.ParseJsonAsync();
-            }
-            catch (Exception ex)
-            {
-                renderer.Dispose();
-                AppendLog("ERROR: " + ex.Message);
-                if (_settings.Current.VerboseErrors)
-                    await _dialogs.ShowErrorAsync("Verbose error", ex.ToString());
-                return;
-            }
-
-            IsRendering = true;
-            NotifyState();
-            Status = "Rendering";
-            AppendLog($"Starting render: {path}");
-            _cancellation = new CancellationTokenSource();
-
-            try
-            {
-                await Task.Run(() => renderer.RenderVideoAsync(_cancellation.Token));
-                progress.SetStatus("Done");
-            }
-            catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException && _cancellation.IsCancellationRequested)
-            {
-                progress.SetStatus("Canceled");
-            }
-            catch (Exception ex)
-            {
-                progress.SetStatus("Error");
-                AppendLog("ERROR: " + ex.Message);
-                if (_settings.Current.VerboseErrors)
-                {
-                    var details = ex.Message.Contains("The pipe has been ended", StringComparison.OrdinalIgnoreCase)
-                        ? string.Join('\n', ffmpegLog.TakeLast(20))
-                        : ex.ToString();
-                    await _dialogs.ShowErrorAsync("Verbose error", details);
-                }
-            }
-            finally
-            {
-                progress.ReportProgress(0);
-                _cancellation.Dispose();
-                _cancellation = null;
-                renderer.Dispose();
-                IsRendering = false;
-                NotifyState();
-            }
+            var item = _queue.EnqueueChatRender(options, _title, ThumbnailBytes);
+            TrackQueued(item);
+            AppendLog($"Added to queue: {path}");
         }
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanCancelQueued))]
         private void Cancel()
         {
-            Status = "Canceling";
-            try
-            {
-                _cancellation?.Cancel();
-            }
-            catch (ObjectDisposedException)
-            {
-            }
+            if (_queued is not null)
+                _queue.Cancel(_queued);
         }
 
         [RelayCommand]
@@ -537,25 +473,14 @@ namespace TwitchDownloaderAvalonia.ViewModels
             if (e.PropertyName is nameof(SelectedContainer))
                 RefreshCodecs(SelectedContainer);
 
-            if (e.PropertyName is nameof(IsBusy) or nameof(InfoLoaded) or nameof(IsRendering)
-                or nameof(InputFile) or nameof(TrimStart) or nameof(TrimEnd))
-            {
+            if (e.PropertyName is nameof(IsBusy) or nameof(InfoLoaded) or nameof(InputFile) or nameof(TrimStart) or nameof(TrimEnd))
                 NotifyState();
-            }
 
             if (e.PropertyName is nameof(TrimStart) or nameof(TrimEnd)
                 or nameof(StartHour) or nameof(StartMinute) or nameof(StartSecond)
                 or nameof(EndHour) or nameof(EndMinute) or nameof(EndSecond)
                 or nameof(SelectedContainer) or nameof(InfoLoaded))
-            {
                 UpdateSuggestedFileName();
-            }
-
-            if (e.PropertyName is nameof(IsRendering) or nameof(Status))
-                PushAppStatus();
-
-            if (e.PropertyName is nameof(Progress))
-                _appStatus.Progress = Progress;
 
             if (_loading)
                 return;
@@ -583,8 +508,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
         private async Task LoadFileAsync(string path)
         {
             var extension = Path.GetExtension(path);
-            if (!extension.Equals(".json", StringComparison.OrdinalIgnoreCase)
-                && !extension.Equals(".gz", StringComparison.OrdinalIgnoreCase))
+            if (!extension.Equals(".json", StringComparison.OrdinalIgnoreCase) && !extension.Equals(".gz", StringComparison.OrdinalIgnoreCase))
             {
                 AppendLog("ERROR: Only JSON and GZip JSON chat files are supported.");
                 await _dialogs.ShowErrorAsync("Unsupported file", "Please choose a .json or .json.gz chat file.");
@@ -1140,6 +1064,33 @@ namespace TwitchDownloaderAvalonia.ViewModels
             BrowseCommand.NotifyCanExecuteChanged();
             LoadTypedFileCommand.NotifyCanExecuteChanged();
             RenderCommand.NotifyCanExecuteChanged();
+            CancelCommand.NotifyCanExecuteChanged();
+            OnPropertyChanged(nameof(CanCancelQueued));
+        }
+
+        private void TrackQueued(QueueItemViewModel item)
+        {
+            if (_queued is not null)
+                _queued.PropertyChanged -= OnQueuedChanged;
+
+            _queued = item;
+            _queued.PropertyChanged += OnQueuedChanged;
+            Status = item.DisplayStatus;
+            Progress = item.Progress;
+            NotifyState();
+        }
+
+        private void OnQueuedChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (_queued is null)
+                return;
+
+            if (e.PropertyName is null or nameof(QueueItemViewModel.DisplayStatus))
+                Status = _queued.DisplayStatus;
+            if (e.PropertyName is null or nameof(QueueItemViewModel.Progress))
+                Progress = _queued.Progress;
+            if (e.PropertyName is null or nameof(QueueItemViewModel.CanCancel) or nameof(QueueItemViewModel.Status))
+                NotifyState();
         }
 
         public void AppendLog(string message)
@@ -1150,19 +1101,6 @@ namespace TwitchDownloaderAvalonia.ViewModels
 
             builder.Append(message);
             LogText = builder.ToString();
-        }
-
-        private void PushAppStatus()
-        {
-            var kind = Status switch
-            {
-                "Canceling" => AppStatusKind.Canceling,
-                "Error" => AppStatusKind.Error,
-                _ when IsRendering => AppStatusKind.Running,
-                _ => AppStatusKind.Idle,
-            };
-
-            _appStatus.Set(kind, Status, Progress);
         }
 
         private static List<string> LoadFonts()

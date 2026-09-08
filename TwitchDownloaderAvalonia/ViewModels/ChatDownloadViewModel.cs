@@ -1,8 +1,8 @@
+using System.ComponentModel;
 using System.Globalization;
 using System.Text;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using TwitchDownloaderAvalonia.Models;
 using TwitchDownloaderAvalonia.Services;
 using TwitchDownloaderCore;
 using TwitchDownloaderCore.Models;
@@ -15,12 +15,12 @@ namespace TwitchDownloaderAvalonia.ViewModels
     public partial class ChatDownloadViewModel : ViewModelBase
     {
         private readonly SettingsService _settings;
-        private readonly AppStatus _appStatus;
         private readonly DialogService _dialogs;
         private readonly FileDialogService _fileDialogs;
         private readonly FileCollisionService _collision;
         private readonly ThumbnailService _thumbnails;
-        private CancellationTokenSource? _cancellation;
+        private readonly QueueService _queue;
+        private QueueItemViewModel? _queued;
         private string _downloadId = string.Empty;
         private bool _isClip;
         private DateTime _videoTime;
@@ -39,14 +39,16 @@ namespace TwitchDownloaderAvalonia.ViewModels
             DialogService dialogs,
             FileDialogService fileDialogs,
             FileCollisionService collision,
-            ThumbnailService thumbnails)
+            ThumbnailService thumbnails,
+            QueueService queue)
         {
             _settings = settings;
-            _appStatus = appStatus;
+            AppStatus = appStatus;
             _dialogs = dialogs;
             _fileDialogs = fileDialogs;
             _collision = collision;
             _thumbnails = thumbnails;
+            _queue = queue;
             DownloadFormat = _settings.Current.ChatDownloadFormat;
             Compression = _settings.Current.ChatJsonCompression;
             TimestampStyle = _settings.Current.ChatTextTimestampStyle;
@@ -155,10 +157,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
         [ObservableProperty]
         public partial double Progress { get; set; }
 
-        [ObservableProperty]
-        public partial bool IsDownloading { get; set; }
-
-        public AppStatus AppStatus => _appStatus;
+        public AppStatus AppStatus { get; }
 
         [ObservableProperty]
         public partial bool InfoLoaded { get; set; }
@@ -166,11 +165,12 @@ namespace TwitchDownloaderAvalonia.ViewModels
         [ObservableProperty]
         public partial bool IsBusy { get; private set; }
 
-        public bool CanGetInfo => !IsBusy && !IsDownloading;
-        public bool CanEditOptions => InfoLoaded && !IsDownloading;
+        public bool CanGetInfo => !IsBusy;
+        public bool CanEditOptions => InfoLoaded;
         public bool CanEditTrimStart => CanEditOptions && TrimStart;
         public bool CanEditTrimEnd => CanEditOptions && TrimEnd;
-        public bool CanDownload => InfoLoaded && !IsDownloading;
+        public bool CanDownload => InfoLoaded;
+        public bool CanCancelQueued => _queued?.CanCancel == true;
         public bool HasSuggestedFileName => !string.IsNullOrWhiteSpace(SuggestedFileName);
         public bool HasStreamerAvatar => StreamerAvatarBytes is { Length: > 0 };
         public bool ShowCompression => DownloadFormat == ChatFormat.Json;
@@ -229,55 +229,16 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 return;
 
             var options = BuildOptions(path);
-            IsDownloading = true;
-            NotifyDownloadState();
-            Status = "Downloading";
-            AppendLog($"Starting download: {path}");
-            _cancellation = new CancellationTokenSource();
-            var progress = new AvaloniaTaskProgress(
-                (LogLevel)_settings.Current.LogLevels,
-                percent => Progress = percent,
-                status => Status = status,
-                AppendLog);
-
-            try
-            {
-                var downloader = new ChatDownloader(options, progress);
-                await Task.Run(() => downloader.DownloadAsync(_cancellation.Token));
-                progress.SetStatus("Done");
-            }
-            catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException && _cancellation.IsCancellationRequested)
-            {
-                progress.SetStatus("Canceled");
-            }
-            catch (Exception ex)
-            {
-                progress.SetStatus("Error");
-                AppendLog("ERROR: " + ex.Message);
-                if (_settings.Current.VerboseErrors)
-                    await _dialogs.ShowErrorAsync("Verbose error", ex.ToString());
-            }
-            finally
-            {
-                progress.ReportProgress(0);
-                _cancellation.Dispose();
-                _cancellation = null;
-                IsDownloading = false;
-                NotifyDownloadState();
-            }
+            var item = _queue.EnqueueChat(options, _title, ThumbnailBytes);
+            TrackQueued(item);
+            AppendLog($"Added to queue: {path}");
         }
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanCancelQueued))]
         private void Cancel()
         {
-            Status = "Canceling";
-            try
-            {
-                _cancellation?.Cancel();
-            }
-            catch (ObjectDisposedException)
-            {
-            }
+            if (_queued is not null)
+                _queue.Cancel(_queued);
         }
 
         [RelayCommand]
@@ -364,14 +325,6 @@ namespace TwitchDownloaderAvalonia.ViewModels
         partial void OnEndSecondChanged(int value) => UpdateSuggestedFileName();
         partial void OnIsBusyChanged(bool value) => NotifyDownloadState();
         partial void OnInfoLoadedChanged(bool value) => NotifyDownloadState();
-        partial void OnIsDownloadingChanged(bool value)
-        {
-            NotifyDownloadState();
-            PushAppStatus();
-        }
-
-        partial void OnStatusChanged(string value) => PushAppStatus();
-        partial void OnProgressChanged(double value) => _appStatus.Progress = value;
 
         private async Task LoadVideoInfoAsync()
         {
@@ -555,6 +508,33 @@ namespace TwitchDownloaderAvalonia.ViewModels
             OnPropertyChanged(nameof(CanEditThirdPartyEmotes));
             GetInfoCommand.NotifyCanExecuteChanged();
             DownloadCommand.NotifyCanExecuteChanged();
+            CancelCommand.NotifyCanExecuteChanged();
+            OnPropertyChanged(nameof(CanCancelQueued));
+        }
+
+        private void TrackQueued(QueueItemViewModel item)
+        {
+            if (_queued is not null)
+                _queued.PropertyChanged -= OnQueuedChanged;
+
+            _queued = item;
+            _queued.PropertyChanged += OnQueuedChanged;
+            Status = item.DisplayStatus;
+            Progress = item.Progress;
+            NotifyDownloadState();
+        }
+
+        private void OnQueuedChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (_queued is null)
+                return;
+
+            if (e.PropertyName is null or nameof(QueueItemViewModel.DisplayStatus))
+                Status = _queued.DisplayStatus;
+            if (e.PropertyName is null or nameof(QueueItemViewModel.Progress))
+                Progress = _queued.Progress;
+            if (e.PropertyName is null or nameof(QueueItemViewModel.CanCancel) or nameof(QueueItemViewModel.Status))
+                NotifyDownloadState();
         }
 
         public void AppendLog(string message)
@@ -565,19 +545,6 @@ namespace TwitchDownloaderAvalonia.ViewModels
 
             builder.Append(message);
             LogText = builder.ToString();
-        }
-
-        private void PushAppStatus()
-        {
-            var kind = Status switch
-            {
-                "Canceling" => AppStatusKind.Canceling,
-                "Error" => AppStatusKind.Error,
-                _ when IsDownloading => AppStatusKind.Running,
-                _ => AppStatusKind.Idle,
-            };
-
-            _appStatus.Set(kind, Status, Progress);
         }
     }
 }

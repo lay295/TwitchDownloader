@@ -186,15 +186,28 @@
 
             <Border Grid.Row="2" Classes="statusBar" Margin="0,10,0,0">
                 <Grid ColumnDefinitions="Auto,*,Auto">
-                    <Border Classes="mascotStage" VerticalAlignment="Center" IsVisible="{Binding Status.ShowStatusImage}">
+                    <Border Classes="mascotStage" VerticalAlignment="Center" IsVisible="{Binding Status.ShowStage}">
                         <Panel>
+                            <Image
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                Stretch="UniformToFill"
+                                Source="{Binding Status.PreviewBytes, Converter={x:Static c:ByteArrayToBitmapConverter.Instance}}"
+                                IsVisible="{Binding Status.HasPreview}" />
+                            <Image
+                                Classes="idleWait"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Stretch="Uniform"
+                                Source="/Assets/Status/wait.png"
+                                IsVisible="{Binding Status.ShowIdleWait}" />
                             <Image
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
                                 Stretch="Uniform"
                                 anim:ImageBehavior.AnimatedSource="{Binding Status.AnimatedSource}"
                                 anim:ImageBehavior.RepeatBehavior="Forever"
-                                IsVisible="{Binding Status.IsAnimatedStatus}" />
+                                IsVisible="{Binding Status.ShowMascotGif}" />
                             <Image
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"

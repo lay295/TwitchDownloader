@@ -13,10 +13,15 @@ namespace TwitchDownloaderAvalonia.Models
         public required string Game { get; init; }
         public required string ThumbnailUrl { get; init; }
         public required bool IsClip { get; init; }
+        public required string StreamerName { get; init; }
+        public required string StreamerId { get; init; }
+        public string ClipperName { get; init; } = string.Empty;
+        public string ClipperId { get; init; } = string.Empty;
         public required Func<SearchResultItem, Task> CopyId { get; init; }
         public required Func<SearchResultItem, Task> CopyUrl { get; init; }
         public required Func<SearchResultItem, Task> OpenInBrowser { get; init; }
         public required Func<SearchResultItem, Task> OpenInApp { get; init; }
+        public required Func<SearchResultItem, Task> EnqueueOne { get; init; }
 
         public string Url => IsClip
             ? $"https://clips.twitch.tv/{Id}"
@@ -62,5 +67,8 @@ namespace TwitchDownloaderAvalonia.Models
 
         [RelayCommand]
         private Task Open() => OpenInApp(this);
+
+        [RelayCommand]
+        private Task AddToQueue() => EnqueueOne(this);
     }
 }

@@ -16,18 +16,19 @@ namespace TwitchDownloaderAvalonia.ViewModels
             DialogService dialogs,
             FileDialogService fileDialogs,
             FileCollisionService collision,
-            ThumbnailService thumbnails)
+            ThumbnailService thumbnails,
+            QueueService queue)
         {
             _ffmpeg = ffmpeg;
             Status = status;
-            Vod = new VodDownloadViewModel(settings, status, ffmpeg, dialogs, fileDialogs, collision, thumbnails);
-            Clip = new ClipDownloadViewModel(settings, status, ffmpeg, dialogs, fileDialogs, collision, thumbnails);
-            ChatDownload = new ChatDownloadViewModel(settings, status, dialogs, fileDialogs, collision, thumbnails);
-            ChatUpdate = new ChatUpdateViewModel(settings, status, dialogs, fileDialogs, collision, thumbnails);
-            ChatRender = new ChatRenderViewModel(settings, status, ffmpeg, dialogs, fileDialogs, collision, thumbnails);
-            Search = new SearchViewModel(settings, status, dialogs, thumbnails, OpenSearchResultAsync);
-            Queue = new QueueViewModel(status);
-            SettingsPage = new SettingsViewModel(settings, status);
+            Vod = new VodDownloadViewModel(settings, status, ffmpeg, dialogs, fileDialogs, collision, thumbnails, queue);
+            Clip = new ClipDownloadViewModel(settings, status, ffmpeg, dialogs, fileDialogs, collision, thumbnails, queue);
+            ChatDownload = new ChatDownloadViewModel(settings, status, dialogs, fileDialogs, collision, thumbnails, queue);
+            ChatUpdate = new ChatUpdateViewModel(settings, status, dialogs, fileDialogs, collision, thumbnails, queue);
+            ChatRender = new ChatRenderViewModel(settings, status, ffmpeg, dialogs, fileDialogs, collision, thumbnails, queue);
+            Search = new SearchViewModel(settings, status, dialogs, thumbnails, OpenSearchResultAsync, queue, ffmpeg, collision);
+            Queue = new QueueViewModel(status, queue);
+            SettingsPage = new SettingsViewModel(settings, status, fileDialogs, queue);
             About = new AboutViewModel();
             CurrentPage = Vod;
             AppVersion = $"v{typeof(MainWindowViewModel).Assembly.GetName().Version?.ToString(3)}";
@@ -83,18 +84,15 @@ namespace TwitchDownloaderAvalonia.ViewModels
             AppPage.ChatDownload => "Download VOD or clip chat.",
             AppPage.ChatUpdate => "Update existing chat files.",
             AppPage.ChatRender => "Render chat to video.",
-            AppPage.Search => "Find VODs and clips, then open one to download.",
-            AppPage.Queue => "Manage downloads and renders.",
+            AppPage.Search => "Find VODs and clips, then open one or add a selection to the queue.",
+            AppPage.Queue => "Every download and render lives here.",
             AppPage.Settings => "Preferences for this app.",
             AppPage.About => "About Twitch Downloader.",
             _ => "Download Twitch VODs with ease.",
         };
 
         [RelayCommand]
-        private void Navigate(AppPage page)
-        {
-            SelectedPage = page;
-        }
+        private void Navigate(AppPage page) => SelectedPage = page;
 
         private async Task OpenSearchResultAsync(SearchResultItem item)
         {

@@ -28,14 +28,15 @@ namespace TwitchDownloaderAvalonia
                 var settings = new SettingsService();
                 var status = new AppStatus(settings);
                 var ffmpeg = new FfmpegService();
-                var dialogs = new DialogService();
                 var files = new FileDialogService();
+                var dialogs = new DialogService(settings, files);
                 var collision = new FileCollisionService(settings, dialogs);
                 var thumbnails = new ThumbnailService();
+                var queue = new QueueService(settings, status, dialogs);
 
                 var mainWindow = new MainWindow
                 {
-                    DataContext = new MainWindowViewModel(settings, status, ffmpeg, dialogs, files, collision, thumbnails),
+                    DataContext = new MainWindowViewModel(settings, status, ffmpeg, dialogs, files, collision, thumbnails, queue),
                 };
 
                 dialogs.SetOwner(mainWindow);

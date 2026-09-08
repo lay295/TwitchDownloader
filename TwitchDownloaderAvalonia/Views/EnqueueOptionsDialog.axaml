@@ -1,0 +1,48 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
+    x:Class="TwitchDownloaderAvalonia.Views.EnqueueOptionsDialog"
+    x:DataType="vm:EnqueueOptionsViewModel"
+    Title="Add to Queue"
+    Width="480"
+    SizeToContent="Height"
+    WindowStartupLocation="CenterOwner"
+    CanResize="False"
+    ShowInTaskbar="False">
+    <StackPanel Margin="16" Spacing="12">
+        <TextBlock Classes="label" Text="Download folder" Margin="0" />
+        <Grid ColumnDefinitions="*,8,Auto">
+            <TextBox
+                PlaceholderText="Choose a folder"
+                Text="{Binding Folder}" />
+            <Button
+                Grid.Column="2"
+                Content="Browse"
+                Command="{Binding BrowseCommand}" />
+        </Grid>
+
+        <TextBlock Classes="label" Text="Preferred quality" Margin="0" />
+        <ComboBox
+            HorizontalAlignment="Stretch"
+            ItemsSource="{Binding AvailableQualities}"
+            SelectedItem="{Binding SelectedQuality}" />
+
+        <CheckBox
+            Content="Also download chat"
+            IsChecked="{Binding DownloadChat}" />
+        <TextBlock
+            Classes="muted"
+            Text="Chat uses the format, compression, and emote settings from the Chat page."
+            TextWrapping="Wrap" />
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,8,0,0">
+            <Button Content="Cancel" MinWidth="100" Command="{Binding CancelCommand}" />
+            <Button
+                Classes="accent"
+                Content="Add to Queue"
+                MinWidth="120"
+                Command="{Binding AddCommand}" />
+        </StackPanel>
+    </StackPanel>
+</Window>

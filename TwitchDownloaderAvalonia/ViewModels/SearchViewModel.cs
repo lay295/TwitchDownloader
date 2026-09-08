@@ -8,6 +8,9 @@ using CommunityToolkit.Mvvm.Input;
 using TwitchDownloaderAvalonia.Models;
 using TwitchDownloaderAvalonia.Services;
 using TwitchDownloaderCore;
+using TwitchDownloaderCore.Models;
+using TwitchDownloaderCore.Options;
+using TwitchDownloaderCore.Services;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderAvalonia.ViewModels
@@ -19,6 +22,9 @@ namespace TwitchDownloaderAvalonia.ViewModels
         private readonly SettingsService _settings;
         private readonly DialogService _dialogs;
         private readonly ThumbnailService _thumbnails;
+        private readonly QueueService _queue;
+        private readonly FfmpegService _ffmpeg;
+        private readonly FileCollisionService _collision;
         private readonly Func<SearchResultItem, Task> _openItem;
         private readonly List<string> _cursors = [""];
         private readonly Dictionary<string, SearchResultItem> _selected = new(StringComparer.Ordinal);
@@ -34,13 +40,19 @@ namespace TwitchDownloaderAvalonia.ViewModels
             AppStatus status,
             DialogService dialogs,
             ThumbnailService thumbnails,
-            Func<SearchResultItem, Task> openItem)
+            Func<SearchResultItem, Task> openItem,
+            QueueService queue,
+            FfmpegService ffmpeg,
+            FileCollisionService collision)
         {
             _settings = settings;
             AppStatus = status;
             _dialogs = dialogs;
             _thumbnails = thumbnails;
             _openItem = openItem;
+            _queue = queue;
+            _ffmpeg = ffmpeg;
+            _collision = collision;
 
             VideoTypes =
             [
@@ -100,6 +112,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
         [NotifyCanExecuteChangedFor(nameof(PreviousPageCommand))]
         [NotifyCanExecuteChangedFor(nameof(SelectAllCommand))]
         [NotifyCanExecuteChangedFor(nameof(OpenSelectedCommand))]
+        [NotifyCanExecuteChangedFor(nameof(EnqueueSelectedCommand))]
         [NotifyPropertyChangedFor(nameof(CanEditFilters))]
         [NotifyPropertyChangedFor(nameof(ShowSearchSpinner))]
         [NotifyPropertyChangedFor(nameof(ShowEmptyIdleGif))]
@@ -116,11 +129,13 @@ namespace TwitchDownloaderAvalonia.ViewModels
         public bool ShowEmptyIdleGif => !IsSearching && AppStatus.ShowStatusImage;
         public int SelectedCount => _selected.Count;
         public string SelectedCountText => $"Selected {SelectedCount}";
+        public string AddToQueueText => SelectedCount <= 1 ? "Add to Queue" : $"Add {SelectedCount} to Queue";
         public bool CanSearch => !IsSearching;
         public bool CanNextPage => !IsSearching && _hasNextPage;
         public bool CanPreviousPage => !IsSearching && _cursorIndex > 0;
         public bool CanSelectAll => !IsSearching && Results.Count > 0;
         public bool CanOpenSelected => !IsSearching && _selected.Count == 1;
+        public bool CanEnqueueSelected => !IsSearching && _selected.Count > 0;
 
         public string EmptyText
         {
@@ -132,7 +147,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 if (_hasSearched)
                     return "No VODs or clips found for this channel.";
 
-                return "Enter a channel to list VODs or clips. Open a result on the Video or Clip page.";
+                return "Enter a channel to list VODs or clips. Open a result or add selected items to the queue.";
             }
         }
 
@@ -261,6 +276,155 @@ namespace TwitchDownloaderAvalonia.ViewModels
         {
             var item = _selected.Values.FirstOrDefault();
             return item is null ? Task.CompletedTask : _openItem(item);
+        }
+
+        [RelayCommand(CanExecute = nameof(CanEnqueueSelected))]
+        private Task EnqueueSelectedAsync()
+        {
+            return EnqueueItemsAsync(_selected.Values.ToArray());
+        }
+
+        private Task EnqueueOneAsync(SearchResultItem item)
+        {
+            return EnqueueItemsAsync([item]);
+        }
+
+        private async Task EnqueueItemsAsync(IReadOnlyList<SearchResultItem> items)
+        {
+            if (items.Count == 0)
+                return;
+
+            var options = await _dialogs.ShowEnqueueOptionsAsync(items.Any(item => !item.IsClip));
+            if (options is null)
+                return;
+
+            try
+            {
+                if (!Directory.Exists(options.Folder))
+                    TwitchHelper.CreateDirectory(options.Folder);
+            }
+            catch (Exception ex)
+            {
+                await _dialogs.ShowErrorAsync("Invalid folder", "Unable to create the download folder.");
+                if (_settings.Current.VerboseErrors)
+                    await _dialogs.ShowErrorAsync("Verbose error", ex.ToString());
+
+                return;
+            }
+
+            var collision = (FileInfo file) => _collision.HandleCollision(file);
+            var throttle = _settings.Current.DownloadThrottleEnabled ? _settings.Current.MaximumBandwidthKib : -1;
+            var tasks = new List<QueueItemViewModel>(items.Count * (options.DownloadChat ? 2 : 1));
+
+            foreach (var item in items)
+            {
+                if (item.IsClip)
+                {
+                    var clipOptions = new ClipDownloadOptions
+                    {
+                        Id = item.Id,
+                        Quality = options.Quality,
+                        Filename = Path.Combine(options.Folder, FilenameService.GetFilename(
+                            _settings.Current.TemplateClip,
+                            item.Title,
+                            item.Id,
+                            item.Time,
+                            item.StreamerName,
+                            item.StreamerId,
+                            TimeSpan.Zero,
+                            TimeSpan.FromSeconds(item.Length),
+                            TimeSpan.FromSeconds(item.Length),
+                            item.Views,
+                            item.Game,
+                            string.IsNullOrEmpty(item.ClipperName) ? null : item.ClipperName,
+                            string.IsNullOrEmpty(item.ClipperId) ? null : item.ClipperId) + ".mp4"),
+                        ThrottleKib = throttle,
+                        TempFolder = _settings.Current.TempPath,
+                        EncodeMetadata = _settings.Current.EncodeClipMetadata,
+                        FfmpegPath = _ffmpeg.ResolvedPath,
+                        FileCollisionCallback = collision,
+                    };
+
+                    tasks.Add(QueueItemViewModel.CreateClip(clipOptions, item.Title, item.ThumbnailBytes, _queue.LogLevel));
+                }
+                else if (long.TryParse(item.Id, out var videoId))
+                {
+                    var vodOptions = new VideoDownloadOptions
+                    {
+                        Oauth = _settings.Current.OAuth,
+                        TempFolder = _settings.Current.TempPath,
+                        Id = videoId,
+                        Quality = options.Quality,
+                        FfmpegPath = _ffmpeg.ResolvedPath,
+                        TrimBeginning = false,
+                        TrimEnding = false,
+                        DownloadThreads = Math.Clamp(_settings.Current.VodDownloadThreads, 1, 20),
+                        ThrottleKib = throttle,
+                        FileCollisionCallback = collision,
+                        CacheCleanerCallback = _ => [],
+                    };
+                    vodOptions.Filename = Path.Combine(options.Folder, FilenameService.GetFilename(
+                        _settings.Current.TemplateVod,
+                        item.Title,
+                        item.Id,
+                        item.Time,
+                        item.StreamerName,
+                        item.StreamerId,
+                        TimeSpan.Zero,
+                        TimeSpan.FromSeconds(item.Length),
+                        TimeSpan.FromSeconds(item.Length),
+                        item.Views,
+                        item.Game) + FilenameService.GuessVodFileExtension(vodOptions.Quality));
+
+                    tasks.Add(QueueItemViewModel.CreateVod(vodOptions, item.Title, item.ThumbnailBytes, _queue.LogLevel));
+                }
+
+                if (!options.DownloadChat)
+                    continue;
+
+                var chatOptions = new ChatDownloadOptions
+                {
+                    EmbedData = _settings.Current.ChatEmbedEmotes,
+                    BttvEmotes = _settings.Current.BttvEmotes,
+                    FfzEmotes = _settings.Current.FfzEmotes,
+                    StvEmotes = _settings.Current.StvEmotes,
+                    TimeFormat = _settings.Current.ChatTextTimestampStyle,
+                    Id = item.Id,
+                    TrimBeginning = false,
+                    TrimEnding = false,
+                    FileCollisionCallback = collision,
+                    DownloadFormat = _settings.Current.ChatDownloadFormat,
+                    Compression = _settings.Current.ChatDownloadFormat == ChatFormat.Json
+                        ? _settings.Current.ChatJsonCompression
+                        : ChatCompression.None,
+                    DownloadThreads = Math.Clamp(_settings.Current.ChatDownloadThreads, 1, 20),
+                    TempFolder = _settings.Current.TempPath,
+                };
+                chatOptions.Filename = Path.Combine(options.Folder, FilenameService.GetFilename(
+                    _settings.Current.TemplateChat,
+                    item.Title,
+                    item.Id,
+                    item.Time,
+                    item.StreamerName,
+                    item.StreamerId,
+                    TimeSpan.Zero,
+                    TimeSpan.FromSeconds(item.Length),
+                    TimeSpan.FromSeconds(item.Length),
+                    item.Views,
+                    item.Game,
+                    string.IsNullOrEmpty(item.ClipperName) ? null : item.ClipperName,
+                    string.IsNullOrEmpty(item.ClipperId) ? null : item.ClipperId) + chatOptions.FileExtension);
+
+                tasks.Add(QueueItemViewModel.CreateChat(chatOptions, item.Title, item.ThumbnailBytes, _queue.LogLevel));
+            }
+
+            if (tasks.Count == 0)
+                return;
+
+            _queue.EnqueueRange(tasks);
+
+            foreach (var item in items)
+                item.IsSelected = false;
         }
 
         private async Task UpdateListAsync()
@@ -399,7 +563,9 @@ namespace TwitchDownloaderAvalonia.ViewModels
                         clip.node.viewCount,
                         clip.node.game?.displayName,
                         clip.node.thumbnailURL,
-                        isClip: true));
+                        isClip: true,
+                        clip.node.curator?.displayName,
+                        clip.node.curator?.id));
                 }
             }
 
@@ -431,7 +597,9 @@ namespace TwitchDownloaderAvalonia.ViewModels
             int views,
             string? game,
             string? thumbnailUrl,
-            bool isClip)
+            bool isClip,
+            string? clipperName = null,
+            string? clipperId = null)
         {
             var item = new SearchResultItem
             {
@@ -443,10 +611,15 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 Game = game ?? "Unknown Game",
                 ThumbnailUrl = thumbnailUrl ?? string.Empty,
                 IsClip = isClip,
+                StreamerName = _currentChannel?.displayName ?? _currentChannel?.login ?? "Unknown User",
+                StreamerId = _currentChannel?.id ?? string.Empty,
+                ClipperName = clipperName ?? string.Empty,
+                ClipperId = clipperId ?? string.Empty,
                 CopyId = CopyIdAsync,
                 CopyUrl = CopyUrlAsync,
                 OpenInBrowser = OpenInBrowserAsync,
                 OpenInApp = _openItem,
+                EnqueueOne = EnqueueOneAsync,
             };
 
             return item;
@@ -622,7 +795,9 @@ namespace TwitchDownloaderAvalonia.ViewModels
         {
             OnPropertyChanged(nameof(SelectedCount));
             OnPropertyChanged(nameof(SelectedCountText));
+            OnPropertyChanged(nameof(AddToQueueText));
             OpenSelectedCommand.NotifyCanExecuteChanged();
+            EnqueueSelectedCommand.NotifyCanExecuteChanged();
         }
 
         private void NotifyPaging()

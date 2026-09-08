@@ -31,6 +31,13 @@ namespace TwitchDownloaderAvalonia.Models
         public bool ReduceMotion { get; set; }
         public List<string> RecentChannels { get; set; } = [];
 
+        public string QueueFolder { get; set; } = string.Empty;
+        public string PreferredQuality { get; set; } = "Source";
+        public int LimitVod { get; set; } = 6;
+        public int LimitClip { get; set; } = 10;
+        public int LimitChat { get; set; } = 10;
+        public int LimitRender { get; set; } = 2;
+
         public string RenderFont { get; set; } = "Inter Embedded";
         public double RenderFontSize { get; set; } = 24;
         public int RenderWidth { get; set; } = 700;

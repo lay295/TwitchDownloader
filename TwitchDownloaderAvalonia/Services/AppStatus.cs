@@ -12,12 +12,18 @@ namespace TwitchDownloaderAvalonia.Services
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ShowStatusImage))]
+        [NotifyPropertyChangedFor(nameof(ShowStage))]
         [NotifyPropertyChangedFor(nameof(IsAnimatedStatus))]
+        [NotifyPropertyChangedFor(nameof(ShowMascotGif))]
         [NotifyPropertyChangedFor(nameof(ShowErrorStatus))]
+        [NotifyPropertyChangedFor(nameof(AnimatedSource))]
         public partial bool ReduceMotion { get; set; }
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsAnimatedStatus))]
+        [NotifyPropertyChangedFor(nameof(ShowMascotGif))]
+        [NotifyPropertyChangedFor(nameof(ShowIdleWait))]
+        [NotifyPropertyChangedFor(nameof(ShowStage))]
         [NotifyPropertyChangedFor(nameof(ShowErrorStatus))]
         [NotifyPropertyChangedFor(nameof(AnimatedSource))]
         [NotifyPropertyChangedFor(nameof(ShowProgress))]
@@ -33,30 +39,49 @@ namespace TwitchDownloaderAvalonia.Services
         [NotifyPropertyChangedFor(nameof(QueueChipText))]
         public partial int QueueCount { get; set; }
 
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasPreview))]
+        [NotifyPropertyChangedFor(nameof(ShowStage))]
+        [NotifyPropertyChangedFor(nameof(ShowMascotGif))]
+        [NotifyPropertyChangedFor(nameof(ShowIdleWait))]
+        [NotifyPropertyChangedFor(nameof(ShowErrorStatus))]
+        [NotifyPropertyChangedFor(nameof(AnimatedSource))]
+        public partial byte[]? PreviewBytes { get; set; }
+
         public bool ShowStatusImage => !ReduceMotion;
 
-        public bool IsAnimatedStatus => ShowStatusImage && Kind != AppStatusKind.Error;
+        public bool HasPreview => PreviewBytes is { Length: > 0 };
 
-        public bool ShowErrorStatus => ShowStatusImage && Kind == AppStatusKind.Error;
+        public bool ShowIdleWait => !HasPreview && Kind == AppStatusKind.Idle;
+
+        public bool ShowStage => HasPreview || ShowStatusImage || ShowIdleWait;
+
+        public bool IsAnimatedStatus => ShowStatusImage && !HasPreview && Kind is AppStatusKind.Running or AppStatusKind.Canceling;
+
+        public bool ShowMascotGif => IsAnimatedStatus;
+
+        public bool ShowErrorStatus => ShowStatusImage && !HasPreview && Kind == AppStatusKind.Error;
 
         public bool ShowProgress => Kind is AppStatusKind.Running or AppStatusKind.Canceling;
 
         public string? AnimatedSource => Kind switch
         {
-            AppStatusKind.Running => "avares://TwitchDownloaderAvalonia/Assets/Status/ppOverheat.gif",
-            AppStatusKind.Canceling => "avares://TwitchDownloaderAvalonia/Assets/Status/ppStretch.gif",
-            AppStatusKind.Error => null,
-            _ => "avares://TwitchDownloaderAvalonia/Assets/Status/ppHop.gif",
+            AppStatusKind.Running when ShowMascotGif => "avares://TwitchDownloaderAvalonia/Assets/Status/ppOverheat.gif",
+            AppStatusKind.Canceling when ShowMascotGif => "avares://TwitchDownloaderAvalonia/Assets/Status/ppStretch.gif",
+            _ => null,
         };
 
-        public string QueueChipText => $"Queue · {QueueCount}";
-
-        public void Set(AppStatusKind kind, string message, double? progress = null)
+        public void Set(AppStatusKind kind, string message, double? progress = null, byte[]? preview = null)
         {
             Kind = kind;
             Message = message;
             if (progress.HasValue)
                 Progress = progress.Value;
+
+            if (!ReferenceEquals(PreviewBytes, preview))
+                PreviewBytes = preview;
         }
+
+        public string QueueChipText => $"Queue · {QueueCount}";
     }
 }

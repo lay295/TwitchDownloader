@@ -1,11 +1,17 @@
+using CommunityToolkit.Mvvm.Input;
 using TwitchDownloaderAvalonia.Services;
 
 namespace TwitchDownloaderAvalonia.ViewModels
 {
-    public sealed class QueueViewModel(AppStatus status) : ViewModelBase
+    public sealed partial class QueueViewModel(AppStatus status, QueueService queue) : ViewModelBase
     {
         public AppStatus AppStatus { get; } = status;
+        public QueueService Queue { get; } = queue;
 
-        public string Details => "Queued downloads and renders will appear here. Use the status bar chip to return to this page.";
+        [RelayCommand]
+        private void CancelAll() => Queue.CancelAll();
+
+        [RelayCommand]
+        private void ClearFinished() => Queue.ClearFinished();
     }
 }
