@@ -18,7 +18,8 @@ namespace TwitchDownloaderAvalonia.ViewModels
             FileDialogService fileDialogs,
             FileCollisionService collision,
             ThumbnailService thumbnails,
-            QueueService queue)
+            QueueService queue,
+            UpdateCheckService updates)
         {
             _ffmpeg = ffmpeg;
             Status = status;
@@ -30,7 +31,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
             Search = new SearchViewModel(settings, status, dialogs, thumbnails, OpenSearchResultAsync, queue, ffmpeg, collision);
             Queue = new QueueViewModel(status, queue);
             SettingsPage = new SettingsViewModel(settings, status, fileDialogs, dialogs, collision, queue);
-            About = new AboutViewModel();
+            About = new AboutViewModel(updates, dialogs, ffmpeg);
             CurrentPage = Vod;
             AppVersion = $"v{typeof(MainWindowViewModel).Assembly.GetName().Version?.ToString(3)}";
             WindowTitle = $"Twitch Downloader {AppVersion}";
@@ -88,7 +89,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
             AppPage.Search => "Find VODs and clips, then open one or add a selection to the queue.",
             AppPage.Queue => "Every download and render lives here.",
             AppPage.Settings => "Theme, files, filenames, and queue defaults.",
-            AppPage.About => "About Twitch Downloader.",
+            AppPage.About => About.Description,
             _ => "Download Twitch VODs with ease.",
         };
 
@@ -134,6 +135,9 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 AppPage.About => About,
                 _ => Vod,
             };
+
+            if (value == AppPage.About)
+                _ = About.EnsureUpdateCheckAsync();
         }
 
         public async Task InitializeAsync()

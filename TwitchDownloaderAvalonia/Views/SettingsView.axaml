@@ -60,9 +60,13 @@
                     <Button
                         Classes="link"
                         HorizontalAlignment="Left"
-                        Content="How to get a token"
                         Command="{Binding OpenUrlCommand}"
-                        CommandParameter="https://www.youtube.com/watch?v=1MBsUoFGuls" />
+                        CommandParameter="https://www.youtube.com/watch?v=1MBsUoFGuls">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="How to get a token" VerticalAlignment="Center" />
+                            <PathIcon Data="{StaticResource IconExternal}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
             </Border>
 
@@ -195,17 +199,25 @@
                         <TextBlock Classes="muted" Text="Date custom formatting:" VerticalAlignment="Center" />
                         <Button
                             Classes="link"
-                            Content="docs"
                             Command="{Binding OpenUrlCommand}"
-                            CommandParameter="https://learn.microsoft.com/dotnet/standard/base-types/custom-date-and-time-format-strings" />
+                            CommandParameter="https://learn.microsoft.com/dotnet/standard/base-types/custom-date-and-time-format-strings">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock Text="docs" VerticalAlignment="Center" />
+                                <PathIcon Data="{StaticResource IconExternal}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
                     </WrapPanel>
                     <WrapPanel>
                         <TextBlock Classes="muted" Text="Time span custom formatting:" VerticalAlignment="Center" />
                         <Button
                             Classes="link"
-                            Content="docs"
                             Command="{Binding OpenUrlCommand}"
-                            CommandParameter="https://learn.microsoft.com/dotnet/standard/base-types/custom-timespan-format-strings" />
+                            CommandParameter="https://learn.microsoft.com/dotnet/standard/base-types/custom-timespan-format-strings">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock Text="docs" VerticalAlignment="Center" />
+                                <PathIcon Data="{StaticResource IconExternal}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
                     </WrapPanel>
                 </StackPanel>
             </Border>

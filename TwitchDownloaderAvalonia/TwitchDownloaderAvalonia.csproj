@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
+    <EmbeddedResource Include="..\LICENSE.txt" LogicalName="TwitchDownloaderAvalonia.LICENSE.txt" />
   </ItemGroup>
 
   <ItemGroup>

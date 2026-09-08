@@ -122,6 +122,26 @@
         <Setter Property="Foreground" Value="{DynamicResource AccentHoverBrush}" />
     </Style>
 
+    <Style Selector="Button.link PathIcon">
+        <Setter Property="Width" Value="9" />
+        <Setter Property="Height" Value="9" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="Opacity" Value="0.8" />
+        <Setter Property="Margin" Value="0,1,0,0" />
+    </Style>
+
+    <Style Selector="Button.link TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+    </Style>
+
+    <Style Selector="Button.link:pointerover PathIcon">
+        <Setter Property="Foreground" Value="{DynamicResource AccentHoverBrush}" />
+    </Style>
+
+    <Style Selector="Button.link:pointerover TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource AccentHoverBrush}" />
+    </Style>
+
     <Style Selector="Button.nav">
         <Setter Property="HorizontalAlignment" Value="Stretch" />
         <Setter Property="HorizontalContentAlignment" Value="Left" />
