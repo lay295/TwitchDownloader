@@ -19,8 +19,8 @@ namespace TwitchDownloaderAvalonia.Models
 
     public sealed class CustomFfmpegArgs
     {
-        public string CodecName { get; set; } = string.Empty;
-        public string ContainerName { get; set; } = string.Empty;
+        public string CodecName { get; init; } = string.Empty;
+        public string ContainerName { get; init; } = string.Empty;
         public string InputArgs { get; set; } = string.Empty;
         public string OutputArgs { get; set; } = string.Empty;
     }

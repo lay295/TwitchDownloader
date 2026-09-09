@@ -133,13 +133,13 @@ namespace TwitchDownloaderAvalonia.Services
         public void LogError(string logMessage)
         {
             if ((logLevel & LogLevel.Error) == 0) return;
-            PostLog("ERROR: " + logMessage);
+            PostLog(Loc.Error(logMessage));
         }
 
         public void LogError(DefaultInterpolatedStringHandler logMessage)
         {
             if ((logLevel & LogLevel.Error) == 0) return;
-            PostLog("ERROR: " + logMessage.ToStringAndClear());
+            PostLog(Loc.Error(logMessage.ToStringAndClear()));
         }
 
         public void LogFfmpeg(string logMessage)

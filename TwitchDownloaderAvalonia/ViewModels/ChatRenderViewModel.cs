@@ -346,7 +346,14 @@ namespace TwitchDownloaderAvalonia.ViewModels
         [NotifyPropertyChangedFor(nameof(LogToggleText))]
         public partial bool IsLogExpanded { get; set; }
 
-        public string LogToggleText => IsLogExpanded ? "Hide log" : "Show log";
+        public string LogToggleText => IsLogExpanded
+            ? Loc.Get("common.hide_log")
+            : Loc.Get("common.show_log");
+
+        protected override void OnCultureChanged(object? sender, EventArgs e)
+        {
+            Notify(nameof(LogToggleText));
+        }
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(HasSuggestedFileName))]
@@ -378,7 +385,11 @@ namespace TwitchDownloaderAvalonia.ViewModels
         [RelayCommand(CanExecute = nameof(CanBrowse))]
         private async Task BrowseAsync()
         {
-            var path = await _fileDialogs.OpenFileAsync("Open chat JSON", "JSON files", ["*.json", "*.json.gz"]);
+            var path = await _fileDialogs.OpenFileAsync(
+                Loc.Get("dialogs.open_chat_json"),
+                Loc.Get("dialogs.filter_json"),
+                ["*.json", "*.json.gz"]);
+
             if (string.IsNullOrWhiteSpace(path))
                 return;
 
@@ -399,22 +410,22 @@ namespace TwitchDownloaderAvalonia.ViewModels
         {
             if (!ValidateInputs(out var error))
             {
-                AppendLog("ERROR: " + error);
-                await _dialogs.ShowErrorAsync("Unable to parse inputs", error);
+                AppendLog(Loc.Error(error));
+                await _dialogs.ShowErrorAsync(Loc.Get("render.parse_failed"), error);
                 return;
             }
 
             if (!_ffmpeg.IsAvailable())
             {
-                const string MISSING = "FFmpeg was not found. Install it or restart the app to download a copy.";
-                AppendLog("ERROR: " + MISSING);
-                await _dialogs.ShowErrorAsync("FFmpeg not found", MISSING);
+                var missing = Loc.Get("render.ffmpeg_missing");
+                AppendLog(Loc.Error(missing));
+                await _dialogs.ShowErrorAsync(Loc.Get("render.ffmpeg_missing_title"), missing);
                 return;
             }
 
             var extension = SelectedContainer!.Name.ToLowerInvariant();
             var suggestedName = BuildSuggestedFileName(extension);
-            var path = await _fileDialogs.SaveFileAsync(suggestedName, $"{SelectedContainer.Name} files", extension);
+            var path = await _fileDialogs.SaveFileAsync(suggestedName, Loc.Get("dialogs.filter_generic", SelectedContainer.Name), extension);
             if (string.IsNullOrWhiteSpace(path))
                 return;
 
@@ -424,7 +435,8 @@ namespace TwitchDownloaderAvalonia.ViewModels
             var options = BuildOptions(path);
             var item = _queue.EnqueueChatRender(options, _title, ThumbnailBytes);
             TrackQueued(item);
-            AppendLog($"Added to queue: {path}");
+
+            AppendLog(Loc.Get("common.added_to_queue", path));
         }
 
         [RelayCommand(CanExecute = nameof(CanCancelQueued))]
@@ -510,15 +522,15 @@ namespace TwitchDownloaderAvalonia.ViewModels
             var extension = Path.GetExtension(path);
             if (!extension.Equals(".json", StringComparison.OrdinalIgnoreCase) && !extension.Equals(".gz", StringComparison.OrdinalIgnoreCase))
             {
-                AppendLog("ERROR: Only JSON and GZip JSON chat files are supported.");
-                await _dialogs.ShowErrorAsync("Unsupported file", "Please choose a .json or .json.gz chat file.");
+                AppendLog(Loc.Error(Loc.Get("update.unsupported")));
+                await _dialogs.ShowErrorAsync(Loc.Get("update.unsupported_title"), Loc.Get("update.unsupported_message"));
                 return;
             }
 
             if (!File.Exists(path))
             {
-                AppendLog("ERROR: File not found: " + Path.GetFileName(path));
-                await _dialogs.ShowErrorAsync("File not found", path);
+                AppendLog(Loc.Error(Loc.Get("render.file_not_found") + " " + Path.GetFileName(path)));
+                await _dialogs.ShowErrorAsync(Loc.Get("render.file_not_found"), path);
                 return;
             }
 
@@ -537,16 +549,16 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 InfoLoaded = true;
                 UpdateSuggestedFileName();
                 NotifyState();
-                AppendLog($"Loaded {InfoTitle} from {Path.GetFileName(path)}.");
+                AppendLog(Loc.Get("common.loaded_file", InfoTitle, Path.GetFileName(path)));
                 await TryRefreshMetadataAsync();
             }
             catch (Exception ex)
             {
                 InputFile = path;
-                AppendLog("ERROR: " + ex.Message);
-                await _dialogs.ShowErrorAsync("Unable to read chat file", ex.Message);
+                AppendLog(Loc.Error(ex.Message));
+                await _dialogs.ShowErrorAsync(Loc.Get("update.read_failed"), ex.Message);
                 if (_settings.Current.VerboseErrors)
-                    await _dialogs.ShowErrorAsync("Verbose error", ex.ToString());
+                    await _dialogs.ShowErrorAsync(Loc.Get("dialogs.verbose_error"), ex.ToString());
             }
             finally
             {
@@ -564,14 +576,14 @@ namespace TwitchDownloaderAvalonia.ViewModels
             _videoTime = _settings.Current.UtcVideoTime ? videoCreatedAt : videoCreatedAt.ToLocalTime();
             InfoCreatedAt = videoCreatedAt != default
                 ? _videoTime.ToString(CultureInfo.CurrentCulture)
-                : "Unknown";
+                : Loc.Get("common.unknown");
 
-            _streamerName = chat.streamer?.name ?? "Unknown User";
+            _streamerName = chat.streamer?.name ?? Loc.Get("common.unknown_user");
             _streamerId = chat.streamer?.id.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
             InfoStreamer = _streamerName;
             _title = !string.IsNullOrWhiteSpace(chat.video?.title)
                 ? chat.video.title
-                : "Unknown";
+                : Loc.Get("common.unknown");
 
             InfoTitle = _title;
             _clipperName = chat.clipper?.name ?? string.Empty;
@@ -579,7 +591,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
             _viewCount = chat.video?.viewCount ?? 0;
             _game = chat.video?.game
                 ?? chat.video?.chapters?.FirstOrDefault()?.gameDisplayName
-                ?? "Unknown Game";
+                ?? Loc.Get("common.unknown_game");
 
             _videoId = chat.video?.id ?? firstComment?.content_id ?? "-1";
             _chatStartSeconds = chat.video is not null && !double.IsNegative(chat.video.start) ? chat.video.start : 0;
@@ -597,7 +609,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
             _videoLength = TimeSpan.FromSeconds(chat.video is not null && !double.IsNegative(chat.video.length) ? chat.video.length : 0);
             LengthText = _videoLength.TotalSeconds > 0
                 ? _videoLength.ToString("c")
-                : "Unknown";
+                : Loc.Get("common.unknown");
 
             TrimHourMaximum = _videoLength > TimeSpan.Zero ? (int)_videoLength.TotalHours : 48;
             TrimStart = false;
@@ -617,7 +629,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
                     var video = videoInfo.data.video;
                     if (video is null)
                     {
-                        AppendLog("ERROR: Unable to find thumbnail: VOD expired or ID corrupt.");
+                        AppendLog(Loc.Error(Loc.Get("update.thumbnail_missing")));
                         ThumbnailBytes = await _thumbnails.TryGetAsync(null);
                         TrimHourMaximum = 48;
                         return;
@@ -641,7 +653,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 var clip = clipInfo.data.clip;
                 if (clip?.video is null)
                 {
-                    AppendLog("ERROR: Unable to find thumbnail: VOD expired or ID corrupt.");
+                    AppendLog(Loc.Error(Loc.Get("update.thumbnail_missing")));
                     ThumbnailBytes = await _thumbnails.TryGetAsync(null);
                     return;
                 }
@@ -651,7 +663,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 _viewCount = clip.viewCount;
                 _game = clip.game?.displayName ?? _game;
                 if (string.IsNullOrEmpty(_clipperName))
-                    _clipperName = clip.curator?.displayName ?? "Unknown User";
+                    _clipperName = clip.curator?.displayName ?? Loc.Get("common.unknown_user");
 
                 if (string.IsNullOrEmpty(_clipperId))
                     _clipperId = clip.curator?.id ?? string.Empty;
@@ -662,10 +674,10 @@ namespace TwitchDownloaderAvalonia.ViewModels
             }
             catch (Exception ex)
             {
-                AppendLog("ERROR: " + ex.Message);
-                await _dialogs.ShowErrorAsync("Unable to get info", ex.Message);
+                AppendLog(Loc.Error(ex.Message));
+                await _dialogs.ShowErrorAsync(Loc.Get("update.get_info_failed"), ex.Message);
                 if (_settings.Current.VerboseErrors)
-                    await _dialogs.ShowErrorAsync("Verbose error", ex.ToString());
+                    await _dialogs.ShowErrorAsync(Loc.Get("dialogs.verbose_error"), ex.ToString());
             }
         }
 
@@ -674,13 +686,13 @@ namespace TwitchDownloaderAvalonia.ViewModels
             error = string.Empty;
             if (string.IsNullOrWhiteSpace(InputFile) || !File.Exists(InputFile))
             {
-                error = "No JSON files selected";
+                error = Loc.Get("render.no_json");
                 return false;
             }
 
             if (SelectedContainer is null || SelectedCodec is null)
             {
-                error = "Select a container and codec.";
+                error = Loc.Get("render.select_codec");
                 return false;
             }
 
@@ -689,31 +701,31 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 || !TryParseColor(AlternateBackgroundColorHex, out var alternate)
                 || !TryParseColor(HighlightUsersColorHex, out _))
             {
-                error = "One or more colors are invalid. Use #RRGGBB or #AARRGGBB.";
+                error = Loc.Get("render.invalid_colors");
                 return false;
             }
 
             if (ChatWidth < 2 || ChatHeight < 2)
             {
-                error = "Width and Height must be at least 2.";
+                error = Loc.Get("render.size_min");
                 return false;
             }
 
             if (ChatWidth % 2 != 0 || ChatHeight % 2 != 0)
             {
-                error = "Width and Height must be even";
+                error = Loc.Get("render.size_even");
                 return false;
             }
 
             if (Framerate < 1)
             {
-                error = "Framerate must be at least 1.";
+                error = Loc.Get("render.fps_min");
                 return false;
             }
 
             if (UpdateRate < 0)
             {
-                error = "Update rate cannot be negative.";
+                error = Loc.Get("render.update_rate_negative");
                 return false;
             }
 
@@ -723,14 +735,14 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 var codec = SelectedCodec.Name;
                 if (container is not ("MOV" or "WEBM") || codec is not ("RLE" or "ProRes" or "VP8" or "VP9"))
                 {
-                    error = "You've selected an alpha channel (transparency) for a container/codec that does not support it. Remove transparency or encode with MOV + RLE/PRORES or WEBM + VP8/VP9";
+                    error = Loc.Get("render.alpha_unsupported");
                     return false;
                 }
             }
 
             if (GenerateMask && background.Alpha == 255 && !(AlternateMessageBackgrounds && alternate.Alpha != 255))
             {
-                error = "You've selected generate mask with an opaque background. Reduce the background color alpha or disable generate mask.";
+                error = Loc.Get("render.mask_no_alpha");
                 return false;
             }
 
@@ -1123,7 +1135,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
         private static SKColor RequireColor(string hex)
         {
             if (!TryParseColor(hex, out var color))
-                throw new InvalidOperationException("One or more colors are invalid. Use #RRGGBB or #AARRGGBB.");
+                throw new InvalidOperationException(Loc.Get("render.invalid_colors"));
 
             return color;
         }

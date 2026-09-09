@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
+    <AvaloniaResource Include="Lang\**" />
     <EmbeddedResource Include="..\LICENSE.txt" LogicalName="TwitchDownloaderAvalonia.LICENSE.txt" />
   </ItemGroup>
 
@@ -30,6 +31,7 @@
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="Tomlyn" Version="2.10.1" />
     <PackageReference Include="Xabe.FFmpeg.Downloader" Version="6.0.2" />
   </ItemGroup>
 

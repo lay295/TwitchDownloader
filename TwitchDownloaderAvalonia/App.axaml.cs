@@ -26,6 +26,7 @@ namespace TwitchDownloaderAvalonia
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
                 var settings = new SettingsService();
+                LocalizationService.Current.SetCulture(settings.Current.GuiCulture);
                 ThemeService.Apply(settings.Current.GuiTheme);
                 var status = new AppStatus(settings);
                 var ffmpeg = new FfmpegService();
@@ -36,11 +37,16 @@ namespace TwitchDownloaderAvalonia
                 var queue = new QueueService(settings, status, dialogs);
                 var updates = new UpdateCheckService();
 
-                var mainWindow = new MainWindow
-                {
-                    DataContext = new MainWindowViewModel(settings, status, ffmpeg, dialogs, files, collision, thumbnails, queue, updates),
-                };
+                var vm = new MainWindowViewModel(settings, status, ffmpeg, dialogs, files, collision, thumbnails, queue, updates);
+                var mainWindow = new MainWindow { DataContext = vm };
 
+                void OnOpened(object? sender, EventArgs e)
+                {
+                    mainWindow.Opened -= OnOpened;
+                    _ = vm.InitializeAsync();
+                }
+
+                mainWindow.Opened += OnOpened;
                 dialogs.SetOwner(mainWindow);
                 files.SetOwner(mainWindow);
                 desktop.MainWindow = mainWindow;

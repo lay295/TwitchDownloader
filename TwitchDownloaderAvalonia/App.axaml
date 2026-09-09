@@ -33,9 +33,6 @@
         <DataTemplate DataType="vm:AboutViewModel">
             <views:AboutView />
         </DataTemplate>
-        <DataTemplate DataType="vm:DownloadPlaceholderViewModel">
-            <views:DownloadPlaceholderView />
-        </DataTemplate>
     </Application.DataTemplates>
 
     <Application.Resources>

@@ -4,6 +4,7 @@
     xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
     xmlns:m="using:TwitchDownloaderAvalonia.Models"
     xmlns:c="using:TwitchDownloaderAvalonia.Converters"
+    xmlns:loc="using:TwitchDownloaderAvalonia.Markup"
     xmlns:anim="https://github.com/whistyun/AnimatedImage.Avalonia"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -21,12 +22,12 @@
                 Margin="0,0,16,8"
                 VerticalAlignment="Center">
                 <RadioButton
-                    Content="VODs"
+                    Content="{loc:Translate Key=search.kind_vods}"
                     GroupName="SearchKind"
                     IsEnabled="{Binding CanEditFilters}"
                     IsChecked="{Binding Kind, Converter={x:Static c:EnumEqualsConverter.Instance}, ConverterParameter={x:Static m:SearchKind.Videos}, Mode=TwoWay}" />
                 <RadioButton
-                    Content="Clips"
+                    Content="{loc:Translate Key=search.kind_clips}"
                     GroupName="SearchKind"
                     IsEnabled="{Binding CanEditFilters}"
                     IsChecked="{Binding Kind, Converter={x:Static c:EnumEqualsConverter.Instance}, ConverterParameter={x:Static m:SearchKind.Clips}, Mode=TwoWay}" />
@@ -62,7 +63,7 @@
                 HorizontalAlignment="Left"
                 Margin="0,0,8,8"
                 IsEditable="True"
-                PlaceholderText="Channel"
+                PlaceholderText="{loc:Translate Key=search.channel_placeholder}"
                 ItemsSource="{Binding ChannelSuggestions}"
                 SelectedItem="{Binding SelectedSuggestion}"
                 Text="{Binding ChannelQuery}"
@@ -76,7 +77,7 @@
                 Classes="accent"
                 Margin="0,0,0,8"
                 VerticalAlignment="Center"
-                Content="Search"
+                Content="{loc:Translate Key=search.action}"
                 Command="{Binding SearchCommand}" />
         </WrapPanel>
 
@@ -99,19 +100,19 @@
                                     <Button.ContextMenu>
                                         <ContextMenu>
                                             <MenuItem
-                                                Header="Open"
+                                                Header="{loc:Translate Key=search.menu_open}"
                                                 Command="{Binding OpenCommand}" />
                                             <MenuItem
-                                                Header="Add to Queue"
+                                                Header="{loc:Translate Key=search.menu_add_queue}"
                                                 Command="{Binding AddToQueueCommand}" />
                                             <MenuItem
-                                                Header="Copy ID"
+                                                Header="{loc:Translate Key=search.menu_copy_id}"
                                                 Command="{Binding CopyIdToClipboardCommand}" />
                                             <MenuItem
-                                                Header="Copy URL"
+                                                Header="{loc:Translate Key=search.menu_copy_url}"
                                                 Command="{Binding CopyUrlToClipboardCommand}" />
                                             <MenuItem
-                                                Header="Open in browser"
+                                                Header="{loc:Translate Key=search.menu_open_browser}"
                                                 Command="{Binding OpenBrowserCommand}" />
                                         </ContextMenu>
                                     </Button.ContextMenu>
@@ -123,7 +124,7 @@
                                                         Classes="muted"
                                                         HorizontalAlignment="Center"
                                                         VerticalAlignment="Center"
-                                                        Text="No thumbnail"
+                                                        Text="{loc:Translate Key=common.no_thumbnail}"
                                                         IsVisible="{Binding !HasThumbnail}" />
                                                     <Image
                                                         HorizontalAlignment="Stretch"
@@ -144,11 +145,11 @@
                                             <TextBlock
                                                 Classes="muted"
                                                 DockPanel.Dock="Left"
-                                                Text="{Binding LengthFormatted, StringFormat='Duration: {0}'}" />
+                                                Text="{Binding DurationText}" />
                                             <TextBlock
                                                 Classes="muted"
                                                 HorizontalAlignment="Right"
-                                                Text="{Binding Views, StringFormat='Views: {0}'}" />
+                                                Text="{Binding ViewsText}" />
                                         </DockPanel>
                                     </StackPanel>
                                 </Button>
@@ -195,7 +196,7 @@
                     VerticalAlignment="Center"
                     Text="{Binding SelectedCountText}" />
                 <Button
-                    Content="Select all"
+                    Content="{loc:Translate Key=search.select_all}"
                     Command="{Binding SelectAllCommand}" />
             </StackPanel>
             <StackPanel
@@ -217,14 +218,14 @@
                 Spacing="8"
                 HorizontalAlignment="Right">
                 <Button
-                    Content="Open"
+                    Content="{loc:Translate Key=search.open}"
                     Command="{Binding OpenSelectedCommand}"
-                    ToolTip.Tip="Opens the selected VOD or clip on the Video or Clip page." />
+                    ToolTip.Tip="{loc:Translate Key=search.open_tip}" />
                 <Button
                     Classes="accent"
                     Content="{Binding AddToQueueText}"
                     Command="{Binding EnqueueSelectedCommand}"
-                    ToolTip.Tip="Adds the selected VODs or clips to the queue." />
+                    ToolTip.Tip="{loc:Translate Key=search.add_queue_tip}" />
             </StackPanel>
         </Grid>
     </Grid>

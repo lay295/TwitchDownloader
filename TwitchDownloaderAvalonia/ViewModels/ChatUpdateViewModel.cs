@@ -150,7 +150,14 @@ namespace TwitchDownloaderAvalonia.ViewModels
         [NotifyPropertyChangedFor(nameof(LogToggleText))]
         public partial bool IsLogExpanded { get; set; }
 
-        public string LogToggleText => IsLogExpanded ? "Hide log" : "Show log";
+        public string LogToggleText => IsLogExpanded
+            ? Loc.Get("common.hide_log")
+            : Loc.Get("common.show_log");
+
+        protected override void OnCultureChanged(object? sender, EventArgs e)
+        {
+            Notify(nameof(LogToggleText));
+        }
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(HasSuggestedFileName))]
@@ -186,7 +193,11 @@ namespace TwitchDownloaderAvalonia.ViewModels
         [RelayCommand(CanExecute = nameof(CanBrowse))]
         private async Task BrowseAsync()
         {
-            var path = await _fileDialogs.OpenFileAsync("Open chat JSON", "JSON files", ["*.json", "*.json.gz"]);
+            var path = await _fileDialogs.OpenFileAsync(
+                Loc.Get("dialogs.open_chat_json"),
+                Loc.Get("dialogs.filter_json"),
+                ["*.json", "*.json.gz"]);
+
             if (string.IsNullOrWhiteSpace(path))
                 return;
 
@@ -218,7 +229,8 @@ namespace TwitchDownloaderAvalonia.ViewModels
             var options = BuildOptions(path);
             var item = _queue.EnqueueChatUpdate(options, _title, ThumbnailBytes);
             TrackQueued(item);
-            AppendLog($"Added to queue: {path}");
+
+            AppendLog(Loc.Get("common.added_to_queue", path));
         }
 
         [RelayCommand(CanExecute = nameof(CanCancelQueued))]
@@ -299,26 +311,25 @@ namespace TwitchDownloaderAvalonia.ViewModels
             _settings.Save();
         }
 
-        partial void OnTrimStartChanged(bool value)
+        partial void OnTrimStartChanged(bool value) => OnTrimEnabledChanged(value);
+        partial void OnTrimEndChanged(bool value) => OnTrimEnabledChanged(value);
+        partial void OnStartHourChanged(int value) => OnTrimTimeChanged(value);
+        partial void OnStartMinuteChanged(int value) => OnTrimTimeChanged(value);
+        partial void OnStartSecondChanged(int value) => OnTrimTimeChanged(value);
+        partial void OnEndHourChanged(int value) => OnTrimTimeChanged(value);
+        partial void OnEndMinuteChanged(int value) => OnTrimTimeChanged(value);
+        partial void OnEndSecondChanged(int value) => OnTrimTimeChanged(value);
+        partial void OnIsBusyChanged(bool value) => OnBusyOrInfoChanged(value);
+        partial void OnInfoLoadedChanged(bool value) => OnBusyOrInfoChanged(value);
+
+        private void OnTrimEnabledChanged(bool _)
         {
             UpdateSuggestedFileName();
             NotifyState();
         }
 
-        partial void OnTrimEndChanged(bool value)
-        {
-            UpdateSuggestedFileName();
-            NotifyState();
-        }
-
-        partial void OnStartHourChanged(int value) => UpdateSuggestedFileName();
-        partial void OnStartMinuteChanged(int value) => UpdateSuggestedFileName();
-        partial void OnStartSecondChanged(int value) => UpdateSuggestedFileName();
-        partial void OnEndHourChanged(int value) => UpdateSuggestedFileName();
-        partial void OnEndMinuteChanged(int value) => UpdateSuggestedFileName();
-        partial void OnEndSecondChanged(int value) => UpdateSuggestedFileName();
-        partial void OnIsBusyChanged(bool value) => NotifyState();
-        partial void OnInfoLoadedChanged(bool value) => NotifyState();
+        private void OnTrimTimeChanged(int _) => UpdateSuggestedFileName();
+        private void OnBusyOrInfoChanged(bool _) => NotifyState();
 
         private async Task LoadFileAsync(string path)
         {
@@ -326,8 +337,8 @@ namespace TwitchDownloaderAvalonia.ViewModels
             if (!extension.Equals(".json", StringComparison.OrdinalIgnoreCase)
                 && !extension.Equals(".gz", StringComparison.OrdinalIgnoreCase))
             {
-                AppendLog("ERROR: Only JSON and GZip JSON chat files are supported.");
-                await _dialogs.ShowErrorAsync("Unsupported file", "Please choose a .json or .json.gz chat file.");
+                AppendLog(Loc.Error(Loc.Get("update.unsupported")));
+                await _dialogs.ShowErrorAsync(Loc.Get("update.unsupported_title"), Loc.Get("update.unsupported_message"));
                 return;
             }
 
@@ -346,16 +357,16 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 InfoLoaded = true;
                 UpdateSuggestedFileName();
                 NotifyState();
-                AppendLog($"Loaded {InfoTitle} from {Path.GetFileName(path)}.");
+                AppendLog(Loc.Get("common.loaded_file", InfoTitle, Path.GetFileName(path)));
                 await TryRefreshMetadataAsync();
             }
             catch (Exception ex)
             {
                 InputFile = path;
-                AppendLog("ERROR: " + ex.Message);
-                await _dialogs.ShowErrorAsync("Unable to read chat file", ex.Message);
+                AppendLog(Loc.Error(ex.Message));
+                await _dialogs.ShowErrorAsync(Loc.Get("update.read_failed"), ex.Message);
                 if (_settings.Current.VerboseErrors)
-                    await _dialogs.ShowErrorAsync("Verbose error", ex.ToString());
+                    await _dialogs.ShowErrorAsync(Loc.Get("dialogs.verbose_error"), ex.ToString());
             }
             finally
             {
@@ -373,12 +384,15 @@ namespace TwitchDownloaderAvalonia.ViewModels
             _videoTime = _settings.Current.UtcVideoTime ? videoCreatedAt : videoCreatedAt.ToLocalTime();
             InfoCreatedAt = videoCreatedAt != default
                 ? _videoTime.ToString(CultureInfo.CurrentCulture)
-                : "Unknown";
+                : Loc.Get("common.unknown");
 
-            _streamerName = chat.streamer?.name ?? "Unknown User";
+            _streamerName = chat.streamer?.name ?? Loc.Get("common.unknown_user");
             _streamerId = chat.streamer?.id.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
             InfoStreamer = _streamerName;
-            _title = string.IsNullOrWhiteSpace(chat.video?.title) ? "Unknown" : chat.video.title;
+            _title = string.IsNullOrWhiteSpace(chat.video?.title)
+                ? Loc.Get("common.unknown")
+                : chat.video.title;
+
             InfoTitle = _title;
             _clipperName = chat.clipper?.name ?? string.Empty;
             _clipperId = chat.clipper is not null
@@ -388,7 +402,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
             _viewCount = chat.video?.viewCount ?? 0;
             _game = chat.video?.game
                 ?? chat.video?.chapters?.FirstOrDefault()?.gameDisplayName
-                ?? "Unknown Game";
+                ?? Loc.Get("common.unknown_game");
 
             _videoId = chat.video?.id ?? firstComment?.content_id ?? "-1";
             _chatStartSeconds = chat.video is not null && !double.IsNegative(chat.video.start) ? chat.video.start : 0;
@@ -404,7 +418,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
             EndSecond = chatEnd.Seconds;
 
             _videoLength = TimeSpan.FromSeconds(chat.video is not null && !double.IsNegative(chat.video.length) ? chat.video.length : 0);
-            LengthText = _videoLength.TotalSeconds > 0 ? _videoLength.ToString("c") : "Unknown";
+            LengthText = _videoLength.TotalSeconds > 0 ? _videoLength.ToString("c") : Loc.Get("common.unknown");
             TrimHourMaximum = _videoLength > TimeSpan.Zero ? (int)_videoLength.TotalHours : 48;
             TrimStart = false;
             TrimEnd = false;
@@ -423,7 +437,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
                     var video = videoInfo.data.video;
                     if (video is null)
                     {
-                        AppendLog("ERROR: Unable to find thumbnail: VOD expired or ID corrupt.");
+                        AppendLog(Loc.Error(Loc.Get("update.thumbnail_missing")));
                         ThumbnailBytes = await _thumbnails.TryGetAsync(null);
                         TrimHourMaximum = 48;
                         return;
@@ -447,7 +461,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 var clip = clipInfo.data.clip;
                 if (clip?.video is null)
                 {
-                    AppendLog("ERROR: Unable to find thumbnail: VOD expired or ID corrupt.");
+                    AppendLog(Loc.Error(Loc.Get("update.thumbnail_missing")));
                     ThumbnailBytes = await _thumbnails.TryGetAsync(null);
                     return;
                 }
@@ -457,7 +471,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 _viewCount = clip.viewCount;
                 _game = clip.game?.displayName ?? _game;
                 if (string.IsNullOrEmpty(_clipperName))
-                    _clipperName = clip.curator?.displayName ?? "Unknown User";
+                    _clipperName = clip.curator?.displayName ?? Loc.Get("common.unknown_user");
 
                 if (string.IsNullOrEmpty(_clipperId))
                     _clipperId = clip.curator?.id ?? string.Empty;
@@ -468,10 +482,10 @@ namespace TwitchDownloaderAvalonia.ViewModels
             }
             catch (Exception ex)
             {
-                AppendLog("ERROR: " + ex.Message);
-                await _dialogs.ShowErrorAsync("Unable to get info", ex.Message);
+                AppendLog(Loc.Error(ex.Message));
+                await _dialogs.ShowErrorAsync(Loc.Get("update.get_info_failed"), ex.Message);
                 if (_settings.Current.VerboseErrors)
-                    await _dialogs.ShowErrorAsync("Verbose error", ex.ToString());
+                    await _dialogs.ShowErrorAsync(Loc.Get("dialogs.verbose_error"), ex.ToString());
             }
         }
 
@@ -514,10 +528,10 @@ namespace TwitchDownloaderAvalonia.ViewModels
         {
             return OutputFormat switch
             {
-                ChatFormat.Html => ("HTML files", "html"),
-                ChatFormat.Text => ("TXT files", "txt"),
-                _ when Compression == ChatCompression.Gzip => ("GZip JSON files", "json.gz"),
-                _ => ("JSON files", "json"),
+                ChatFormat.Html => (Loc.Get("dialogs.filter_html"), "html"),
+                ChatFormat.Text => (Loc.Get("dialogs.filter_txt"), "txt"),
+                _ when Compression == ChatCompression.Gzip => (Loc.Get("dialogs.filter_json_gz"), "json.gz"),
+                _ => (Loc.Get("dialogs.filter_json"), "json"),
             };
         }
 

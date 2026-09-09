@@ -3,6 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
     xmlns:c="using:TwitchDownloaderAvalonia.Converters"
+    xmlns:loc="using:TwitchDownloaderAvalonia.Markup"
     xmlns:anim="https://github.com/whistyun/AnimatedImage.Avalonia"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -16,21 +17,21 @@
         <DockPanel Grid.Row="0" Margin="0,0,0,8">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="6">
                 <Button
-                    Content="Clear finished"
+                    Content="{loc:Translate Key=queue.clear_finished}"
                     Command="{Binding ClearFinishedCommand}"
                     IsEnabled="{Binding Queue.HasFinishedItems}" />
                 <Button
                     Classes="secondary"
-                    Content="Cancel all"
+                    Content="{loc:Translate Key=queue.cancel_all}"
                     Command="{Binding CancelAllCommand}"
                     IsEnabled="{Binding Queue.CanCancelAll}" />
             </StackPanel>
-            <TextBlock Text="Tasks" VerticalAlignment="Center" Classes="title" />
+            <TextBlock Text="{loc:Translate Key=queue.tasks}" VerticalAlignment="Center" Classes="title" />
         </DockPanel>
 
         <WrapPanel Grid.Row="1" Margin="0,0,0,10">
             <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,6">
-                <TextBlock Classes="muted" VerticalAlignment="Center" Text="VOD" />
+                <TextBlock Classes="muted" VerticalAlignment="Center" Text="{loc:Translate Key=queue.limit_vod}" />
                 <NumericUpDown
                     Classes="compact"
                     Width="72"
@@ -40,7 +41,7 @@
                     Value="{Binding Queue.LimitVod, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,6">
-                <TextBlock Classes="muted" VerticalAlignment="Center" Text="Clip" />
+                <TextBlock Classes="muted" VerticalAlignment="Center" Text="{loc:Translate Key=queue.limit_clip}" />
                 <NumericUpDown
                     Classes="compact"
                     Width="72"
@@ -50,7 +51,7 @@
                     Value="{Binding Queue.LimitClip, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,6">
-                <TextBlock Classes="muted" VerticalAlignment="Center" Text="Chat" />
+                <TextBlock Classes="muted" VerticalAlignment="Center" Text="{loc:Translate Key=queue.limit_chat}" />
                 <NumericUpDown
                     Classes="compact"
                     Width="72"
@@ -60,7 +61,7 @@
                     Value="{Binding Queue.LimitChat, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,0,6">
-                <TextBlock Classes="muted" VerticalAlignment="Center" Text="Render" />
+                <TextBlock Classes="muted" VerticalAlignment="Center" Text="{loc:Translate Key=queue.limit_render}" />
                 <NumericUpDown
                     Classes="compact"
                     Width="72"
@@ -89,7 +90,7 @@
                                                     FontSize="11"
                                                     HorizontalAlignment="Center"
                                                     VerticalAlignment="Center"
-                                                    Text="No thumb"
+                                                    Text="{loc:Translate Key=queue.no_thumb}"
                                                     IsVisible="{Binding !HasThumbnail}" />
                                                 <Image
                                                     Stretch="UniformToFill"
@@ -135,15 +136,15 @@
                                             Spacing="4"
                                             VerticalAlignment="Center">
                                             <Button
-                                                Content="Cancel"
+                                                Content="{loc:Translate Key=queue.cancel}"
                                                 Command="{Binding CancelCommand}"
                                                 IsVisible="{Binding CanCancel}" />
                                             <Button
-                                                Content="Retry"
+                                                Content="{loc:Translate Key=queue.retry}"
                                                 Command="{Binding RetryCommand}"
                                                 IsVisible="{Binding CanRetry}" />
                                             <Button
-                                                Content="Error"
+                                                Content="{loc:Translate Key=queue.error}"
                                                 Command="{Binding ShowErrorCommand}"
                                                 IsVisible="{Binding HasError}" />
                                             <Button
@@ -152,11 +153,11 @@
                                                 VerticalAlignment="Center">
                                                 <Button.Flyout>
                                                     <MenuFlyout Placement="BottomEdgeAlignedRight">
-                                                        <MenuItem Header="Open folder" Command="{Binding OpenFolderCommand}" />
-                                                        <MenuItem Header="Copy path" Command="{Binding CopyPathCommand}" />
-                                                        <MenuItem Header="Move up" Command="{Binding MoveUpCommand}" />
-                                                        <MenuItem Header="Move down" Command="{Binding MoveDownCommand}" />
-                                                        <MenuItem Header="Remove" Command="{Binding RemoveCommand}" />
+                                                        <MenuItem Header="{loc:Translate Key=queue.open_folder}" Command="{Binding OpenFolderCommand}" />
+                                                        <MenuItem Header="{loc:Translate Key=queue.copy_path}" Command="{Binding CopyPathCommand}" />
+                                                        <MenuItem Header="{loc:Translate Key=queue.move_up}" Command="{Binding MoveUpCommand}" />
+                                                        <MenuItem Header="{loc:Translate Key=queue.move_down}" Command="{Binding MoveDownCommand}" />
+                                                        <MenuItem Header="{loc:Translate Key=queue.remove}" Command="{Binding RemoveCommand}" />
                                                     </MenuFlyout>
                                                 </Button.Flyout>
                                             </Button>
@@ -184,7 +185,7 @@
                     <TextBlock
                         Classes="muted"
                         HorizontalAlignment="Center"
-                        Text="No queued tasks." />
+                        Text="{loc:Translate Key=queue.empty}" />
                 </StackPanel>
             </Grid>
         </Border>

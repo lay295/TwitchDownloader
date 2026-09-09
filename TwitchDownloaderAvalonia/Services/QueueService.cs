@@ -23,6 +23,7 @@ namespace TwitchDownloaderAvalonia.Services
             _dialogs = dialogs;
 
             Items.CollectionChanged += OnItemsChanged;
+            LocalizationService.Current.CultureChanged += (_, _) => RefreshAppStatus();
         }
 
         public ObservableCollection<QueueItemViewModel> Items { get; } = [];
@@ -337,7 +338,7 @@ namespace TwitchDownloaderAvalonia.Services
             var stopping = Items.FirstOrDefault(item => item.Status == QueueItemStatus.Stopping);
             if (stopping is not null)
             {
-                _status.Set(AppStatusKind.Canceling, $"{stopping.Title} · {stopping.DisplayStatus}", stopping.Progress, stopping.ThumbnailBytes);
+                _status.Set(AppStatusKind.Canceling, Loc.Get("status.task_running", stopping.Title, stopping.DisplayStatus), stopping.Progress, stopping.ThumbnailBytes);
                 return;
             }
 
@@ -346,8 +347,8 @@ namespace TwitchDownloaderAvalonia.Services
             {
                 var extra = Items.Count(item => item.Status == QueueItemStatus.Running);
                 var message = extra > 1
-                    ? $"{running.Title} · {running.DisplayStatus}  (+{extra - 1})"
-                    : $"{running.Title} · {running.DisplayStatus}";
+                    ? Loc.Get("status.task_running_extra", running.Title, running.DisplayStatus, extra - 1)
+                    : Loc.Get("status.task_running", running.Title, running.DisplayStatus);
 
                 _status.Set(AppStatusKind.Running, message, running.Progress, running.ThumbnailBytes);
                 return;
@@ -356,18 +357,18 @@ namespace TwitchDownloaderAvalonia.Services
             var waiting = Items.FirstOrDefault(item => item.Status is QueueItemStatus.Waiting or QueueItemStatus.Ready);
             if (unfinished > 0)
             {
-                _status.Set(AppStatusKind.Idle, $"{unfinished} waiting in queue", 0, waiting?.ThumbnailBytes);
+                _status.Set(AppStatusKind.Idle, Loc.Get("status.waiting_in_queue", unfinished), 0, waiting?.ThumbnailBytes);
                 return;
             }
 
             var failed = Items.LastOrDefault(item => item.Status == QueueItemStatus.Failed);
             if (failed is not null)
             {
-                _status.Set(AppStatusKind.Error, $"{failed.Title} failed", 0, failed.ThumbnailBytes);
+                _status.Set(AppStatusKind.Error, Loc.Get("status.task_failed", failed.Title), 0, failed.ThumbnailBytes);
                 return;
             }
 
-            _status.Set(AppStatusKind.Idle, "Idle", 0);
+            _status.Set(AppStatusKind.Idle, Loc.Get("status.idle"), 0);
         }
     }
 }

@@ -2,45 +2,46 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
+    xmlns:loc="using:TwitchDownloaderAvalonia.Markup"
     x:Class="TwitchDownloaderAvalonia.Views.EnqueueOptionsDialog"
     x:DataType="vm:EnqueueOptionsViewModel"
-    Title="Add to Queue"
+    Title="{loc:Translate Key=search.add_to_queue}"
     Width="480"
     SizeToContent="Height"
     WindowStartupLocation="CenterOwner"
     CanResize="False"
     ShowInTaskbar="False">
     <StackPanel Margin="16" Spacing="12">
-        <TextBlock Classes="label" Text="Download folder" Margin="0" />
+        <TextBlock Classes="label" Text="{loc:Translate Key=settings.download_folder}" Margin="0" />
         <Grid ColumnDefinitions="*,8,Auto">
             <TextBox
-                PlaceholderText="Choose a folder"
+                PlaceholderText="{loc:Translate Key=dialogs.choose_folder}"
                 Text="{Binding Folder}" />
             <Button
                 Grid.Column="2"
-                Content="Browse"
+                Content="{loc:Translate Key=common.browse}"
                 Command="{Binding BrowseCommand}" />
         </Grid>
 
-        <TextBlock Classes="label" Text="Preferred quality" Margin="0" />
+        <TextBlock Classes="label" Text="{loc:Translate Key=settings.preferred_quality}" Margin="0" />
         <ComboBox
             HorizontalAlignment="Stretch"
-            ItemsSource="{Binding AvailableQualities}"
-            SelectedItem="{Binding SelectedQuality}" />
+            ItemsSource="{Binding QualityOptions}"
+            SelectedItem="{Binding SelectedQualityOption}" />
 
         <CheckBox
-            Content="Also download chat"
+            Content="{loc:Translate Key=dialogs.also_download_chat}"
             IsChecked="{Binding DownloadChat}" />
         <TextBlock
             Classes="muted"
-            Text="Chat uses the format, compression, and emote settings from the Chat page."
+            Text="{loc:Translate Key=dialogs.chat_uses_page_settings}"
             TextWrapping="Wrap" />
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,8,0,0">
-            <Button Content="Cancel" MinWidth="100" Command="{Binding CancelCommand}" />
+            <Button Content="{loc:Translate Key=common.cancel}" MinWidth="100" Command="{Binding CancelCommand}" />
             <Button
                 Classes="accent"
-                Content="Add to Queue"
+                Content="{loc:Translate Key=search.add_to_queue}"
                 MinWidth="120"
                 Command="{Binding AddCommand}" />
         </StackPanel>

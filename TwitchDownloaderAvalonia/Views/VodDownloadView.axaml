@@ -5,6 +5,7 @@
     xmlns:models="using:TwitchDownloaderAvalonia.Models"
     xmlns:core="using:TwitchDownloaderCore.Models"
     xmlns:c="using:TwitchDownloaderAvalonia.Converters"
+    xmlns:loc="using:TwitchDownloaderAvalonia.Markup"
     xmlns:anim="https://github.com/whistyun/AnimatedImage.Avalonia"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -19,12 +20,12 @@
             <Button
                 DockPanel.Dock="Right"
                 Classes="accent"
-                Content="Get Info"
+                Content="{loc:Translate Key=common.get_info}"
                 Command="{Binding GetInfoCommand}"
                 IsEnabled="{Binding CanGetInfo}" />
             <TextBox
                 Margin="0,0,8,0"
-                PlaceholderText="https://www.twitch.tv/videos/..."
+                PlaceholderText="{loc:Translate Key=vod.url_placeholder}"
                 Text="{Binding VideoUrl}">
                 <TextBox.KeyBindings>
                     <KeyBinding Gesture="Enter" Command="{Binding GetInfoCommand}" />
@@ -57,7 +58,7 @@
                                     <TextBlock
                                         Classes="muted"
                                         HorizontalAlignment="Center"
-                                        Text="No thumbnail"
+                                        Text="{loc:Translate Key=common.no_thumbnail}"
                                         IsVisible="{Binding AppStatus.ReduceMotion}" />
                                 </StackPanel>
                                 <Image
@@ -75,7 +76,7 @@
                             IsVisible="{Binding InfoLoaded}" />
                         <TextBlock
                             Classes="muted"
-                            Text="Get Info to load title, channel, and length."
+                            Text="{loc:Translate Key=common.get_info_hint}"
                             TextWrapping="Wrap"
                             IsVisible="{Binding !InfoLoaded}" />
                         <StackPanel
@@ -106,7 +107,7 @@
                                         Height="14"
                                         Data="{StaticResource IconClock}"
                                         Foreground="{DynamicResource MutedForegroundBrush}" />
-                                    <TextBlock Classes="muted" Text="Length" VerticalAlignment="Center" />
+                                    <TextBlock Classes="muted" Text="{loc:Translate Key=common.length}" VerticalAlignment="Center" />
                                 </StackPanel>
                                 <TextBlock
                                     Grid.Column="1"
@@ -121,7 +122,7 @@
                                         Height="14"
                                         Data="{StaticResource IconCalendar}"
                                         Foreground="{DynamicResource MutedForegroundBrush}" />
-                                    <TextBlock Classes="muted" Text="Created" VerticalAlignment="Center" />
+                                    <TextBlock Classes="muted" Text="{loc:Translate Key=common.created}" VerticalAlignment="Center" />
                                 </StackPanel>
                                 <TextBlock
                                     Grid.Column="1"
@@ -137,12 +138,12 @@
             <Border Grid.Column="1" Classes="card">
                 <ScrollViewer VerticalAlignment="Top">
                     <StackPanel Spacing="6" VerticalAlignment="Top">
-                        <TextBlock Classes="label" Text="Quality" />
+                        <TextBlock Classes="label" Text="{loc:Translate Key=common.quality}" />
                         <ComboBox
                             ItemsSource="{Binding Qualities}"
                             SelectedItem="{Binding SelectedQuality}"
                             IsEnabled="{Binding InfoLoaded}"
-                            PlaceholderText="Get Info first">
+                            PlaceholderText="{loc:Translate Key=common.get_info_first}">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate x:DataType="models:QualityOption">
                                     <TextBlock Text="{Binding DisplayName}" />
@@ -165,30 +166,30 @@
                                 IsEnabled="{Binding CanDownload}">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <PathIcon Data="{StaticResource IconDownload}" />
-                                    <TextBlock Text="Download" VerticalAlignment="Center" />
+                                    <TextBlock Text="{loc:Translate Key=common.download}" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
                             <Button
                                 Grid.Column="2"
                                 Classes="secondary"
                                 HorizontalAlignment="Stretch"
-                                Content="Cancel"
+                                Content="{loc:Translate Key=common.cancel}"
                                 Command="{Binding CancelCommand}"
                                 IsEnabled="{Binding CanCancelQueued}" />
                         </Grid>
 
-                        <Expander Header="Advanced">
+                        <Expander Header="{loc:Translate Key=common.advanced}">
                             <StackPanel Spacing="10">
                                 <StackPanel Spacing="6">
-                                    <TextBlock Classes="label" Text="Trim mode" Margin="0" />
+                                    <TextBlock Classes="label" Text="{loc:Translate Key=vod.trim_mode}" Margin="0" />
                                     <StackPanel Orientation="Horizontal" Spacing="16">
                                         <RadioButton
-                                            Content="Safe"
+                                            Content="{loc:Translate Key=vod.trim_safe}"
                                             GroupName="VodTrim"
                                             IsChecked="{Binding TrimMode, Converter={x:Static c:VideoTrimModeEqualsConverter.Instance}, ConverterParameter={x:Static core:VideoTrimMode.Safe}, Mode=TwoWay}"
                                             IsEnabled="{Binding InfoLoaded}" />
                                         <RadioButton
-                                            Content="Exact"
+                                            Content="{loc:Translate Key=vod.trim_exact}"
                                             GroupName="VodTrim"
                                             IsChecked="{Binding TrimMode, Converter={x:Static c:VideoTrimModeEqualsConverter.Instance}, ConverterParameter={x:Static core:VideoTrimMode.Exact}, Mode=TwoWay}"
                                             IsEnabled="{Binding InfoLoaded}" />
@@ -217,7 +218,7 @@
                                                        Value="{Binding StartSecond, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
                                     </StackPanel>
                                     <CheckBox
-                                        Content="Trim start"
+                                        Content="{loc:Translate Key=common.trim_start}"
                                         VerticalAlignment="Center"
                                         IsChecked="{Binding TrimStart}"
                                         IsEnabled="{Binding InfoLoaded}" />
@@ -245,7 +246,7 @@
                                                        Value="{Binding EndSecond, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
                                     </StackPanel>
                                     <CheckBox
-                                        Content="Trim end"
+                                        Content="{loc:Translate Key=common.trim_end}"
                                         VerticalAlignment="Center"
                                         IsChecked="{Binding TrimEnd}"
                                         IsEnabled="{Binding InfoLoaded}" />
@@ -263,7 +264,7 @@
                                         Value="{Binding DownloadThreads, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
                                     <TextBlock
                                         Classes="label"
-                                        Text="Download threads"
+                                        Text="{loc:Translate Key=common.download_threads}"
                                         VerticalAlignment="Center"
                                         Margin="0" />
                                 </DockPanel>
@@ -271,12 +272,12 @@
                                 <WrapPanel>
                                     <TextBlock
                                         Classes="muted"
-                                        Text="Looking for the OAuth token?"
+                                        Text="{loc:Translate Key=vod.oauth_hint}"
                                         VerticalAlignment="Center" />
                                     <Button
                                         Classes="link"
                                         Margin="4,0,0,0"
-                                        Content="Go to Settings"
+                                        Content="{loc:Translate Key=vod.go_to_settings}"
                                         x:DataType="vm:MainWindowViewModel"
                                         DataContext="{Binding $parent[Window].DataContext}"
                                         Command="{Binding NavigateCommand}"
@@ -295,7 +296,7 @@
                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4">
                         <Button
                             Classes="link"
-                            Content="Clear"
+                            Content="{loc:Translate Key=common.clear}"
                             Command="{Binding ClearLogCommand}"
                             IsVisible="{Binding IsLogExpanded}" />
                         <Button
@@ -305,14 +306,14 @@
                     </StackPanel>
                     <TextBlock
                         Classes="label"
-                        Text="Log"
+                        Text="{loc:Translate Key=common.log}"
                         VerticalAlignment="Center"
                         Margin="0" />
                 </DockPanel>
                 <TextBox
                     Height="128"
                     Text="{Binding LogText}"
-                    PlaceholderText="Log output will appear here."
+                    PlaceholderText="{loc:Translate Key=common.log_placeholder}"
                     IsReadOnly="True"
                     AcceptsReturn="True"
                     TextWrapping="Wrap"

@@ -4,6 +4,7 @@
     xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
     xmlns:m="using:TwitchDownloaderAvalonia.Models"
     xmlns:c="using:TwitchDownloaderAvalonia.Converters"
+    xmlns:loc="using:TwitchDownloaderAvalonia.Markup"
     xmlns:anim="https://github.com/whistyun/AnimatedImage.Avalonia"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -68,7 +69,7 @@
                     Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=Settings}">
                     <StackPanel Orientation="Horizontal" Spacing="10">
                         <PathIcon Data="{StaticResource IconSettings}" />
-                        <TextBlock Text="Settings" VerticalAlignment="Center" />
+                        <TextBlock Text="{loc:Translate Key=nav.settings}" VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
                 <Button
@@ -78,7 +79,7 @@
                     Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=About}">
                     <StackPanel Orientation="Horizontal" Spacing="10">
                         <PathIcon Data="{StaticResource IconAbout}" />
-                        <TextBlock Text="About" VerticalAlignment="Center" />
+                        <TextBlock Text="{loc:Translate Key=nav.about}" VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
                 <Button
@@ -91,7 +92,7 @@
                         <TextBlock
                             Grid.Column="1"
                             Margin="10,0,0,0"
-                            Text="Donate"
+                            Text="{loc:Translate Key=nav.donate}"
                             VerticalAlignment="Center" />
                         <PathIcon
                             Grid.Column="2"
@@ -108,7 +109,7 @@
                 x:DataType="vm:MainWindowViewModel"
                 DataContext="{Binding $parent[Window].DataContext}">
                 <StackPanel Margin="8,4,8,8" Spacing="2">
-                    <TextBlock Classes="navHeader first" Text="DOWNLOAD" />
+                    <TextBlock Classes="navHeader first" Text="{loc:Translate Key=nav.group_download}" />
                     <Button
                         Classes="nav"
                         Command="{Binding NavigateCommand}"
@@ -116,7 +117,7 @@
                         Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=Vod}">
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <PathIcon Data="{StaticResource IconVideo}" />
-                            <TextBlock Text="Video" VerticalAlignment="Center" />
+                            <TextBlock Text="{loc:Translate Key=nav.video}" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
                     <Button
@@ -126,7 +127,7 @@
                         Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=Clip}">
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <PathIcon Data="{StaticResource IconClip}" />
-                            <TextBlock Text="Clip" VerticalAlignment="Center" />
+                            <TextBlock Text="{loc:Translate Key=nav.clip}" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
                     <Button
@@ -136,11 +137,11 @@
                         Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=ChatDownload}">
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <PathIcon Data="{StaticResource IconChat}" />
-                            <TextBlock Text="Chat" VerticalAlignment="Center" />
+                            <TextBlock Text="{loc:Translate Key=nav.chat}" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
 
-                    <TextBlock Classes="navHeader" Text="PROCESS" />
+                    <TextBlock Classes="navHeader" Text="{loc:Translate Key=nav.group_process}" />
                     <Button
                         Classes="nav"
                         Command="{Binding NavigateCommand}"
@@ -148,7 +149,7 @@
                         Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=ChatUpdate}">
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <PathIcon Data="{StaticResource IconChatUpdate}" />
-                            <TextBlock Text="Chat Update" VerticalAlignment="Center" />
+                            <TextBlock Text="{loc:Translate Key=nav.chat_update}" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
                     <Button
@@ -158,11 +159,11 @@
                         Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=ChatRender}">
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <PathIcon Data="{StaticResource IconChatRender}" />
-                            <TextBlock Text="Chat Render" VerticalAlignment="Center" />
+                            <TextBlock Text="{loc:Translate Key=nav.chat_render}" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
 
-                    <TextBlock Classes="navHeader" Text="TOOLS" />
+                    <TextBlock Classes="navHeader" Text="{loc:Translate Key=nav.group_tools}" />
                     <Button
                         Classes="nav"
                         Command="{Binding NavigateCommand}"
@@ -170,7 +171,7 @@
                         Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=Search}">
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <PathIcon Data="{StaticResource IconSearch}" />
-                            <TextBlock Text="Search" VerticalAlignment="Center" />
+                            <TextBlock Text="{loc:Translate Key=nav.search}" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
                     <Button
@@ -180,7 +181,7 @@
                         Classes.selected="{Binding SelectedPage, Converter={x:Static c:AppPageEqualsConverter.Instance}, ConverterParameter=Queue}">
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <PathIcon Data="{StaticResource IconQueue}" />
-                            <TextBlock Text="Queue" VerticalAlignment="Center" />
+                            <TextBlock Text="{loc:Translate Key=nav.queue}" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
                 </StackPanel>

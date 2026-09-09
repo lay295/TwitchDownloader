@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using TwitchDownloaderAvalonia.Converters;
 using TwitchDownloaderAvalonia.Models;
 using TwitchDownloaderAvalonia.Services;
 using TwitchDownloaderCore.Services;
@@ -34,36 +35,25 @@ namespace TwitchDownloaderAvalonia.ViewModels
         }
 
         public QueueService Queue { get; }
-        public IReadOnlyList<string> Themes => ThemeService.Options;
-        public IReadOnlyList<string> Qualities => EnqueueOptionsViewModel.Qualities;
-        public IReadOnlyList<string> CollisionLabels { get; } = ["Ask", "Overwrite", "Rename", "Cancel"];
+        public IReadOnlyList<CultureOption> Cultures => AvailableCultures.All;
         public string TempPathPlaceholder { get; } = Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
-        public IReadOnlyList<FilenameParameter> FilenameParameters { get; } =
-        [
-            new("{title}", "The title of the video/clip."),
-            new("{id}", "The ID of the video/clip."),
-            new("{date}", "The date that the video/clip was created in the format M-d-yy."),
-            new("{date_custom=\"\"}", "The date that the video/clip was created in a customizable format."),
-            new("{channel}", "The display name of the channel which owns the video/clip/chat."),
-            new("{channel_id}", "The ID of the channel which owns the video/clip/chat."),
-            new("{clipper}", "The display name of the channel which created the clip, or empty for videos."),
-            new("{clipper_id}", "The ID of the channel which created the clip, or empty for videos."),
-            new("{random_string}", "A string of 11 random characters."),
-            new("{trim_start}", "The start trim of the video/chat in the format hh-mm-ss."),
-            new("{trim_start_custom=\"\"}", "The start trim of the video/chat in a customizable format."),
-            new("{trim_end}", "The end trim of the video/chat in the format hh-mm-ss."),
-            new("{trim_end_custom=\"\"}", "The end trim of the video/chat in a customizable format."),
-            new("{trim_length}", "The length (including trim) of the video/clip/chat in the format hh-mm-ss."),
-            new("{trim_length_custom=\"\"}", "The length (including trim) of the video/clip/chat in a customizable format."),
-            new("{length}", "The length (excluding trim) of the video/clip/chat in the format hh-mm-ss."),
-            new("{length_custom=\"\"}", "The length (excluding trim) of the video/clip/chat in a customizable format."),
-            new("{views}", "The amount of views the video/clip has."),
-            new("{game}", "The display name of the primary game/category in the video/clip/chat."),
-        ];
+        public IReadOnlyList<LabeledOption> ThemeOptions { get; private set; } = [];
+        public IReadOnlyList<LabeledOption> CollisionOptions { get; private set; } = [];
+        public IReadOnlyList<LabeledOption> QualityOptions { get; private set; } = [];
+        public IReadOnlyList<FilenameParameter> FilenameParameters { get; private set; } = [];
 
         [ObservableProperty]
-        public partial string SelectedTheme { get; set; } = ThemeService.System;
+        public partial CultureOption SelectedCulture { get; set; } = AvailableCultures.English;
+
+        [ObservableProperty]
+        public partial LabeledOption? SelectedThemeOption { get; set; }
+
+        [ObservableProperty]
+        public partial LabeledOption? SelectedCollisionOption { get; set; }
+
+        [ObservableProperty]
+        public partial LabeledOption? SelectedQualityOption { get; set; }
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ShowDonateButton))]
@@ -125,14 +115,26 @@ namespace TwitchDownloaderAvalonia.ViewModels
 
         public bool ShowDonateButton => !HideDonation;
 
+        protected override void OnCultureChanged(object? sender, EventArgs e)
+        {
+            _suppressSave = true;
+            var theme = SelectedThemeOption?.Value;
+            var collision = SelectedCollisionOption?.Value;
+            var quality = SelectedQualityOption?.Value;
+            RebuildLocalizedOptions();
+            SelectedThemeOption = FindOption(ThemeOptions, theme, ThemeService.System);
+            SelectedCollisionOption = FindOption(CollisionOptions, collision, "Ask");
+            SelectedQualityOption = FindOption(QualityOptions, quality, EnqueueOptionsViewModel.Qualities[0]);
+            _suppressSave = false;
+        }
+
         public void LoadFromSettings()
         {
             _suppressSave = true;
             var current = _settings.Current;
-            SelectedTheme = !ThemeService.Options.Contains(current.GuiTheme)
-                ? ThemeService.System
-                : current.GuiTheme;
-
+            RebuildLocalizedOptions();
+            SelectedCulture = AvailableCultures.FromCode(current.GuiCulture);
+            SelectedThemeOption = FindOption(ThemeOptions, current.GuiTheme, ThemeService.System);
             HideDonation = current.HideDonation;
             ReduceMotion = current.ReduceMotion;
             UtcVideoTime = current.UtcVideoTime;
@@ -141,6 +143,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
             DownloadThrottleEnabled = current.DownloadThrottleEnabled;
             MaximumBandwidthKib = Math.Clamp(current.MaximumBandwidthKib, 1, 122070);
             SelectedCollision = CollisionToLabel(current.FileCollisionBehavior);
+            SelectedCollisionOption = FindOption(CollisionOptions, SelectedCollision, "Ask");
             VerboseErrors = current.VerboseErrors;
             var levels = (LogLevel)current.LogLevels;
             LogVerbose = levels.HasFlag(LogLevel.Verbose);
@@ -156,14 +159,66 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 ? EnqueueOptionsViewModel.Qualities[0]
                 : current.PreferredQuality;
 
+            SelectedQualityOption = FindOption(QualityOptions, SelectedQuality, EnqueueOptionsViewModel.Qualities[0]);
             _suppressSave = false;
+        }
+
+        private void RebuildLocalizedOptions()
+        {
+            ThemeOptions =
+            [
+                new LabeledOption(ThemeService.System, Loc.Get("settings.theme_system")),
+                new LabeledOption(ThemeService.Light, Loc.Get("settings.theme_light")),
+                new LabeledOption(ThemeService.Dark, Loc.Get("settings.theme_dark")),
+            ];
+            CollisionOptions =
+            [
+                new LabeledOption("Ask", Loc.Get("settings.collision_ask")),
+                new LabeledOption("Overwrite", Loc.Get("settings.collision_overwrite")),
+                new LabeledOption("Rename", Loc.Get("settings.collision_rename")),
+                new LabeledOption("Cancel", Loc.Get("settings.collision_cancel")),
+            ];
+            QualityOptions = [.. EnqueueOptionsViewModel.Qualities.Select(value => new LabeledOption(value, QualityLabels.Get(value)))];
+            FilenameParameters =
+            [
+                new FilenameParameter("{title}", "settings.param_title"),
+                new FilenameParameter("{id}", "settings.param_id"),
+                new FilenameParameter("{date}", "settings.param_date"),
+                new FilenameParameter("{date_custom=\"\"}", "settings.param_date_custom"),
+                new FilenameParameter("{channel}", "settings.param_channel"),
+                new FilenameParameter("{channel_id}", "settings.param_channel_id"),
+                new FilenameParameter("{clipper}", "settings.param_clipper"),
+                new FilenameParameter("{clipper_id}", "settings.param_clipper_id"),
+                new FilenameParameter("{random_string}", "settings.param_random"),
+                new FilenameParameter("{trim_start}", "settings.param_trim_start"),
+                new FilenameParameter("{trim_start_custom=\"\"}", "settings.param_trim_start_custom"),
+                new FilenameParameter("{trim_end}", "settings.param_trim_end"),
+                new FilenameParameter("{trim_end_custom=\"\"}", "settings.param_trim_end_custom"),
+                new FilenameParameter("{trim_length}", "settings.param_trim_length"),
+                new FilenameParameter("{trim_length_custom=\"\"}", "settings.param_trim_length_custom"),
+                new FilenameParameter("{length}", "settings.param_length"),
+                new FilenameParameter("{length_custom=\"\"}", "settings.param_length_custom"),
+                new FilenameParameter("{views}", "settings.param_views"),
+                new FilenameParameter("{game}", "settings.param_game"),
+            ];
+            OnPropertyChanged(nameof(ThemeOptions));
+            OnPropertyChanged(nameof(CollisionOptions));
+            OnPropertyChanged(nameof(QualityOptions));
+            OnPropertyChanged(nameof(FilenameParameters));
+        }
+
+        private static LabeledOption FindOption(IReadOnlyList<LabeledOption> options, string? value, string fallback)
+        {
+            return options.FirstOrDefault(option => option.Value == value)
+                ?? options.FirstOrDefault(option => option.Value == fallback)
+                ?? options[0];
         }
 
         [RelayCommand]
         private async Task BrowseTempPathAsync()
         {
             var start = string.IsNullOrWhiteSpace(TempPath) ? TempPathPlaceholder : TempPath;
-            var path = await _files.PickFolderAsync("Cache folder", start);
+            var path = await _files.PickFolderAsync(Loc.Get("settings.cache_folder"), start);
             if (!string.IsNullOrWhiteSpace(path))
                 TempPath = path;
         }
@@ -171,7 +226,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
         [RelayCommand]
         private async Task BrowseQueueFolderAsync()
         {
-            var path = await _files.PickFolderAsync("Download folder", QueueFolder);
+            var path = await _files.PickFolderAsync(Loc.Get("settings.download_folder"), QueueFolder);
             if (!string.IsNullOrWhiteSpace(path))
                 QueueFolder = path;
         }
@@ -180,8 +235,9 @@ namespace TwitchDownloaderAvalonia.ViewModels
         private async Task ClearCacheAsync()
         {
             var confirmed = await _dialogs.ShowConfirmAsync(
-                "Clear cache",
-                "Are you sure you want to clear your cache?\nYou should only really do this if the program isn't working correctly.");
+                Loc.Get("settings.clear_cache_title"),
+                Loc.Get("settings.clear_cache_confirm"));
+
             if (!confirmed)
                 return;
 
@@ -189,22 +245,24 @@ namespace TwitchDownloaderAvalonia.ViewModels
             CacheDirectoryService.ClearCacheDirectory(Path.GetTempPath(), out var defaultError);
             var error = selectedError ?? defaultError;
             if (error is not null)
-                await _dialogs.ShowErrorAsync("Clear cache", error.Message);
+                await _dialogs.ShowErrorAsync(Loc.Get("settings.clear_cache_title"), error.Message);
         }
 
         [RelayCommand]
         private async Task RestoreDefaultsAsync()
         {
             var confirmed = await _dialogs.ShowConfirmAsync(
-                "Restore defaults",
-                "Are you sure you want to restore all settings to their default values?");
+                Loc.Get("settings.restore_title"),
+                Loc.Get("settings.restore_confirm"));
+
             if (!confirmed)
                 return;
 
             _settings.ResetToDefaults();
             _collision.ResetSessionBehavior();
             LoadFromSettings();
-            ThemeService.Apply(SelectedTheme);
+            LocalizationService.Current.SetCulture(SelectedCulture.Code);
+            ThemeService.Apply(SelectedThemeOption?.Value ?? ThemeService.System);
             _status.ReduceMotion = ReduceMotion;
             Queue.NotifyLimitsChanged();
         }
@@ -212,14 +270,40 @@ namespace TwitchDownloaderAvalonia.ViewModels
         [RelayCommand]
         private void OpenUrl(string url) => Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
 
-        partial void OnSelectedThemeChanged(string value)
+        partial void OnSelectedCultureChanged(CultureOption value)
         {
             if (_suppressSave)
                 return;
 
-            _settings.Current.GuiTheme = value;
+            _settings.Current.GuiCulture = value.Code;
             _settings.Save();
-            ThemeService.Apply(value);
+            LocalizationService.Current.SetCulture(value.Code);
+        }
+
+        partial void OnSelectedThemeOptionChanged(LabeledOption? value)
+        {
+            if (_suppressSave || value is null)
+                return;
+
+            _settings.Current.GuiTheme = value.Value;
+            _settings.Save();
+            ThemeService.Apply(value.Value);
+        }
+
+        partial void OnSelectedCollisionOptionChanged(LabeledOption? value)
+        {
+            if (_suppressSave || value is null)
+                return;
+
+            SelectedCollision = value.Value;
+        }
+
+        partial void OnSelectedQualityOptionChanged(LabeledOption? value)
+        {
+            if (_suppressSave || value is null)
+                return;
+
+            SelectedQuality = value.Value;
         }
 
         partial void OnHideDonationChanged(bool value)

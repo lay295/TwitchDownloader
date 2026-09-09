@@ -94,7 +94,14 @@ namespace TwitchDownloaderAvalonia.ViewModels
         [NotifyPropertyChangedFor(nameof(LogToggleText))]
         public partial bool IsLogExpanded { get; set; }
 
-        public string LogToggleText => IsLogExpanded ? "Hide log" : "Show log";
+        public string LogToggleText => IsLogExpanded
+            ? Loc.Get("common.hide_log")
+            : Loc.Get("common.show_log");
+
+        protected override void OnCultureChanged(object? sender, EventArgs e)
+        {
+            Notify(nameof(LogToggleText));
+        }
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(HasSuggestedFileName))]
@@ -127,8 +134,8 @@ namespace TwitchDownloaderAvalonia.ViewModels
             var clipIdMatch = IdParse.MatchClipId(ClipUrl.Trim());
             if (clipIdMatch is not { Success: true })
             {
-                AppendLog("ERROR: Invalid clip link or ID.");
-                await _dialogs.ShowErrorAsync("Invalid clip", "Please enter a valid Twitch clip link or ID.");
+                AppendLog(Loc.Get("clip.invalid_log"));
+                await _dialogs.ShowErrorAsync(Loc.Get("clip.invalid_title"), Loc.Get("clip.invalid_message"));
                 return;
             }
 
@@ -138,7 +145,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 _clipId = clipIdMatch.Value;
                 var clipRenderStatus = await TwitchHelper.GetShareClipRenderStatus(_clipId);
                 var clip = clipRenderStatus.data.clip
-                    ?? throw new NullReferenceException("Invalid clip, deleted possibly?");
+                    ?? throw new NullReferenceException(Loc.Get("clip.deleted"));
 
                 Qualities.Clear();
                 foreach (var quality in VideoQualities.FromClip(clip).Qualities)
@@ -147,10 +154,10 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 SelectedQuality = Qualities.FirstOrDefault();
                 _clipLength = TimeSpan.FromSeconds(clip.durationSeconds);
                 LengthText = _clipLength.ToString("c");
-                _streamerName = clip.broadcaster?.displayName ?? "Unknown User";
+                _streamerName = clip.broadcaster?.displayName ?? Loc.Get("common.unknown_user");
                 _streamerId = clip.broadcaster?.id ?? string.Empty;
                 InfoStreamer = _streamerName;
-                _clipperName = clip.curator?.displayName ?? "Unknown User";
+                _clipperName = clip.curator?.displayName ?? Loc.Get("common.unknown_user");
                 _clipperId = clip.curator?.id ?? string.Empty;
                 _clipTitle = clip.title;
                 InfoTitle = _clipTitle;
@@ -158,7 +165,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 _clipTime = _settings.Current.UtcVideoTime ? createdAt : createdAt.ToLocalTime();
                 InfoCreatedAt = _clipTime.ToString(CultureInfo.CurrentCulture);
                 _viewCount = clip.viewCount;
-                _game = clip.game?.displayName ?? "Unknown Game";
+                _game = clip.game?.displayName ?? Loc.Get("common.unknown_game");
 
                 ThumbnailBytes = await _thumbnails.TryGetAsync(clip.thumbnailURL);
                 StreamerAvatarBytes = await _thumbnails.TryGetAsync(clip.broadcaster?.profileImageURL);
@@ -167,14 +174,14 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 UpdateVideoSizeEstimates();
                 UpdateSuggestedFileName();
                 NotifyDownloadState();
-                AppendLog($"Loaded {InfoTitle} ({LengthText}) from {_streamerName}.");
+                AppendLog(Loc.Get("common.loaded_info", InfoTitle, LengthText, _streamerName));
             }
             catch (Exception ex)
             {
-                AppendLog("ERROR: " + ex.Message);
-                await _dialogs.ShowErrorAsync("Unable to get clip info", ex.Message);
+                AppendLog(Loc.Error(ex.Message));
+                await _dialogs.ShowErrorAsync(Loc.Get("clip.get_info_failed"), ex.Message);
                 if (_settings.Current.VerboseErrors)
-                    await _dialogs.ShowErrorAsync("Verbose error", ex.ToString());
+                    await _dialogs.ShowErrorAsync(Loc.Get("dialogs.verbose_error"), ex.ToString());
             }
             finally
             {
@@ -186,7 +193,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
         private async Task DownloadAsync()
         {
             var suggestedName = BuildSuggestedFileName();
-            var path = await _fileDialogs.SaveFileAsync(suggestedName, "MP4 files", "mp4");
+            var path = await _fileDialogs.SaveFileAsync(suggestedName, Loc.Get("dialogs.filter_mp4"), "mp4");
             if (string.IsNullOrWhiteSpace(path))
                 return;
 
@@ -204,7 +211,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
 
             var item = _queue.EnqueueClip(options, _clipTitle, ThumbnailBytes);
             TrackQueued(item);
-            AppendLog($"Added to queue: {path}");
+            AppendLog(Loc.Get("common.added_to_queue", path));
         }
 
         [RelayCommand(CanExecute = nameof(CanCancelQueued))]
@@ -233,14 +240,17 @@ namespace TwitchDownloaderAvalonia.ViewModels
             _settings.Save();
         }
 
-        partial void OnSelectedQualityChanged(ClipQualityOption? value)
+        partial void OnSelectedQualityChanged(ClipQualityOption? value) => OnQualityOrNameChanged(value);
+        partial void OnIsBusyChanged(bool value) => OnBusyOrInfoChanged(value);
+        partial void OnInfoLoadedChanged(bool value) => OnBusyOrInfoChanged(value);
+
+        private void OnQualityOrNameChanged(ClipQualityOption? _)
         {
             UpdateSuggestedFileName();
             DownloadCommand.NotifyCanExecuteChanged();
         }
 
-        partial void OnIsBusyChanged(bool value) => NotifyDownloadState();
-        partial void OnInfoLoadedChanged(bool value) => NotifyDownloadState();
+        private void OnBusyOrInfoChanged(bool _) => NotifyDownloadState();
 
         private void UpdateVideoSizeEstimates()
         {

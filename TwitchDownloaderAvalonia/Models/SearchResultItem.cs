@@ -1,10 +1,16 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using TwitchDownloaderAvalonia.Services;
 
 namespace TwitchDownloaderAvalonia.Models
 {
     public sealed partial class SearchResultItem : ObservableObject
     {
+        public SearchResultItem()
+        {
+            LocalizationService.Current.CultureChanged += OnCultureChanged;
+        }
+
         public required string Id { get; init; }
         public required string Title { get; init; }
         public required DateTime Time { get; init; }
@@ -44,6 +50,9 @@ namespace TwitchDownloaderAvalonia.Models
             }
         }
 
+        public string DurationText => Loc.Get("search.duration", LengthFormatted);
+        public string ViewsText => Loc.Get("search.views", Views);
+
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(HasThumbnail))]
         public partial byte[]? ThumbnailBytes { get; set; }
@@ -70,5 +79,16 @@ namespace TwitchDownloaderAvalonia.Models
 
         [RelayCommand]
         private Task AddToQueue() => EnqueueOne(this);
+
+        public void Detach()
+        {
+            LocalizationService.Current.CultureChanged -= OnCultureChanged;
+        }
+
+        private void OnCultureChanged(object? sender, EventArgs e)
+        {
+            OnPropertyChanged(nameof(DurationText));
+            OnPropertyChanged(nameof(ViewsText));
+        }
     }
 }

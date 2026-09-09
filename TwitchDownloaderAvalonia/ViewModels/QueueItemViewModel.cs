@@ -10,7 +10,7 @@ using TwitchDownloaderCore.Options;
 
 namespace TwitchDownloaderAvalonia.ViewModels
 {
-    public sealed partial class QueueItemViewModel : ObservableObject
+    public sealed partial class QueueItemViewModel : ViewModelBase
     {
         private readonly object _options;
         private readonly LogLevel _logLevel;
@@ -35,24 +35,23 @@ namespace TwitchDownloaderAvalonia.ViewModels
             SourceId = sourceId;
             _logLevel = logLevel;
             DependantTask = dependantTask;
-            TaskType = kind switch
-            {
-                QueueTaskKind.VodDownload => "VOD Download",
-                QueueTaskKind.ClipDownload => "Clip Download",
-                QueueTaskKind.ChatDownload => "Chat Download",
-                QueueTaskKind.ChatUpdate => "Chat Update",
-                QueueTaskKind.ChatRender => "Chat Render",
-                _ => "Task",
-            };
-
-            DisplayStatus = dependantTask is null ? "Ready" : "Waiting";
+            DisplayStatus = dependantTask is null ? Loc.Get("queue.status_ready") : Loc.Get("queue.status_waiting");
             Status = dependantTask is null ? QueueItemStatus.Ready : QueueItemStatus.Waiting;
             CanCancel = true;
         }
 
         public QueueTaskKind Kind { get; }
         public string Title { get; }
-        public string TaskType { get; }
+        public string TaskType => Kind switch
+        {
+            QueueTaskKind.VodDownload => Loc.Get("queue.kind_vod"),
+            QueueTaskKind.ClipDownload => Loc.Get("queue.kind_clip"),
+            QueueTaskKind.ChatDownload => Loc.Get("queue.kind_chat"),
+            QueueTaskKind.ChatUpdate => Loc.Get("queue.kind_update"),
+            QueueTaskKind.ChatRender => Loc.Get("queue.kind_render"),
+            _ => Loc.Get("queue.kind_task"),
+        };
+
         public string SourceId { get; }
         public byte[]? ThumbnailBytes { get; }
         public QueueItemViewModel? DependantTask { get; }
@@ -272,7 +271,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
             if (Exception is null || _dialogs is null)
                 return Task.CompletedTask;
 
-            return _dialogs.ShowErrorAsync("Task error", Exception.ToString());
+            return _dialogs.ShowErrorAsync(Loc.Get("queue.task_error"), Exception.ToString());
         }
 
         [RelayCommand]
@@ -448,15 +447,13 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 Status = status;
                 DisplayStatus = status switch
                 {
-                    QueueItemStatus.Ready => "Ready",
-                    QueueItemStatus.Waiting => "Waiting",
-                    QueueItemStatus.Running => DisplayStatus is "Ready" or "Waiting" or "Canceled" or "Failed" or "Finished" or "Stopping"
-                        ? "Running"
-                        : DisplayStatus,
-                    QueueItemStatus.Stopping => "Canceling",
-                    QueueItemStatus.Finished => "Finished",
-                    QueueItemStatus.Failed => "Failed",
-                    QueueItemStatus.Canceled => "Canceled",
+                    QueueItemStatus.Ready => Loc.Get("queue.status_ready"),
+                    QueueItemStatus.Waiting => Loc.Get("queue.status_waiting"),
+                    QueueItemStatus.Running => IsCannedStatus(DisplayStatus) ? Loc.Get("queue.status_running") : DisplayStatus,
+                    QueueItemStatus.Stopping => Loc.Get("queue.status_canceling"),
+                    QueueItemStatus.Finished => Loc.Get("queue.status_finished"),
+                    QueueItemStatus.Failed => Loc.Get("queue.status_failed"),
+                    QueueItemStatus.Canceled => Loc.Get("queue.status_canceled"),
                     _ => status.ToString(),
                 };
 
@@ -465,6 +462,46 @@ namespace TwitchDownloaderAvalonia.ViewModels
                     and not QueueItemStatus.Finished
                     and not QueueItemStatus.Stopping;
             }
+        }
+
+        protected override void OnCultureChanged(object? sender, EventArgs e)
+        {
+            Notify(nameof(TaskType));
+            if (Status is QueueItemStatus.Running)
+            {
+                if (IsCannedStatus(DisplayStatus))
+                    DisplayStatus = Loc.Get("queue.status_running");
+            }
+            else
+            {
+                DisplayStatus = StatusLabel(Status);
+            }
+        }
+
+        private static string StatusLabel(QueueItemStatus status) => status switch
+        {
+            QueueItemStatus.Ready => Loc.Get("queue.status_ready"),
+            QueueItemStatus.Waiting => Loc.Get("queue.status_waiting"),
+            QueueItemStatus.Running => Loc.Get("queue.status_running"),
+            QueueItemStatus.Stopping => Loc.Get("queue.status_canceling"),
+            QueueItemStatus.Finished => Loc.Get("queue.status_finished"),
+            QueueItemStatus.Failed => Loc.Get("queue.status_failed"),
+            QueueItemStatus.Canceled => Loc.Get("queue.status_canceled"),
+            _ => status.ToString(),
+        };
+
+        private static bool IsCannedStatus(string text)
+        {
+            if (text is "Ready" or "Waiting" or "Running" or "Canceling" or "Finished" or "Failed" or "Canceled" or "Stopping")
+                return true;
+
+            return text == Loc.Get("queue.status_ready")
+                   || text == Loc.Get("queue.status_waiting")
+                   || text == Loc.Get("queue.status_running")
+                   || text == Loc.Get("queue.status_canceling")
+                   || text == Loc.Get("queue.status_finished")
+                   || text == Loc.Get("queue.status_failed")
+                   || text == Loc.Get("queue.status_canceled");
         }
 
         private void NotifyActionState()

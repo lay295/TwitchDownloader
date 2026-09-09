@@ -2,6 +2,7 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
+    xmlns:loc="using:TwitchDownloaderAvalonia.Markup"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
@@ -34,7 +35,7 @@
                                 <Button
                                     Classes="link"
                                     VerticalAlignment="Center"
-                                    Content="View release"
+                                    Content="{loc:Translate Key=about.view_release}"
                                     IsVisible="{Binding HasUpdate}"
                                     Command="{Binding OpenUrlCommand}"
                                     CommandParameter="{Binding ChangelogUrl}" />
@@ -50,14 +51,14 @@
 
             <Border Classes="card">
                 <StackPanel Spacing="4">
-                    <TextBlock Classes="title" Text="Links" />
+                    <TextBlock Classes="title" Text="{loc:Translate Key=about.links}" />
                     <Button
                         Classes="link"
                         HorizontalAlignment="Left"
                         Command="{Binding OpenUrlCommand}"
                         CommandParameter="https://github.com/lay295/TwitchDownloader">
                         <StackPanel Orientation="Horizontal" Spacing="4">
-                            <TextBlock Text="Repository" VerticalAlignment="Center" />
+                            <TextBlock Text="{loc:Translate Key=about.repository}" VerticalAlignment="Center" />
                             <PathIcon Data="{StaticResource IconExternal}" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
@@ -67,7 +68,7 @@
                         Command="{Binding OpenUrlCommand}"
                         CommandParameter="https://github.com/lay295/TwitchDownloader/issues">
                         <StackPanel Orientation="Horizontal" Spacing="4">
-                            <TextBlock Text="Report an issue" VerticalAlignment="Center" />
+                            <TextBlock Text="{loc:Translate Key=about.report_issue}" VerticalAlignment="Center" />
                             <PathIcon Data="{StaticResource IconExternal}" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
@@ -77,7 +78,7 @@
                         Command="{Binding OpenUrlCommand}"
                         CommandParameter="https://github.com/lay295/TwitchDownloader/releases">
                         <StackPanel Orientation="Horizontal" Spacing="4">
-                            <TextBlock Text="Releases" VerticalAlignment="Center" />
+                            <TextBlock Text="{loc:Translate Key=about.releases}" VerticalAlignment="Center" />
                             <PathIcon Data="{StaticResource IconExternal}" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
@@ -86,12 +87,12 @@
 
             <Border Classes="card">
                 <StackPanel Spacing="8">
-                    <TextBlock Classes="title" Text="MIT License" />
+                    <TextBlock Classes="title" Text="{loc:Translate Key=about.mit_license}" />
                     <TextBlock
                         Classes="muted"
                         TextWrapping="Wrap"
-                        Text="Open-source software originally by lay295 and contributors." />
-                    <Expander Header="Full license">
+                        Text="{loc:Translate Key=about.license_blurb}" />
+                    <Expander Header="{loc:Translate Key=about.full_license}">
                         <TextBlock
                             Classes="muted"
                             Margin="0,8,0,0"
@@ -110,7 +111,7 @@
                 <Button
                     Classes="secondary"
                     HorizontalAlignment="Left"
-                    Content="Copy debug info"
+                    Content="{loc:Translate Key=about.copy_debug}"
                     Command="{Binding CopyDebugInfoCommand}" />
             </StackPanel>
         </StackPanel>

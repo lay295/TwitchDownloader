@@ -7,14 +7,6 @@ namespace TwitchDownloaderAvalonia.Views
         public MainWindow()
         {
             InitializeComponent();
-            Opened += OnOpened;
-        }
-
-        private async void OnOpened(object? sender, EventArgs e)
-        {
-            Opened -= OnOpened;
-            if (DataContext is ViewModels.MainWindowViewModel vm)
-                await vm.InitializeAsync();
         }
     }
 }

@@ -33,8 +33,8 @@ namespace TwitchDownloaderAvalonia.ViewModels
             SettingsPage = new SettingsViewModel(settings, status, fileDialogs, dialogs, collision, queue);
             About = new AboutViewModel(updates, dialogs, ffmpeg);
             CurrentPage = Vod;
-            AppVersion = $"v{typeof(MainWindowViewModel).Assembly.GetName().Version?.ToString(3)}";
-            WindowTitle = $"Twitch Downloader {AppVersion}";
+            AppVersion = Loc.Get("about.version", typeof(MainWindowViewModel).Assembly.GetName().Version?.ToString(3) ?? "0.0.0");
+            RefreshWindowTitle();
         }
 
         public AppStatus Status { get; }
@@ -59,39 +59,50 @@ namespace TwitchDownloaderAvalonia.ViewModels
         public partial AppPage SelectedPage { get; set; } = AppPage.Vod;
 
         [ObservableProperty]
-        public partial string WindowTitle { get; set; }
+        public partial string WindowTitle { get; set; } = string.Empty;
 
-        public string AppName => "Twitch Downloader";
+        public string AppName => Loc.Get("common.app_name");
 
         public string AppVersion { get; }
 
         public string PageTitle => SelectedPage switch
         {
-            AppPage.Vod => "Video",
-            AppPage.Clip => "Clip",
-            AppPage.ChatDownload => "Chat",
-            AppPage.ChatUpdate => "Chat Update",
-            AppPage.ChatRender => "Chat Render",
-            AppPage.Search => "Search",
-            AppPage.Queue => "Queue",
-            AppPage.Settings => "Settings",
-            AppPage.About => "About",
-            _ => "Video",
+            AppPage.Vod => Loc.Get("nav.video"),
+            AppPage.Clip => Loc.Get("nav.clip"),
+            AppPage.ChatDownload => Loc.Get("nav.chat"),
+            AppPage.ChatUpdate => Loc.Get("nav.chat_update"),
+            AppPage.ChatRender => Loc.Get("nav.chat_render"),
+            AppPage.Search => Loc.Get("nav.search"),
+            AppPage.Queue => Loc.Get("nav.queue"),
+            AppPage.Settings => Loc.Get("nav.settings"),
+            AppPage.About => Loc.Get("nav.about"),
+            _ => Loc.Get("nav.video"),
         };
 
         public string PageSubtitle => SelectedPage switch
         {
-            AppPage.Vod => "Download Twitch VODs with ease.",
-            AppPage.Clip => "Download Twitch clips.",
-            AppPage.ChatDownload => "Download VOD or clip chat.",
-            AppPage.ChatUpdate => "Update existing chat files.",
-            AppPage.ChatRender => "Render chat to video.",
-            AppPage.Search => "Find VODs and clips, then open one or add a selection to the queue.",
-            AppPage.Queue => "Every download and render lives here.",
-            AppPage.Settings => "Theme, files, filenames, and queue defaults.",
+            AppPage.Vod => Loc.Get("vod.subtitle"),
+            AppPage.Clip => Loc.Get("clip.subtitle"),
+            AppPage.ChatDownload => Loc.Get("chat.subtitle"),
+            AppPage.ChatUpdate => Loc.Get("update.subtitle"),
+            AppPage.ChatRender => Loc.Get("render.subtitle"),
+            AppPage.Search => Loc.Get("search.subtitle"),
+            AppPage.Queue => Loc.Get("queue.subtitle"),
+            AppPage.Settings => Loc.Get("settings.subtitle"),
             AppPage.About => About.Description,
-            _ => "Download Twitch VODs with ease.",
+            _ => Loc.Get("vod.subtitle"),
         };
+
+        protected override void OnCultureChanged(object? sender, EventArgs e)
+        {
+            Notify(nameof(AppName), nameof(PageTitle), nameof(PageSubtitle));
+            RefreshWindowTitle();
+        }
+
+        private void RefreshWindowTitle()
+        {
+            WindowTitle = Loc.Get("common.window_title", AppVersion);
+        }
 
         [RelayCommand]
         private void Navigate(AppPage page) => SelectedPage = page;
@@ -165,8 +176,8 @@ namespace TwitchDownloaderAvalonia.ViewModels
             catch (Exception ex)
             {
                 WindowTitle = previousTitle;
-                Status.Set(AppStatusKind.Error, "FFmpeg download failed", 0);
-                Vod.AppendLog("ERROR: Unable to download FFmpeg: " + ex.Message);
+                Status.Set(AppStatusKind.Error, Loc.Get("status.ffmpeg_download_failed"), 0);
+                Vod.AppendLog(Loc.Get("status.ffmpeg_download_failed_log", ex.Message));
                 return;
             }
 

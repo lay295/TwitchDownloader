@@ -21,7 +21,7 @@ namespace TwitchDownloaderAvalonia.Services
             var normalizedExtension = extension.TrimStart('.');
             var file = await storage.SaveFilePickerAsync(new FilePickerSaveOptions
             {
-                Title = "Save file",
+                Title = Loc.Get("dialogs.save_file"),
                 SuggestedFileName = suggestedFileName,
                 DefaultExtension = normalizedExtension,
                 FileTypeChoices =

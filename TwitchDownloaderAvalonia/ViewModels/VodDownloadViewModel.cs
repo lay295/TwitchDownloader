@@ -120,7 +120,14 @@ namespace TwitchDownloaderAvalonia.ViewModels
         [NotifyPropertyChangedFor(nameof(LogToggleText))]
         public partial bool IsLogExpanded { get; set; }
 
-        public string LogToggleText => IsLogExpanded ? "Hide log" : "Show log";
+        public string LogToggleText => IsLogExpanded
+            ? Loc.Get("common.hide_log")
+            : Loc.Get("common.show_log");
+
+        protected override void OnCultureChanged(object? sender, EventArgs e)
+        {
+            Notify(nameof(LogToggleText));
+        }
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(HasSuggestedFileName))]
@@ -154,8 +161,8 @@ namespace TwitchDownloaderAvalonia.ViewModels
             var videoIdMatch = IdParse.MatchVideoId(VideoUrl.Trim());
             if (videoIdMatch is not { Success: true } || !long.TryParse(videoIdMatch.ValueSpan, out var videoId))
             {
-                AppendLog("ERROR: Invalid VOD link or ID.");
-                await _dialogs.ShowErrorAsync("Invalid VOD", "Please enter a valid Twitch VOD link or ID.");
+                AppendLog(Loc.Get("vod.invalid_log"));
+                await _dialogs.ShowErrorAsync(Loc.Get("vod.invalid_title"), Loc.Get("vod.invalid_message"));
                 return;
             }
 
@@ -169,11 +176,11 @@ namespace TwitchDownloaderAvalonia.ViewModels
 
                 var token = tokenTask.Result.data.videoPlaybackAccessToken;
                 if (token is null)
-                    throw new NullReferenceException("Invalid VOD, deleted/expired VOD possibly?");
+                    throw new NullReferenceException(Loc.Get("vod.deleted"));
 
                 var playlistString = await TwitchHelper.GetVideoPlaylist(videoId, token.value, token.signature);
                 if (playlistString.Contains("vod_manifest_restricted") || playlistString.Contains("unauthorized_entitlements"))
-                    throw new NullReferenceException("Insufficient access. The VOD may be subscriber-only; try providing an OAuth token in Settings.");
+                    throw new NullReferenceException(Loc.Get("vod.insufficient_access"));
 
                 var video = videoInfoTask.Result.data.video;
                 var playlist = M3U8.Parse(playlistString);
@@ -186,7 +193,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 SelectedQuality = Qualities.FirstOrDefault();
                 _vodLength = TimeSpan.FromSeconds(video.lengthSeconds);
                 LengthText = _vodLength.ToString("c");
-                _streamerName = video.owner?.displayName ?? "Unknown User";
+                _streamerName = video.owner?.displayName ?? Loc.Get("common.unknown_user");
                 _streamerId = video.owner?.id ?? string.Empty;
                 InfoStreamer = _streamerName;
                 _videoTitle = video.title;
@@ -195,7 +202,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 _videoTime = _settings.Current.UtcVideoTime ? createdAt : createdAt.ToLocalTime();
                 InfoCreatedAt = _videoTime.ToString(CultureInfo.CurrentCulture);
                 _viewCount = video.viewCount;
-                _game = video.game?.displayName ?? "Unknown Game";
+                _game = video.game?.displayName ?? Loc.Get("common.unknown_game");
 
                 var urlTimeCodeMatch = TwitchRegex.UrlTimeCode.Match(VideoUrl);
                 if (urlTimeCodeMatch.Success)
@@ -224,14 +231,14 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 UpdateVideoSizeEstimates();
                 UpdateSuggestedFileName();
                 NotifyDownloadState();
-                AppendLog($"Loaded {InfoTitle} ({LengthText}) from {_streamerName}.");
+                AppendLog(Loc.Get("common.loaded_info", InfoTitle, LengthText, _streamerName));
             }
             catch (Exception ex)
             {
-                AppendLog("ERROR: " + ex.Message);
-                await _dialogs.ShowErrorAsync("Unable to get video info", ex.Message);
+                AppendLog(Loc.Error(ex.Message));
+                await _dialogs.ShowErrorAsync(Loc.Get("vod.get_info_failed"), ex.Message);
                 if (_settings.Current.VerboseErrors)
-                    await _dialogs.ShowErrorAsync("Verbose error", ex.ToString());
+                    await _dialogs.ShowErrorAsync(Loc.Get("dialogs.verbose_error"), ex.ToString());
             }
             finally
             {
@@ -244,7 +251,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
         {
             if (!ValidateTrim())
             {
-                AppendLog("ERROR: Invalid trim inputs.");
+                AppendLog(Loc.Get("vod.invalid_trim"));
                 return;
             }
 
@@ -252,8 +259,8 @@ namespace TwitchDownloaderAvalonia.ViewModels
             var suggestedName = BuildSuggestedFileName(extension);
 
             var filterName = SelectedQuality.Quality.Name.Contains("Audio", StringComparison.OrdinalIgnoreCase)
-                ? "M4A files"
-                : "MP4 files";
+                ? Loc.Get("dialogs.filter_m4a")
+                : Loc.Get("dialogs.filter_mp4");
 
             var path = await _fileDialogs.SaveFileAsync(suggestedName, filterName, extension.TrimStart('.'));
             if (string.IsNullOrWhiteSpace(path))
@@ -263,7 +270,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
             options.CacheCleanerCallback = directories =>
             {
                 if (directories.Length > 0)
-                    AppendLog($"{directories.Length} unmanaged video caches were found and can be deleted later from the cache folder.");
+                    AppendLog(Loc.Get("vod.unmanaged_caches", directories.Length));
 
                 return [];
             };
@@ -271,7 +278,8 @@ namespace TwitchDownloaderAvalonia.ViewModels
 
             var item = _queue.EnqueueVod(options, _videoTitle, ThumbnailBytes);
             TrackQueued(item);
-            AppendLog($"Added to queue: {path}");
+
+            AppendLog(Loc.Get("common.added_to_queue", path));
         }
 
         [RelayCommand(CanExecute = nameof(CanCancelQueued))]
@@ -306,34 +314,34 @@ namespace TwitchDownloaderAvalonia.ViewModels
             _settings.Save();
         }
 
-        partial void OnTrimStartChanged(bool value)
+        partial void OnTrimStartChanged(bool value) => OnTrimEnabledChanged(value);
+        partial void OnTrimEndChanged(bool value) => OnTrimEnabledChanged(value);
+        partial void OnStartHourChanged(int value) => OnTrimTimeChanged(value);
+        partial void OnStartMinuteChanged(int value) => OnTrimTimeChanged(value);
+        partial void OnStartSecondChanged(int value) => OnTrimTimeChanged(value);
+        partial void OnEndHourChanged(int value) => OnTrimTimeChanged(value);
+        partial void OnEndMinuteChanged(int value) => OnTrimTimeChanged(value);
+        partial void OnEndSecondChanged(int value) => OnTrimTimeChanged(value);
+        partial void OnSelectedQualityChanged(QualityOption? value) => OnQualityOrNameChanged(value);
+        partial void OnIsBusyChanged(bool value) => OnBusyOrInfoChanged(value);
+        partial void OnInfoLoadedChanged(bool value) => OnBusyOrInfoChanged(value);
+
+        private void OnTrimEnabledChanged(bool _)
         {
             UpdateVideoSizeEstimates();
             UpdateSuggestedFileName();
             NotifyDownloadState();
         }
 
-        partial void OnTrimEndChanged(bool value)
-        {
-            UpdateVideoSizeEstimates();
-            UpdateSuggestedFileName();
-            NotifyDownloadState();
-        }
+        private void OnTrimTimeChanged(int _) => UpdateEstimatesAndSuggestedName();
 
-        partial void OnStartHourChanged(int value) => UpdateEstimatesAndSuggestedName();
-        partial void OnStartMinuteChanged(int value) => UpdateEstimatesAndSuggestedName();
-        partial void OnStartSecondChanged(int value) => UpdateEstimatesAndSuggestedName();
-        partial void OnEndHourChanged(int value) => UpdateEstimatesAndSuggestedName();
-        partial void OnEndMinuteChanged(int value) => UpdateEstimatesAndSuggestedName();
-        partial void OnEndSecondChanged(int value) => UpdateEstimatesAndSuggestedName();
-        partial void OnSelectedQualityChanged(QualityOption? value)
+        private void OnQualityOrNameChanged(QualityOption? _)
         {
             UpdateSuggestedFileName();
             DownloadCommand.NotifyCanExecuteChanged();
         }
 
-        partial void OnIsBusyChanged(bool value) => NotifyDownloadState();
-        partial void OnInfoLoadedChanged(bool value) => NotifyDownloadState();
+        private void OnBusyOrInfoChanged(bool _) => NotifyDownloadState();
 
         private VideoDownloadOptions BuildOptions(string filename)
         {

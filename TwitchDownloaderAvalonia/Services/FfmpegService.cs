@@ -8,8 +8,7 @@ namespace TwitchDownloaderAvalonia.Services
 {
     public sealed class FfmpegService
     {
-        public static string ExecutableName { get; } =
-            RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "ffmpeg.exe" : "ffmpeg";
+        public static string ExecutableName { get; } = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "ffmpeg.exe" : "ffmpeg";
 
         public string ResolvedPath { get; private set; } = ExecutableName;
 
@@ -53,7 +52,7 @@ namespace TwitchDownloaderAvalonia.Services
                         ? "sudo chmod +x ffmpeg"
                         : "chmod +x ffmpeg";
 
-                    progress.LogError($"Unable to automatically update FFmpeg file permissions. Please run \"{chmodCommand}\" to allow FFmpeg to be executed.");
+                    progress.LogError(Loc.Get("status.ffmpeg_chmod_failed", chmodCommand));
                 }
             }
 
@@ -97,7 +96,7 @@ namespace TwitchDownloaderAvalonia.Services
             public XabeProgressHandler(ITaskProgress progress)
             {
                 _progress = progress;
-                _progress.SetTemplateStatus("Downloading FFmpeg {0}%", 0);
+                _progress.SetTemplateStatus(Loc.Get("status.downloading_ffmpeg"), 0);
             }
 
             public void Report(ProgressInfo value)

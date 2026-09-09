@@ -17,8 +17,6 @@ namespace TwitchDownloaderAvalonia.ViewModels
 {
     public partial class SearchViewModel : ViewModelBase
     {
-        private const string CLEAR_RECENT_CHANNELS_LABEL = "Clear recent channels";
-
         private readonly SettingsService _settings;
         private readonly DialogService _dialogs;
         private readonly ThumbnailService _thumbnails;
@@ -54,20 +52,8 @@ namespace TwitchDownloaderAvalonia.ViewModels
             _ffmpeg = ffmpeg;
             _collision = collision;
 
-            VideoTypes =
-            [
-                new SearchFilterOption("All videos", ""),
-                new SearchFilterOption("Past broadcasts", "ARCHIVE"),
-                new SearchFilterOption("Highlights", "HIGHLIGHT"),
-                new SearchFilterOption("Uploads", "UPLOAD"),
-            ];
-            ClipPeriods =
-            [
-                new SearchFilterOption("Top 24 hours", "LAST_DAY"),
-                new SearchFilterOption("Top 7 days", "LAST_WEEK"),
-                new SearchFilterOption("Top 30 days", "LAST_MONTH"),
-                new SearchFilterOption("Top all time", "ALL_TIME"),
-            ];
+            VideoTypes = CreateVideoTypes();
+            ClipPeriods = CreateClipPeriods();
 
             _suppressSearch = true;
             SelectedVideoType = VideoTypes[0];
@@ -82,8 +68,8 @@ namespace TwitchDownloaderAvalonia.ViewModels
         public AppStatus AppStatus { get; }
         public ObservableCollection<SearchResultItem> Results { get; } = [];
         public ObservableCollection<string> ChannelSuggestions { get; } = [];
-        public IReadOnlyList<SearchFilterOption> VideoTypes { get; }
-        public IReadOnlyList<SearchFilterOption> ClipPeriods { get; }
+        public IReadOnlyList<SearchFilterOption> VideoTypes { get; private set; }
+        public IReadOnlyList<SearchFilterOption> ClipPeriods { get; private set; }
         public IReadOnlyList<int> PageSizes { get; } = [16, 30, 50, 100];
 
         [ObservableProperty]
@@ -128,8 +114,10 @@ namespace TwitchDownloaderAvalonia.ViewModels
         public bool ShowSearchSpinner => IsSearching && AppStatus.ShowStatusImage;
         public bool ShowEmptyIdleGif => !IsSearching && AppStatus.ShowStatusImage;
         public int SelectedCount => _selected.Count;
-        public string SelectedCountText => $"Selected {SelectedCount}";
-        public string AddToQueueText => SelectedCount <= 1 ? "Add to Queue" : $"Add {SelectedCount} to Queue";
+        public string SelectedCountText => Loc.Get("search.selected_count", SelectedCount);
+        public string AddToQueueText => SelectedCount <= 1
+            ? Loc.Get("search.add_to_queue")
+            : Loc.Get("search.add_n_to_queue", SelectedCount);
         public bool CanSearch => !IsSearching;
         public bool CanNextPage => !IsSearching && _hasNextPage;
         public bool CanPreviousPage => !IsSearching && _cursorIndex > 0;
@@ -142,24 +130,58 @@ namespace TwitchDownloaderAvalonia.ViewModels
             get
             {
                 if (IsSearching)
-                    return "Searching…";
+                    return Loc.Get("search.searching");
 
                 if (_hasSearched)
-                    return "No VODs or clips found for this channel.";
+                    return Loc.Get("search.empty_results");
 
-                return "Enter a channel to list VODs or clips. Open a result or add selected items to the queue.";
+                return Loc.Get("search.empty_idle");
             }
         }
 
-        partial void OnKindChanged(SearchKind value)
+        protected override void OnCultureChanged(object? sender, EventArgs e)
+        {
+            var videoValue = SelectedVideoType?.Value;
+            var clipValue = SelectedClipPeriod?.Value;
+            var suppress = _suppressSearch;
+            _suppressSearch = true;
+            VideoTypes = CreateVideoTypes();
+            ClipPeriods = CreateClipPeriods();
+            OnPropertyChanged(nameof(VideoTypes));
+            OnPropertyChanged(nameof(ClipPeriods));
+            SelectedVideoType = VideoTypes.FirstOrDefault(option => option.Value == videoValue) ?? VideoTypes[0];
+            SelectedClipPeriod = ClipPeriods.FirstOrDefault(option => option.Value == clipValue) ?? ClipPeriods[2];
+            RefreshChannelSuggestions();
+            _suppressSearch = suppress;
+            Notify(nameof(AddToQueueText), nameof(SelectedCountText), nameof(EmptyText));
+        }
+
+        private static IReadOnlyList<SearchFilterOption> CreateVideoTypes() =>
+        [
+            new("search.video_all", ""),
+            new("search.video_archive", "ARCHIVE"),
+            new("search.video_highlight", "HIGHLIGHT"),
+            new("search.video_upload", "UPLOAD"),
+        ];
+
+        private static IReadOnlyList<SearchFilterOption> CreateClipPeriods() =>
+        [
+            new("search.clip_day", "LAST_DAY"),
+            new("search.clip_week", "LAST_WEEK"),
+            new("search.clip_month", "LAST_MONTH"),
+            new("search.clip_all", "ALL_TIME"),
+        ];
+
+        partial void OnKindChanged(SearchKind value) => OnSearchKindChanged(value);
+
+        private void OnSearchKindChanged(SearchKind _)
         {
             if (_suppressSearch)
                 return;
 
             _selected.Clear();
             NotifySelection();
-            ResetPagination();
-            _ = UpdateListAsync();
+            RestartSearch();
         }
 
         partial void OnSelectedSuggestionChanged(string? value)
@@ -167,7 +189,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
             if (_suppressSearch || string.IsNullOrEmpty(value))
                 return;
 
-            if (value == CLEAR_RECENT_CHANNELS_LABEL)
+            if (value == Loc.Get("search.clear_recent"))
             {
                 Dispatcher.UIThread.Post(ClearRecentChannels, DispatcherPriority.Background);
                 return;
@@ -185,8 +207,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
             if (_suppressSearch || Kind != SearchKind.Videos)
                 return;
 
-            ResetPagination();
-            _ = UpdateListAsync();
+            OnSearchFilterChanged(value);
         }
 
         partial void OnSelectedClipPeriodChanged(SearchFilterOption? value)
@@ -194,9 +215,10 @@ namespace TwitchDownloaderAvalonia.ViewModels
             if (_suppressSearch || Kind != SearchKind.Clips)
                 return;
 
-            ResetPagination();
-            _ = UpdateListAsync();
+            OnSearchFilterChanged(value);
         }
+
+        private void OnSearchFilterChanged(SearchFilterOption? _) => RestartSearch();
 
         partial void OnSelectedPageSizeChanged(int value)
         {
@@ -235,7 +257,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
                     catch (Exception ex)
                     {
                         if (_settings.Current.VerboseErrors)
-                            await _dialogs.ShowErrorAsync("Verbose error", ex.ToString());
+                            await _dialogs.ShowErrorAsync(Loc.Get("dialogs.verbose_error"), ex.ToString());
                     }
                 }
             }
@@ -305,9 +327,9 @@ namespace TwitchDownloaderAvalonia.ViewModels
             }
             catch (Exception ex)
             {
-                await _dialogs.ShowErrorAsync("Invalid folder", "Unable to create the download folder.");
+                await _dialogs.ShowErrorAsync(Loc.Get("search.invalid_folder_title"), Loc.Get("search.invalid_folder"));
                 if (_settings.Current.VerboseErrors)
-                    await _dialogs.ShowErrorAsync("Verbose error", ex.ToString());
+                    await _dialogs.ShowErrorAsync(Loc.Get("dialogs.verbose_error"), ex.ToString());
 
                 return;
             }
@@ -476,9 +498,9 @@ namespace TwitchDownloaderAvalonia.ViewModels
             }
             catch (Exception ex)
             {
-                await _dialogs.ShowErrorAsync("Unable to get channel videos", $"Unable to get channel videos: {ex.Message}");
+                await _dialogs.ShowErrorAsync(Loc.Get("search.videos_failed"), Loc.Get("search.videos_failed_message", ex.Message));
                 if (_settings.Current.VerboseErrors)
-                    await _dialogs.ShowErrorAsync("Verbose error", ex.ToString());
+                    await _dialogs.ShowErrorAsync(Loc.Get("dialogs.verbose_error"), ex.ToString());
 
                 return;
             }
@@ -538,9 +560,9 @@ namespace TwitchDownloaderAvalonia.ViewModels
             }
             catch (Exception ex)
             {
-                await _dialogs.ShowErrorAsync("Unable to get channel clips", $"Unable to get channel clips: {ex.Message}");
+                await _dialogs.ShowErrorAsync(Loc.Get("search.clips_failed"), Loc.Get("search.clips_failed_message", ex.Message));
                 if (_settings.Current.VerboseErrors)
-                    await _dialogs.ShowErrorAsync("Verbose error", ex.ToString());
+                    await _dialogs.ShowErrorAsync(Loc.Get("dialogs.verbose_error"), ex.ToString());
 
                 return;
             }
@@ -608,10 +630,10 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 Time = _settings.Current.UtcVideoTime ? createdAt : createdAt.ToLocalTime(),
                 Length = length,
                 Views = views,
-                Game = game ?? "Unknown Game",
+                Game = game ?? Loc.Get("common.unknown_game"),
                 ThumbnailUrl = thumbnailUrl ?? string.Empty,
                 IsClip = isClip,
-                StreamerName = _currentChannel?.displayName ?? _currentChannel?.login ?? "Unknown User",
+                StreamerName = _currentChannel?.displayName ?? _currentChannel?.login ?? Loc.Get("common.unknown_user"),
                 StreamerId = _currentChannel?.id ?? string.Empty,
                 ClipperName = clipperName ?? string.Empty,
                 ClipperId = clipperId ?? string.Empty,
@@ -643,8 +665,12 @@ namespace TwitchDownloaderAvalonia.ViewModels
 
         private async Task LoadThumbnailsAsync(List<SearchResultItem> items)
         {
-            _thumbnailCts?.Cancel();
-            _thumbnailCts?.Dispose();
+            if (_thumbnailCts is { } previous)
+            {
+                await previous.CancelAsync();
+                previous.Dispose();
+            }
+
             _thumbnailCts = new CancellationTokenSource();
             var token = _thumbnailCts.Token;
 
@@ -659,9 +685,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
 
         private async Task LoadThumbnailAsync(SearchResultItem item, CancellationToken token)
         {
-            var bytes = await _thumbnails.TryGetAsync(item.ThumbnailUrl, token);
-            if (bytes is null)
-                bytes = await _thumbnails.TryGetAsync(null, token);
+            var bytes = await _thumbnails.TryGetAsync(item.ThumbnailUrl, token) ?? await _thumbnails.TryGetAsync(null, token);
 
             token.ThrowIfCancellationRequested();
             await Dispatcher.UIThread.InvokeAsync(() => item.ThumbnailBytes = bytes);
@@ -675,7 +699,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
             }
             catch (Exception ex)
             {
-                await _dialogs.ShowErrorAsync("Failed to copy to clipboard", ex.ToString());
+                await _dialogs.ShowErrorAsync(Loc.Get("search.copy_failed"), ex.ToString());
             }
         }
 
@@ -687,7 +711,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
             }
             catch (Exception ex)
             {
-                await _dialogs.ShowErrorAsync("Failed to copy to clipboard", ex.ToString());
+                await _dialogs.ShowErrorAsync(Loc.Get("search.copy_failed"), ex.ToString());
             }
         }
 
@@ -739,11 +763,17 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 ChannelSuggestions.Add(channel);
 
             if (ChannelSuggestions.Count > 0)
-                ChannelSuggestions.Add(CLEAR_RECENT_CHANNELS_LABEL);
+                ChannelSuggestions.Add(Loc.Get("search.clear_recent"));
 
             SelectedSuggestion = null;
             ChannelQuery = text;
             _suppressSearch = suppress;
+        }
+
+        private void RestartSearch()
+        {
+            ResetPagination();
+            _ = UpdateListAsync();
         }
 
         private void ResetPagination()
@@ -758,7 +788,10 @@ namespace TwitchDownloaderAvalonia.ViewModels
         private void ClearResults()
         {
             foreach (var item in Results)
+            {
                 item.PropertyChanged -= OnItemPropertyChanged;
+                item.Detach();
+            }
 
             Results.Clear();
         }

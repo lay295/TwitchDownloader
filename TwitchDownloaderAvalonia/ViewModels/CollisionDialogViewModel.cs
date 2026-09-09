@@ -10,11 +10,13 @@ namespace TwitchDownloaderAvalonia.ViewModels
         Action<CollisionPromptResult> close)
         : ViewModelBase
     {
-        public string HeaderText { get; } = $"{fileName} already exists.";
+        public string HeaderText => Loc.Get("dialogs.collision_header", fileName);
         public string FullPath { get; } = fullPath;
 
         [ObservableProperty]
         public partial bool Remember { get; set; }
+
+        protected override void OnCultureChanged(object? sender, EventArgs e) => Notify(nameof(HeaderText));
 
         [RelayCommand]
         private void Overwrite() => close(new CollisionPromptResult(CollisionChoice.Overwrite, Remember));

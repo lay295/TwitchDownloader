@@ -4,6 +4,7 @@
     xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
     xmlns:core="using:TwitchDownloaderCore.Models"
     xmlns:c="using:TwitchDownloaderAvalonia.Converters"
+    xmlns:loc="using:TwitchDownloaderAvalonia.Markup"
     xmlns:anim="https://github.com/whistyun/AnimatedImage.Avalonia"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -18,12 +19,12 @@
             <Button
                 DockPanel.Dock="Right"
                 Classes="accent"
-                Content="Get Info"
+                Content="{loc:Translate Key=common.get_info}"
                 Command="{Binding GetInfoCommand}"
                 IsEnabled="{Binding CanGetInfo}" />
             <TextBox
                 Margin="0,0,8,0"
-                PlaceholderText="https://www.twitch.tv/videos/... or clip link"
+                PlaceholderText="{loc:Translate Key=chat.url_placeholder}"
                 Text="{Binding SourceUrl}">
                 <TextBox.KeyBindings>
                     <KeyBinding Gesture="Enter" Command="{Binding GetInfoCommand}" />
@@ -56,7 +57,7 @@
                                     <TextBlock
                                         Classes="muted"
                                         HorizontalAlignment="Center"
-                                        Text="No thumbnail"
+                                        Text="{loc:Translate Key=common.no_thumbnail}"
                                         IsVisible="{Binding AppStatus.ReduceMotion}" />
                                 </StackPanel>
                                 <Image
@@ -74,7 +75,7 @@
                             IsVisible="{Binding InfoLoaded}" />
                         <TextBlock
                             Classes="muted"
-                            Text="Get Info to load title, channel, and length."
+                            Text="{loc:Translate Key=common.get_info_hint}"
                             TextWrapping="Wrap"
                             IsVisible="{Binding !InfoLoaded}" />
                         <StackPanel
@@ -105,7 +106,7 @@
                                         Height="14"
                                         Data="{StaticResource IconClock}"
                                         Foreground="{DynamicResource MutedForegroundBrush}" />
-                                    <TextBlock Classes="muted" Text="Length" VerticalAlignment="Center" />
+                                    <TextBlock Classes="muted" Text="{loc:Translate Key=common.length}" VerticalAlignment="Center" />
                                 </StackPanel>
                                 <TextBlock
                                     Grid.Column="1"
@@ -120,7 +121,7 @@
                                         Height="14"
                                         Data="{StaticResource IconCalendar}"
                                         Foreground="{DynamicResource MutedForegroundBrush}" />
-                                    <TextBlock Classes="muted" Text="Created" VerticalAlignment="Center" />
+                                    <TextBlock Classes="muted" Text="{loc:Translate Key=common.created}" VerticalAlignment="Center" />
                                 </StackPanel>
                                 <TextBlock
                                     Grid.Column="1"
@@ -137,20 +138,20 @@
                 <ScrollViewer VerticalAlignment="Top">
                     <StackPanel Spacing="10" VerticalAlignment="Top">
                         <StackPanel Spacing="6">
-                            <TextBlock Classes="label" Text="Format" Margin="0" />
+                            <TextBlock Classes="label" Text="{loc:Translate Key=chat.format}" Margin="0" />
                             <StackPanel Orientation="Horizontal" Spacing="16">
                                 <RadioButton
-                                    Content="JSON"
+                                    Content="{loc:Translate Key=chat.format_json}"
                                     GroupName="ChatFormat"
                                     IsEnabled="{Binding CanEditOptions}"
                                     IsChecked="{Binding DownloadFormat, Converter={x:Static c:EnumEqualsConverter.Instance}, ConverterParameter={x:Static core:ChatFormat.Json}, Mode=TwoWay}" />
                                 <RadioButton
-                                    Content="Text"
+                                    Content="{loc:Translate Key=chat.format_text}"
                                     GroupName="ChatFormat"
                                     IsEnabled="{Binding CanEditOptions}"
                                     IsChecked="{Binding DownloadFormat, Converter={x:Static c:EnumEqualsConverter.Instance}, ConverterParameter={x:Static core:ChatFormat.Text}, Mode=TwoWay}" />
                                 <RadioButton
-                                    Content="HTML"
+                                    Content="{loc:Translate Key=chat.format_html}"
                                     GroupName="ChatFormat"
                                     IsEnabled="{Binding CanEditOptions}"
                                     IsChecked="{Binding DownloadFormat, Converter={x:Static c:EnumEqualsConverter.Instance}, ConverterParameter={x:Static core:ChatFormat.Html}, Mode=TwoWay}" />
@@ -158,15 +159,15 @@
                         </StackPanel>
 
                         <StackPanel Spacing="6" IsVisible="{Binding ShowCompression}">
-                            <TextBlock Classes="label" Text="Compression" Margin="0" />
+                            <TextBlock Classes="label" Text="{loc:Translate Key=chat.compression}" Margin="0" />
                             <StackPanel Orientation="Horizontal" Spacing="16">
                                 <RadioButton
-                                    Content="None"
+                                    Content="{loc:Translate Key=chat.compression_none}"
                                     GroupName="ChatCompression"
                                     IsEnabled="{Binding CanEditOptions}"
                                     IsChecked="{Binding Compression, Converter={x:Static c:EnumEqualsConverter.Instance}, ConverterParameter={x:Static core:ChatCompression.None}, Mode=TwoWay}" />
                                 <RadioButton
-                                    Content="Gzip"
+                                    Content="{loc:Translate Key=chat.compression_gzip}"
                                     GroupName="ChatCompression"
                                     IsEnabled="{Binding CanEditOptions}"
                                     IsChecked="{Binding Compression, Converter={x:Static c:EnumEqualsConverter.Instance}, ConverterParameter={x:Static core:ChatCompression.Gzip}, Mode=TwoWay}" />
@@ -174,20 +175,20 @@
                         </StackPanel>
 
                         <StackPanel Spacing="6" IsVisible="{Binding ShowTimestamps}">
-                            <TextBlock Classes="label" Text="Timestamp" Margin="0" />
+                            <TextBlock Classes="label" Text="{loc:Translate Key=chat.timestamp}" Margin="0" />
                             <StackPanel Orientation="Horizontal" Spacing="16">
                                 <RadioButton
-                                    Content="UTC"
+                                    Content="{loc:Translate Key=chat.ts_utc}"
                                     GroupName="ChatTimestamp"
                                     IsEnabled="{Binding CanEditOptions}"
                                     IsChecked="{Binding TimestampStyle, Converter={x:Static c:EnumEqualsConverter.Instance}, ConverterParameter={x:Static core:TimestampFormat.Utc}, Mode=TwoWay}" />
                                 <RadioButton
-                                    Content="Relative"
+                                    Content="{loc:Translate Key=chat.ts_relative}"
                                     GroupName="ChatTimestamp"
                                     IsEnabled="{Binding CanEditOptions}"
                                     IsChecked="{Binding TimestampStyle, Converter={x:Static c:EnumEqualsConverter.Instance}, ConverterParameter={x:Static core:TimestampFormat.Relative}, Mode=TwoWay}" />
                                 <RadioButton
-                                    Content="None"
+                                    Content="{loc:Translate Key=chat.ts_none}"
                                     GroupName="ChatTimestamp"
                                     IsEnabled="{Binding CanEditOptions}"
                                     IsChecked="{Binding TimestampStyle, Converter={x:Static c:EnumEqualsConverter.Instance}, ConverterParameter={x:Static core:TimestampFormat.None}, Mode=TwoWay}" />
@@ -216,7 +217,7 @@
                                                Value="{Binding StartSecond, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
                             </StackPanel>
                             <CheckBox
-                                Content="Trim start"
+                                Content="{loc:Translate Key=common.trim_start}"
                                 VerticalAlignment="Center"
                                 IsChecked="{Binding TrimStart}"
                                 IsEnabled="{Binding CanEditOptions}" />
@@ -244,7 +245,7 @@
                                                Value="{Binding EndSecond, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
                             </StackPanel>
                             <CheckBox
-                                Content="Trim end"
+                                Content="{loc:Translate Key=common.trim_end}"
                                 VerticalAlignment="Center"
                                 IsChecked="{Binding TrimEnd}"
                                 IsEnabled="{Binding CanEditOptions}" />
@@ -252,17 +253,17 @@
 
                         <StackPanel Spacing="6" IsVisible="{Binding ShowEmbedOptions}">
                             <CheckBox
-                                Content="Embed images"
+                                Content="{loc:Translate Key=chat.embed_images}"
                                 IsChecked="{Binding EmbedImages}"
                                 IsEnabled="{Binding CanEditOptions}" />
                             <TextBlock
                                 Classes="muted"
-                                Text="Bake emotes and badges into the file."
+                                Text="{loc:Translate Key=chat.embed_images_hint}"
                                 TextWrapping="Wrap" />
                             <StackPanel Orientation="Horizontal" Spacing="16">
-                                <CheckBox Content="BTTV" IsChecked="{Binding BttvEmotes}" IsEnabled="{Binding CanEditThirdPartyEmotes}" />
-                                <CheckBox Content="FFZ" IsChecked="{Binding FfzEmotes}" IsEnabled="{Binding CanEditThirdPartyEmotes}" />
-                                <CheckBox Content="7TV" IsChecked="{Binding StvEmotes}" IsEnabled="{Binding CanEditThirdPartyEmotes}" />
+                                <CheckBox Content="{loc:Translate Key=chat.bttv}" IsChecked="{Binding BttvEmotes}" IsEnabled="{Binding CanEditThirdPartyEmotes}" />
+                                <CheckBox Content="{loc:Translate Key=chat.ffz}" IsChecked="{Binding FfzEmotes}" IsEnabled="{Binding CanEditThirdPartyEmotes}" />
+                                <CheckBox Content="{loc:Translate Key=chat.stv}" IsChecked="{Binding StvEmotes}" IsEnabled="{Binding CanEditThirdPartyEmotes}" />
                             </StackPanel>
                         </StackPanel>
 
@@ -279,7 +280,7 @@
                                 Value="{Binding DownloadThreads, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
                             <TextBlock
                                 Classes="label"
-                                Text="Download threads"
+                                Text="{loc:Translate Key=common.download_threads}"
                                 VerticalAlignment="Center"
                                 Margin="0" />
                         </DockPanel>
@@ -298,14 +299,14 @@
                                 IsEnabled="{Binding CanDownload}">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <PathIcon Data="{StaticResource IconDownload}" />
-                                    <TextBlock Text="Download" VerticalAlignment="Center" />
+                                    <TextBlock Text="{loc:Translate Key=common.download}" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
                             <Button
                                 Grid.Column="2"
                                 Classes="secondary"
                                 HorizontalAlignment="Stretch"
-                                Content="Cancel"
+                                Content="{loc:Translate Key=common.cancel}"
                                 Command="{Binding CancelCommand}"
                                 IsEnabled="{Binding CanCancelQueued}" />
                         </Grid>
@@ -320,7 +321,7 @@
                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4">
                         <Button
                             Classes="link"
-                            Content="Clear"
+                            Content="{loc:Translate Key=common.clear}"
                             Command="{Binding ClearLogCommand}"
                             IsVisible="{Binding IsLogExpanded}" />
                         <Button
@@ -330,14 +331,14 @@
                     </StackPanel>
                     <TextBlock
                         Classes="label"
-                        Text="Log"
+                        Text="{loc:Translate Key=common.log}"
                         VerticalAlignment="Center"
                         Margin="0" />
                 </DockPanel>
                 <TextBox
                     Height="128"
                     Text="{Binding LogText}"
-                    PlaceholderText="Log output will appear here."
+                    PlaceholderText="{loc:Translate Key=common.log_placeholder}"
                     IsReadOnly="True"
                     AcceptsReturn="True"
                     TextWrapping="Wrap"

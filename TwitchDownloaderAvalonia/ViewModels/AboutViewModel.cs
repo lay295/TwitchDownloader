@@ -18,6 +18,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
         private readonly DialogService _dialogs;
         private readonly FfmpegService _ffmpeg;
         private readonly Version _localVersion;
+        private string? _remoteVersion;
         private Task? _checkTask;
 
         public AboutViewModel(UpdateCheckService updates, DialogService dialogs, FfmpegService ffmpeg)
@@ -28,21 +29,19 @@ namespace TwitchDownloaderAvalonia.ViewModels
 
             var assembly = typeof(AboutViewModel).Assembly;
             _localVersion = assembly.GetName().Version?.StripRevisionIfDefault() ?? new Version(0, 0, 0);
-            AppName = "Twitch Downloader";
-            VersionText = FormatVersion(_localVersion);
-            Description = assembly.GetCustomAttribute<AssemblyDescriptionAttribute>()?.Description ?? "Download and render Twitch VODs, clips, and chats";
-            Copyright = assembly.GetCustomAttribute<AssemblyCopyrightAttribute>()?.Copyright ?? "Copyright © lay295 and contributors";
+            Description = assembly.GetCustomAttribute<AssemblyDescriptionAttribute>()?.Description ?? Loc.Get("about.description");
+            Copyright = assembly.GetCustomAttribute<AssemblyCopyrightAttribute>()?.Copyright ?? Loc.Get("about.copyright");
             LicenseText = ReadLicense(assembly);
             ChangelogUrl = DEFAULT_CHANGELOG_URL;
             RuntimeSummary = BuildRuntimeSummary();
         }
 
-        public string AppName { get; }
-        public string VersionText { get; }
-        public string Description { get; }
-        public string Copyright { get; }
+        public string AppName => Loc.Get("common.app_name");
+        public string VersionText => FormatVersion(_localVersion);
+        public string Description => NonEmpty(Loc.Get("about.description"), field);
+        public string Copyright => NonEmpty(Loc.Get("about.copyright"), field);
         public string LicenseText { get; }
-        public string FrontendNote { get; } = "Avalonia UI for Windows, Linux, and macOS.";
+        public string FrontendNote => Loc.Get("about.frontend_note");
 
         [ObservableProperty]
         public partial string RuntimeSummary { get; set; }
@@ -63,6 +62,19 @@ namespace TwitchDownloaderAvalonia.ViewModels
 
         public bool ShowUpdateStatus => IsCheckingUpdate || !string.IsNullOrEmpty(UpdateStatusText);
 
+        protected override void OnCultureChanged(object? sender, EventArgs e)
+        {
+            RuntimeSummary = BuildRuntimeSummary();
+            Notify(nameof(AppName), nameof(VersionText), nameof(Description), nameof(FrontendNote), nameof(Copyright));
+
+            if (IsCheckingUpdate)
+                UpdateStatusText = Loc.Get("about.checking");
+            else if (HasUpdate && _remoteVersion is not null)
+                UpdateStatusText = Loc.Get("about.update_available", _remoteVersion);
+            else if (!string.IsNullOrEmpty(UpdateStatusText))
+                UpdateStatusText = Loc.Get("about.up_to_date");
+        }
+
         public Task EnsureUpdateCheckAsync()
         {
             RuntimeSummary = BuildRuntimeSummary();
@@ -72,7 +84,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
         private async Task CheckForUpdateAsync()
         {
             IsCheckingUpdate = true;
-            UpdateStatusText = "Checking…";
+            UpdateStatusText = Loc.Get("about.checking");
             HasUpdate = false;
 
             try
@@ -88,11 +100,12 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 if (result.IsNewer)
                 {
                     HasUpdate = true;
-                    UpdateStatusText = $"Version {result.RemoteVersion} is available";
+                    _remoteVersion = result.RemoteVersion.ToString();
+                    UpdateStatusText = Loc.Get("about.update_available", _remoteVersion);
                     return;
                 }
 
-                UpdateStatusText = "You're up to date";
+                UpdateStatusText = Loc.Get("about.up_to_date");
             }
             catch
             {
@@ -119,29 +132,35 @@ namespace TwitchDownloaderAvalonia.ViewModels
 
         private string BuildDebugInfo()
         {
-            var ffmpeg = _ffmpeg.IsAvailable() ? _ffmpeg.ResolvedPath : "missing";
+            var ffmpeg = _ffmpeg.IsAvailable() ? _ffmpeg.ResolvedPath : Loc.Get("about.ffmpeg_missing");
+            var avalonia = typeof(Avalonia.Application).Assembly.GetName().Version?.ToString(3);
             var builder = new StringBuilder();
             builder.AppendLine($"{AppName} {_localVersion}");
-            builder.AppendLine($"OS: {RuntimeInformation.OSDescription} {RuntimeInformation.OSArchitecture}");
-            builder.AppendLine($"NET: {RuntimeInformation.FrameworkDescription}");
-            builder.AppendLine($"Avalonia: {typeof(Avalonia.Application).Assembly.GetName().Version?.ToString(3)}");
-            builder.Append($"FFmpeg: {ffmpeg}");
+            builder.AppendLine(Loc.Get("about.debug_os", $"{RuntimeInformation.OSDescription} {RuntimeInformation.OSArchitecture}"));
+            builder.AppendLine(Loc.Get("about.debug_net", RuntimeInformation.FrameworkDescription));
+            builder.AppendLine(Loc.Get("about.debug_avalonia", avalonia ?? string.Empty));
+            builder.Append(Loc.Get("about.debug_ffmpeg", ffmpeg));
             return builder.ToString();
         }
 
         private string BuildRuntimeSummary()
         {
-            var ffmpeg = _ffmpeg.IsAvailable() ? _ffmpeg.ResolvedPath : "missing";
-            var avalonia = typeof(Avalonia.Application).Assembly.GetName().Version?.ToString(3);
-            return $"{RuntimeInformation.OSDescription} {RuntimeInformation.OSArchitecture} · {RuntimeInformation.FrameworkDescription} · Avalonia {avalonia} · FFmpeg {ffmpeg}";
+            var ffmpeg = _ffmpeg.IsAvailable() ? _ffmpeg.ResolvedPath : Loc.Get("about.ffmpeg_missing");
+            var avalonia = typeof(Avalonia.Application).Assembly.GetName().Version?.ToString(3) ?? string.Empty;
+            return Loc.Get(
+                "about.runtime_summary",
+                $"{RuntimeInformation.OSDescription} {RuntimeInformation.OSArchitecture}",
+                RuntimeInformation.FrameworkDescription,
+                avalonia,
+                ffmpeg);
         }
 
         private static string FormatVersion(Version version)
         {
 #if DEBUG
-            return $"v{version} DEBUG";
+            return Loc.Get("about.version_debug", version);
 #else
-            return $"v{version}";
+            return Loc.Get("about.version", version);
 #endif
         }
 
@@ -149,10 +168,18 @@ namespace TwitchDownloaderAvalonia.ViewModels
         {
             using var stream = assembly.GetManifestResourceStream(LICENSE_RESOURCE_NAME);
             if (stream is null)
-                return "MIT License";
+                return Loc.Get("about.mit_license");
 
             using var reader = new StreamReader(stream);
             return reader.ReadToEnd().Trim();
+        }
+
+        private static string NonEmpty(string value, string fallback)
+        {
+            if (string.IsNullOrEmpty(value) || value.StartsWith("about.", StringComparison.Ordinal))
+                return fallback;
+
+            return value;
         }
     }
 }
