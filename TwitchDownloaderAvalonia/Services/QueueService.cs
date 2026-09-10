@@ -1,11 +1,5 @@
-using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.ComponentModel;
-using Avalonia.Threading;
-using CommunityToolkit.Mvvm.ComponentModel;
-using TwitchDownloaderAvalonia.Models;
 using TwitchDownloaderAvalonia.ViewModels;
-using TwitchDownloaderCore.Options;
 
 namespace TwitchDownloaderAvalonia.Services
 {
@@ -244,6 +238,7 @@ namespace TwitchDownloaderAvalonia.Services
         private void Detach(QueueItemViewModel item)
         {
             item.PropertyChanged -= OnItemPropertyChanged;
+            item.Dispose();
         }
 
         private void OnItemsChanged(object? sender, NotifyCollectionChangedEventArgs e) => RefreshDerived();

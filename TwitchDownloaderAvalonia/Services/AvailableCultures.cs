@@ -49,8 +49,14 @@ namespace TwitchDownloaderAvalonia.Services
                     return option.Code;
             }
 
+            if (TryResolveChinese(culture, out var chinese))
+                return chinese;
+
             var dash = culture.IndexOf('-');
             var language = dash > 0 ? culture[..dash] : culture;
+            if (language.Equals("zh", StringComparison.OrdinalIgnoreCase))
+                return SimplifiedChinese.Code;
+
             foreach (var option in All)
             {
                 if (option.Code.StartsWith(language + "-", StringComparison.OrdinalIgnoreCase))
@@ -70,6 +76,50 @@ namespace TwitchDownloaderAvalonia.Services
             }
 
             return English;
+        }
+
+        private static bool TryResolveChinese(string culture, out string code)
+        {
+            code = SimplifiedChinese.Code;
+            CultureInfo? info = null;
+            try
+            {
+                info = CultureInfo.GetCultureInfo(culture);
+            }
+            catch (CultureNotFoundException)
+            {
+            }
+
+            var name = (info?.Name ?? culture).ToLowerInvariant();
+            if (!name.StartsWith("zh", StringComparison.Ordinal))
+                return false;
+
+            for (var current = info; current is { Name.Length: > 0 }; current = current.Parent)
+            {
+                if (current.Name.Equals("zh-Hant", StringComparison.OrdinalIgnoreCase))
+                {
+                    code = TraditionalChinese.Code;
+                    return true;
+                }
+
+                if (current.Name.Equals("zh-Hans", StringComparison.OrdinalIgnoreCase))
+                {
+                    code = SimplifiedChinese.Code;
+                    return true;
+                }
+            }
+
+            if (name.Contains("hant", StringComparison.Ordinal)
+                || name.StartsWith("zh-tw", StringComparison.Ordinal)
+                || name.StartsWith("zh-hk", StringComparison.Ordinal)
+                || name.StartsWith("zh-mo", StringComparison.Ordinal))
+            {
+                code = TraditionalChinese.Code;
+                return true;
+            }
+
+            code = SimplifiedChinese.Code;
+            return true;
         }
     }
 }

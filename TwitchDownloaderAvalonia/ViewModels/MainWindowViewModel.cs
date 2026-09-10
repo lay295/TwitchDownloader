@@ -1,9 +1,3 @@
-using System.Diagnostics;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using TwitchDownloaderAvalonia.Models;
-using TwitchDownloaderAvalonia.Services;
-
 namespace TwitchDownloaderAvalonia.ViewModels
 {
     public partial class MainWindowViewModel : ViewModelBase
@@ -33,7 +27,6 @@ namespace TwitchDownloaderAvalonia.ViewModels
             SettingsPage = new SettingsViewModel(settings, status, fileDialogs, dialogs, collision, queue);
             About = new AboutViewModel(updates, dialogs, ffmpeg);
             CurrentPage = Vod;
-            AppVersion = Loc.Get("about.version", typeof(MainWindowViewModel).Assembly.GetName().Version?.ToString(3) ?? "0.0.0");
             RefreshWindowTitle();
         }
 
@@ -63,7 +56,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
 
         public string AppName => Loc.Get("common.app_name");
 
-        public string AppVersion { get; }
+        public string AppVersion => Loc.Get("about.version", typeof(MainWindowViewModel).Assembly.GetName().Version?.ToString(3) ?? "0.0.0");
 
         public string PageTitle => SelectedPage switch
         {
@@ -95,7 +88,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
 
         protected override void OnCultureChanged(object? sender, EventArgs e)
         {
-            Notify(nameof(AppName), nameof(PageTitle), nameof(PageSubtitle));
+            Notify(nameof(AppName), nameof(AppVersion), nameof(PageTitle), nameof(PageSubtitle));
             RefreshWindowTitle();
         }
 

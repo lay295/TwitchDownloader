@@ -1,6 +1,3 @@
-using CommunityToolkit.Mvvm.ComponentModel;
-using TwitchDownloaderAvalonia.Models;
-
 namespace TwitchDownloaderAvalonia.Services
 {
     public sealed partial class AppStatus : ObservableObject

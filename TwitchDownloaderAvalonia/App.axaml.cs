@@ -1,10 +1,7 @@
-using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using TwitchDownloaderAvalonia.Services;
 using TwitchDownloaderAvalonia.ViewModels;
 using TwitchDownloaderAvalonia.Views;
-using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderAvalonia
 {

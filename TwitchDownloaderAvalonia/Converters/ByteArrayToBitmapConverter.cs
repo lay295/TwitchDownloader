@@ -1,6 +1,4 @@
-using System.Globalization;
 using System.Runtime.CompilerServices;
-using Avalonia.Data.Converters;
 using Avalonia.Media.Imaging;
 
 namespace TwitchDownloaderAvalonia.Converters

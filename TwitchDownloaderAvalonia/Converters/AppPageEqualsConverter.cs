@@ -1,7 +1,3 @@
-using System.Globalization;
-using Avalonia.Data.Converters;
-using TwitchDownloaderAvalonia.Models;
-
 namespace TwitchDownloaderAvalonia.Converters
 {
     public sealed class AppPageEqualsConverter : IValueConverter

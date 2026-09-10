@@ -10,17 +10,16 @@ namespace TwitchDownloaderAvalonia.Services
         public const string FEED_URL = "https://downloader-update.twitcharchives.workers.dev/";
         public const string DEFAULT_CHANGELOG_URL = "https://github.com/lay295/TwitchDownloader/releases";
 
-        private readonly HttpClient _httpClient = new()
-        {
-            Timeout = TimeSpan.FromSeconds(15),
-        };
-
+        private readonly HttpClient _httpClient;
         private readonly SemaphoreSlim _gate = new(1, 1);
         private UpdateCheckResult? _cached;
         private bool _completed;
 
-        public UpdateCheckService()
+        public UpdateCheckService() : this(CreateClient()) { }
+
+        internal UpdateCheckService(HttpClient httpClient)
         {
+            _httpClient = httpClient;
             _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "TwitchDownloader");
         }
 
@@ -35,9 +34,14 @@ namespace TwitchDownloaderAvalonia.Services
                 if (_completed)
                     return _cached;
 
-                _cached = await CheckCoreAsync(localVersion, cancellationToken);
+                var result = await CheckCoreAsync(localVersion, cancellationToken);
+                if (result is null)
+                    return result;
+
+                _cached = result;
                 _completed = true;
-                return _cached;
+
+                return result;
             }
             finally
             {
@@ -71,6 +75,14 @@ namespace TwitchDownloaderAvalonia.Services
             {
                 return null;
             }
+        }
+
+        private static HttpClient CreateClient()
+        {
+            return new HttpClient
+            {
+                Timeout = TimeSpan.FromSeconds(15),
+            };
         }
     }
 }

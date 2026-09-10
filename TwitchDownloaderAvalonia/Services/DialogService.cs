@@ -1,7 +1,4 @@
-using Avalonia.Controls;
 using Avalonia.Input.Platform;
-using Avalonia.Threading;
-using TwitchDownloaderAvalonia.Models;
 using TwitchDownloaderAvalonia.ViewModels;
 using TwitchDownloaderAvalonia.Views;
 

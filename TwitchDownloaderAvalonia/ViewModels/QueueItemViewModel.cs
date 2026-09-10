@@ -1,12 +1,4 @@
-using System.Diagnostics;
 using System.Runtime.InteropServices;
-using Avalonia.Threading;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using TwitchDownloaderAvalonia.Models;
-using TwitchDownloaderAvalonia.Services;
-using TwitchDownloaderCore;
-using TwitchDownloaderCore.Options;
 
 namespace TwitchDownloaderAvalonia.ViewModels
 {
@@ -14,10 +6,12 @@ namespace TwitchDownloaderAvalonia.ViewModels
     {
         private readonly object _options;
         private readonly LogLevel _logLevel;
+
         private CancellationTokenSource _tokenSource = new();
         private QueueService? _queue;
         private DialogService? _dialogs;
         private AppStatus? _appStatus;
+        private bool _hasLiveProgressStatus;
 
         private QueueItemViewModel(
             QueueTaskKind kind,
@@ -35,7 +29,10 @@ namespace TwitchDownloaderAvalonia.ViewModels
             SourceId = sourceId;
             _logLevel = logLevel;
             DependantTask = dependantTask;
-            DisplayStatus = dependantTask is null ? Loc.Get("queue.status_ready") : Loc.Get("queue.status_waiting");
+            DisplayStatus = dependantTask is null
+                ? Loc.Get("queue.status_ready")
+                : Loc.Get("queue.status_waiting");
+
             Status = dependantTask is null ? QueueItemStatus.Ready : QueueItemStatus.Waiting;
             CanCancel = true;
         }
@@ -118,7 +115,22 @@ namespace TwitchDownloaderAvalonia.ViewModels
             OnPropertyChanged(nameof(ShowStatusGif));
         }
 
-        private void OnAppStatusChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        public void DetachHost()
+        {
+            if (_appStatus is not null)
+                _appStatus.PropertyChanged -= OnAppStatusChanged;
+
+            _appStatus = null;
+            _queue = null;
+            _dialogs = null;
+        }
+
+        protected override void DisposeCore()
+        {
+            DetachHost();
+        }
+
+        private void OnAppStatusChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName is nameof(AppStatus.ShowStatusImage) or nameof(AppStatus.ReduceMotion))
                 OnPropertyChanged(nameof(ShowStatusGif));
@@ -126,24 +138,19 @@ namespace TwitchDownloaderAvalonia.ViewModels
 
         public bool CanRun()
         {
-            if (Kind != QueueTaskKind.ChatRender || DependantTask is null)
-                return Status == QueueItemStatus.Ready;
-
-            if (Status != QueueItemStatus.Waiting)
-                return false;
-
-            if (DependantTask.Status == QueueItemStatus.Finished)
-                return true;
-
-            if (DependantTask.Status is not (QueueItemStatus.Failed or QueueItemStatus.Canceled))
-                return false;
-
-            ChangeStatus(QueueItemStatus.Canceled);
-            CanReinitialize = true;
-            NotifyActionState();
-
-            return false;
-
+            switch (QueueDependency.Evaluate(Status, DependantTask?.Status))
+            {
+                case QueueRunDecision.Ready:
+                case QueueRunDecision.Start:
+                    return true;
+                case QueueRunDecision.CancelBecauseDependantFailed:
+                    ChangeStatus(QueueItemStatus.Canceled);
+                    CanReinitialize = true;
+                    NotifyActionState();
+                    return false;
+                default:
+                    return false;
+            }
         }
 
         public async Task RunAsync()
@@ -161,7 +168,11 @@ namespace TwitchDownloaderAvalonia.ViewModels
             var progress = new AvaloniaTaskProgress(
                 _logLevel,
                 percent => Progress = percent,
-                status => DisplayStatus = status);
+                status =>
+                {
+                    _hasLiveProgressStatus = true;
+                    DisplayStatus = status;
+                });
 
             try
             {
@@ -232,6 +243,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
             Progress = 0;
             Exception = null;
             CanReinitialize = false;
+            _hasLiveProgressStatus = false;
             ReplaceTokenSource();
             ChangeStatus(DependantTask is null ? QueueItemStatus.Ready : QueueItemStatus.Waiting);
             NotifyActionState();
@@ -445,17 +457,12 @@ namespace TwitchDownloaderAvalonia.ViewModels
             void Apply()
             {
                 Status = status;
-                DisplayStatus = status switch
-                {
-                    QueueItemStatus.Ready => Loc.Get("queue.status_ready"),
-                    QueueItemStatus.Waiting => Loc.Get("queue.status_waiting"),
-                    QueueItemStatus.Running => IsCannedStatus(DisplayStatus) ? Loc.Get("queue.status_running") : DisplayStatus,
-                    QueueItemStatus.Stopping => Loc.Get("queue.status_canceling"),
-                    QueueItemStatus.Finished => Loc.Get("queue.status_finished"),
-                    QueueItemStatus.Failed => Loc.Get("queue.status_failed"),
-                    QueueItemStatus.Canceled => Loc.Get("queue.status_canceled"),
-                    _ => status.ToString(),
-                };
+                if (status is not QueueItemStatus.Running)
+                    _hasLiveProgressStatus = false;
+
+                DisplayStatus = status is QueueItemStatus.Running && _hasLiveProgressStatus
+                    ? DisplayStatus
+                    : StatusLabel(status);
 
                 CanCancel = status is not QueueItemStatus.Canceled
                     and not QueueItemStatus.Failed
@@ -467,15 +474,10 @@ namespace TwitchDownloaderAvalonia.ViewModels
         protected override void OnCultureChanged(object? sender, EventArgs e)
         {
             Notify(nameof(TaskType));
-            if (Status is QueueItemStatus.Running)
-            {
-                if (IsCannedStatus(DisplayStatus))
-                    DisplayStatus = Loc.Get("queue.status_running");
-            }
-            else
-            {
-                DisplayStatus = StatusLabel(Status);
-            }
+            if (Status is QueueItemStatus.Running && _hasLiveProgressStatus)
+                return;
+
+            DisplayStatus = StatusLabel(Status);
         }
 
         private static string StatusLabel(QueueItemStatus status) => status switch
@@ -489,20 +491,6 @@ namespace TwitchDownloaderAvalonia.ViewModels
             QueueItemStatus.Canceled => Loc.Get("queue.status_canceled"),
             _ => status.ToString(),
         };
-
-        private static bool IsCannedStatus(string text)
-        {
-            if (text is "Ready" or "Waiting" or "Running" or "Canceling" or "Finished" or "Failed" or "Canceled" or "Stopping")
-                return true;
-
-            return text == Loc.Get("queue.status_ready")
-                   || text == Loc.Get("queue.status_waiting")
-                   || text == Loc.Get("queue.status_running")
-                   || text == Loc.Get("queue.status_canceling")
-                   || text == Loc.Get("queue.status_finished")
-                   || text == Loc.Get("queue.status_failed")
-                   || text == Loc.Get("queue.status_canceled");
-        }
 
         private void NotifyActionState()
         {

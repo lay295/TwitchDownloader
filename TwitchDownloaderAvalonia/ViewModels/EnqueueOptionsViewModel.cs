@@ -1,9 +1,3 @@
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using TwitchDownloaderAvalonia.Converters;
-using TwitchDownloaderAvalonia.Models;
-using TwitchDownloaderAvalonia.Services;
-
 namespace TwitchDownloaderAvalonia.ViewModels
 {
     public sealed partial class EnqueueOptionsViewModel : ViewModelBase

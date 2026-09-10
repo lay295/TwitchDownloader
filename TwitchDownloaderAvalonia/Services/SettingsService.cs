@@ -1,6 +1,5 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using TwitchDownloaderAvalonia.Models;
 
 namespace TwitchDownloaderAvalonia.Services
 {
@@ -16,10 +15,17 @@ namespace TwitchDownloaderAvalonia.Services
         private readonly Lock _saveLock = new();
 
         public SettingsService()
+            : this(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TwitchDownloader", "avalonia-settings.json"))
         {
-            var directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TwitchDownloader");
-            Directory.CreateDirectory(directory);
-            _filePath = Path.Combine(directory, "avalonia-settings.json");
+        }
+
+        internal SettingsService(string filePath)
+        {
+            var directory = Path.GetDirectoryName(filePath);
+            if (!string.IsNullOrEmpty(directory))
+                Directory.CreateDirectory(directory);
+
+            _filePath = filePath;
             Current = Load();
         }
 
@@ -30,7 +36,9 @@ namespace TwitchDownloaderAvalonia.Services
             lock (_saveLock)
             {
                 var json = JsonSerializer.Serialize(Current, JsonOptions);
-                File.WriteAllText(_filePath, json);
+                var tempPath = _filePath + ".tmp";
+                File.WriteAllText(tempPath, json);
+                File.Move(tempPath, _filePath, overwrite: true);
             }
         }
 

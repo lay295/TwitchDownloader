@@ -1,5 +1,3 @@
-using CommunityToolkit.Mvvm.Input;
-
 namespace TwitchDownloaderAvalonia.ViewModels
 {
     public sealed partial class MessageDialogViewModel(

@@ -1,8 +1,4 @@
-using System.Globalization;
-using Avalonia.Data;
-using Avalonia.Data.Converters;
 using Avalonia.Markup.Xaml;
-using TwitchDownloaderAvalonia.Services;
 
 namespace TwitchDownloaderAvalonia.Markup
 {
@@ -30,7 +26,7 @@ namespace TwitchDownloaderAvalonia.Markup
         {
             return parameter is string key
                 ? LocalizationService.Current.Get(key)
-                : Avalonia.AvaloniaProperty.UnsetValue;
+                : AvaloniaProperty.UnsetValue;
         }
 
         public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

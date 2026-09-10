@@ -1,5 +1,4 @@
 using System.Runtime.InteropServices;
-using TwitchDownloaderCore;
 using TwitchDownloaderCore.Interfaces;
 using Xabe.FFmpeg;
 using Xabe.FFmpeg.Downloader;
@@ -33,31 +32,46 @@ namespace TwitchDownloaderAvalonia.Services
 
         public async Task EnsureAvailableAsync(ITaskProgress progress, CancellationToken cancellationToken = default)
         {
-            if (IsAvailable() && !NeedsRefresh())
+            var alreadyAvailable = IsAvailable();
+            if (alreadyAvailable && !NeedsRefresh())
                 return;
 
-            var destination = Path.Combine(AppContext.BaseDirectory, ExecutableName);
-            using var progressHandler = new XabeProgressHandler(progress);
-            await FFmpegDownloader.GetLatestVersion(FFmpegVersion.Official, AppContext.BaseDirectory, progressHandler);
-
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && File.Exists(destination))
-            {
-                try
-                {
-                    TwitchHelper.Set777UnixFilePermissions(new FileInfo(destination));
-                }
-                catch
-                {
-                    var chmodCommand = !RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
-                        ? "sudo chmod +x ffmpeg"
-                        : "chmod +x ffmpeg";
-
-                    progress.LogError(Loc.Get("status.ffmpeg_chmod_failed", chmodCommand));
-                }
-            }
-
             cancellationToken.ThrowIfCancellationRequested();
-            IsAvailable();
+
+            var destination = Path.Combine(AppContext.BaseDirectory, ExecutableName);
+            try
+            {
+                using var progressHandler = new XabeProgressHandler(progress);
+                await FFmpegDownloader.GetLatestVersion(FFmpegVersion.Official, AppContext.BaseDirectory, progressHandler);
+
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && File.Exists(destination))
+                {
+                    try
+                    {
+                        TwitchHelper.Set777UnixFilePermissions(new FileInfo(destination));
+                    }
+                    catch
+                    {
+                        var chmodCommand = !RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
+                            ? "sudo chmod +x ffmpeg"
+                            : "chmod +x ffmpeg";
+
+                        progress.LogError(Loc.Get("status.ffmpeg_chmod_failed", chmodCommand));
+                    }
+                }
+
+                cancellationToken.ThrowIfCancellationRequested();
+                IsAvailable();
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex) when (alreadyAvailable || IsAvailable())
+            {
+                progress.LogWarning(Loc.Get("status.ffmpeg_download_failed_log", ex.Message));
+                IsAvailable();
+            }
         }
 
         private static string? ResolvePath()

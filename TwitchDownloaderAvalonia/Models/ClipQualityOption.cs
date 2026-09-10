@@ -1,4 +1,3 @@
-using CommunityToolkit.Mvvm.ComponentModel;
 using TwitchDownloaderCore.Models.Interfaces;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 

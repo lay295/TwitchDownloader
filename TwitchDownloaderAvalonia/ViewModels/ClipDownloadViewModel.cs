@@ -1,17 +1,3 @@
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Globalization;
-using System.Text;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using TwitchDownloaderAvalonia.Models;
-using TwitchDownloaderAvalonia.Services;
-using TwitchDownloaderCore;
-using TwitchDownloaderCore.Models;
-using TwitchDownloaderCore.Options;
-using TwitchDownloaderCore.Services;
-using TwitchDownloaderCore.Tools;
-
 namespace TwitchDownloaderAvalonia.ViewModels
 {
     public partial class ClipDownloadViewModel : ViewModelBase
@@ -23,11 +9,15 @@ namespace TwitchDownloaderAvalonia.ViewModels
         private readonly FileCollisionService _collision;
         private readonly ThumbnailService _thumbnails;
         private readonly QueueService _queue;
+
+        private readonly bool _suppressSave;
+
         private QueueItemViewModel? _queued;
         private string _clipId = string.Empty;
         private DateTime _clipTime;
         private TimeSpan _clipLength;
         private int _viewCount;
+
         private string _game = string.Empty;
         private string _streamerId = string.Empty;
         private string _streamerName = string.Empty;
@@ -53,8 +43,10 @@ namespace TwitchDownloaderAvalonia.ViewModels
             _collision = collision;
             _thumbnails = thumbnails;
             _queue = queue;
+            _suppressSave = true;
             EncodeMetadata = _settings.Current.EncodeClipMetadata;
-            Status = "Idle";
+            _suppressSave = false;
+            Status = Loc.Get("status.idle");
         }
 
         public ObservableCollection<ClipQualityOption> Qualities { get; } = [];
@@ -98,13 +90,22 @@ namespace TwitchDownloaderAvalonia.ViewModels
             ? Loc.Get("common.hide_log")
             : Loc.Get("common.show_log");
 
+        public string SuggestedFileDisplay => !string.IsNullOrWhiteSpace(SuggestedFileName)
+            ? Loc.Get("common.suggested_file", SuggestedFileName)
+            : string.Empty;
+
         protected override void OnCultureChanged(object? sender, EventArgs e)
         {
-            Notify(nameof(LogToggleText));
+            if (InfoLoaded)
+                InfoCreatedAt = _clipTime.ToString(CultureInfo.CurrentCulture);
+
+            Notify(nameof(LogToggleText), nameof(SuggestedFileDisplay));
+            UpdateVideoSizeEstimates();
         }
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(HasSuggestedFileName))]
+        [NotifyPropertyChangedFor(nameof(SuggestedFileDisplay))]
         public partial string SuggestedFileName { get; set; } = string.Empty;
 
         [ObservableProperty]
@@ -237,7 +238,8 @@ namespace TwitchDownloaderAvalonia.ViewModels
         partial void OnEncodeMetadataChanged(bool value)
         {
             _settings.Current.EncodeClipMetadata = value;
-            _settings.Save();
+            if (!_suppressSave)
+                _settings.Save();
         }
 
         partial void OnSelectedQualityChanged(ClipQualityOption? value) => OnQualityOrNameChanged(value);
@@ -257,9 +259,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
             foreach (var item in Qualities)
             {
                 var sizeInBytes = VideoSizeEstimator.EstimateVideoSize(item.Quality.BitRate, _clipLength);
-                item.DisplayName = sizeInBytes != 0
-                    ? $"{item.Quality.Name} - {VideoSizeEstimator.StringifyByteCount(sizeInBytes)}"
-                    : item.Quality.Name;
+                item.DisplayName = QualityLabels.WithSize(item.Quality.Name, sizeInBytes);
             }
         }
 
@@ -324,7 +324,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 NotifyDownloadState();
         }
 
-        public void AppendLog(string message)
+        private void AppendLog(string message)
         {
             var builder = new StringBuilder(LogText);
             if (builder.Length > 0)

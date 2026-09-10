@@ -1,5 +1,3 @@
-using TwitchDownloaderAvalonia.Services;
-
 namespace TwitchDownloaderAvalonia.Models
 {
     public sealed class SearchFilterOption(string nameKey, string value)

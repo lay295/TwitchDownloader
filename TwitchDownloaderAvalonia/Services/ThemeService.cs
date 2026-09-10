@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using Avalonia;
 using Avalonia.Styling;
 
 namespace TwitchDownloaderAvalonia.Services

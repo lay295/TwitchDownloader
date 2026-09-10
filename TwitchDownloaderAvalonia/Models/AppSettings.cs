@@ -1,5 +1,4 @@
 using System.Reflection;
-using TwitchDownloaderCore.Models;
 
 namespace TwitchDownloaderAvalonia.Models
 {

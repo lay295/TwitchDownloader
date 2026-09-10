@@ -1,16 +1,4 @@
-using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Diagnostics;
-using Avalonia.Threading;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using TwitchDownloaderAvalonia.Models;
-using TwitchDownloaderAvalonia.Services;
-using TwitchDownloaderCore;
-using TwitchDownloaderCore.Models;
-using TwitchDownloaderCore.Options;
-using TwitchDownloaderCore.Services;
 using TwitchDownloaderCore.TwitchObjects.Gql;
 
 namespace TwitchDownloaderAvalonia.ViewModels
@@ -24,6 +12,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
         private readonly FfmpegService _ffmpeg;
         private readonly FileCollisionService _collision;
         private readonly Func<SearchResultItem, Task> _openItem;
+        private readonly SearchRequestCoordinator _searchRequests = new();
         private readonly List<string> _cursors = [""];
         private readonly Dictionary<string, SearchResultItem> _selected = new(StringComparer.Ordinal);
         private User? _currentChannel;
@@ -115,9 +104,9 @@ namespace TwitchDownloaderAvalonia.ViewModels
         public bool ShowEmptyIdleGif => !IsSearching && AppStatus.ShowStatusImage;
         public int SelectedCount => _selected.Count;
         public string SelectedCountText => Loc.Get("search.selected_count", SelectedCount);
-        public string AddToQueueText => SelectedCount <= 1
-            ? Loc.Get("search.add_to_queue")
-            : Loc.Get("search.add_n_to_queue", SelectedCount);
+        public string AddToQueueText => SelectedCount > 1
+            ? Loc.Get("search.add_n_to_queue", SelectedCount)
+            : Loc.Get("search.add_to_queue");
         public bool CanSearch => !IsSearching;
         public bool CanNextPage => !IsSearching && _hasNextPage;
         public bool CanPreviousPage => !IsSearching && _cursorIndex > 0;
@@ -230,60 +219,89 @@ namespace TwitchDownloaderAvalonia.ViewModels
         }
 
         [RelayCommand(CanExecute = nameof(CanSearch))]
-        private async Task SearchAsync()
+        private Task SearchAsync()
         {
-            IsSearching = true;
-
-            var textTrimmed = ChannelQuery.Trim();
-            if (!textTrimmed.Equals(_currentChannel?.login, StringComparison.InvariantCultureIgnoreCase))
+            return RunSearchOperationAsync(async token =>
             {
-                _currentChannel = null;
-                if (!string.IsNullOrEmpty(textTrimmed) && !textTrimmed.Any(char.IsWhiteSpace))
+                var textTrimmed = ChannelQuery.Trim();
+                if (!textTrimmed.Equals(_currentChannel?.login, StringComparison.InvariantCultureIgnoreCase))
                 {
-                    try
+                    _currentChannel = null;
+                    if (!string.IsNullOrEmpty(textTrimmed) && !textTrimmed.Any(char.IsWhiteSpace))
                     {
-                        var idRes = await TwitchHelper.GetUserIds([textTrimmed.ToLowerInvariant()]);
-                        var ids = idRes.data?.users?
-                            .Where(user => !string.IsNullOrEmpty(user?.id))
-                            .Select(user => user.id)
-                            .ToArray() ?? [];
-
-                        if (ids.Length > 0)
+                        try
                         {
-                            var infoRes = await TwitchHelper.GetUserInfo(ids);
-                            _currentChannel = infoRes.data?.users?.FirstOrDefault();
+                            token.ThrowIfCancellationRequested();
+                            var idRes = await TwitchHelper.GetUserIds([textTrimmed.ToLowerInvariant()]);
+                            token.ThrowIfCancellationRequested();
+                            var ids = idRes.data?.users?
+                                .Where(user => !string.IsNullOrEmpty(user?.id))
+                                .Select(user => user.id)
+                                .ToArray() ?? [];
+
+                            if (ids.Length > 0)
+                            {
+                                var infoRes = await TwitchHelper.GetUserInfo(ids);
+                                token.ThrowIfCancellationRequested();
+                                _currentChannel = infoRes.data?.users?.FirstOrDefault();
+                            }
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            throw;
+                        }
+                        catch (Exception ex)
+                        {
+                            if (_settings.Current.VerboseErrors)
+                                await _dialogs.ShowErrorAsync(Loc.Get("dialogs.verbose_error"), ex.ToString());
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        if (_settings.Current.VerboseErrors)
-                            await _dialogs.ShowErrorAsync(Loc.Get("dialogs.verbose_error"), ex.ToString());
-                    }
                 }
-            }
 
-            _selected.Clear();
-            NotifySelection();
-            ResetPagination();
-            await UpdateListAsync();
+                token.ThrowIfCancellationRequested();
+                _selected.Clear();
+                NotifySelection();
+                ResetPagination();
+                await UpdateListCoreAsync(token);
+            });
         }
 
         [RelayCommand(CanExecute = nameof(CanNextPage))]
-        private async Task NextPageAsync()
+        private Task NextPageAsync()
         {
-            if (_cursorIndex < _cursors.Count - 1)
-                _cursorIndex++;
+            return RunSearchOperationAsync(async token =>
+            {
+                var previousIndex = _cursorIndex;
+                var previousHasNext = _hasNextPage;
+                if (_cursorIndex < _cursors.Count - 1)
+                    _cursorIndex++;
 
-            await UpdateListAsync();
+                var loaded = await UpdateListCoreAsync(token);
+                if (!loaded)
+                {
+                    _cursorIndex = previousIndex;
+                    _hasNextPage = previousHasNext;
+                }
+            });
         }
 
         [RelayCommand(CanExecute = nameof(CanPreviousPage))]
-        private async Task PreviousPageAsync()
+        private Task PreviousPageAsync()
         {
-            if (_cursorIndex > 0)
-                _cursorIndex--;
+            return RunSearchOperationAsync(async token =>
+            {
+                var previousIndex = _cursorIndex;
+                var previousHasNext = _hasNextPage;
+                if (_cursorIndex > 0)
+                    _cursorIndex--;
 
-            await UpdateListAsync();
+                var loaded = await UpdateListCoreAsync(token);
+                if (!loaded)
+                {
+                    _cursorIndex = previousIndex;
+                    _hasNextPage = previousHasNext;
+                }
+            });
         }
 
         [RelayCommand(CanExecute = nameof(CanSelectAll))]
@@ -449,22 +467,49 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 item.IsSelected = false;
         }
 
-        private async Task UpdateListAsync()
+        private Task UpdateListAsync()
+        {
+            return RunSearchOperationAsync(async token => { await UpdateListCoreAsync(token); });
+        }
+
+        private async Task RunSearchOperationAsync(Func<CancellationToken, Task> operation)
+        {
+            var token = _searchRequests.StartNew();
+            IsSearching = true;
+            try
+            {
+                await operation(token);
+            }
+            catch (OperationCanceledException) when (!_searchRequests.IsCurrent(token))
+            {
+            }
+            finally
+            {
+                if (_searchRequests.IsCurrent(token))
+                {
+                    IsSearching = false;
+                    NotifyPaging();
+                }
+            }
+        }
+
+        private async Task<bool> UpdateListCoreAsync(CancellationToken cancellationToken)
         {
             CancelThumbnails();
-            IsSearching = true;
+            var previousHasNext = _hasNextPage;
             _hasNextPage = false;
             NotifyPaging();
 
             try
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 if (string.IsNullOrWhiteSpace(_currentChannel?.login))
                 {
-                    await Task.Delay(50);
+                    await Task.Delay(50, cancellationToken);
                     _hasSearched = !string.IsNullOrWhiteSpace(ChannelQuery);
                     ResetPagination();
                     OnPropertyChanged(nameof(EmptyText));
-                    return;
+                    return true;
                 }
 
                 var cursor = _cursors.Count > 0 && _cursorIndex >= 0 && _cursorIndex < _cursors.Count
@@ -472,29 +517,38 @@ namespace TwitchDownloaderAvalonia.ViewModels
                     : "";
 
                 var pageSize = SelectedPageSize <= 0 ? 30 : SelectedPageSize;
+                var loaded = Kind == SearchKind.Videos
+                    ? await LoadVideosAsync(cursor, pageSize, cancellationToken)
+                    : await LoadClipsAsync(cursor, pageSize, cancellationToken);
 
-                if (Kind == SearchKind.Videos)
-                    await LoadVideosAsync(cursor, pageSize);
-                else
-                    await LoadClipsAsync(cursor, pageSize);
+                if (!loaded)
+                {
+                    _hasNextPage = previousHasNext;
+                    return false;
+                }
 
                 RememberCurrentChannel();
                 _hasSearched = true;
                 OnPropertyChanged(nameof(EmptyText));
+                return true;
             }
-            finally
+            catch (OperationCanceledException)
             {
-                IsSearching = false;
-                NotifyPaging();
+                _hasNextPage = previousHasNext;
+                throw;
             }
         }
 
-        private async Task LoadVideosAsync(string cursor, int pageSize)
+        private async Task<bool> LoadVideosAsync(string cursor, int pageSize, CancellationToken cancellationToken)
         {
             GqlVideoSearchResponse res;
             try
             {
                 res = await TwitchHelper.GetGqlVideos(_currentChannel!.login, cursor, pageSize, SelectedVideoType?.Value ?? "");
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -502,9 +556,10 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 if (_settings.Current.VerboseErrors)
                     await _dialogs.ShowErrorAsync(Loc.Get("dialogs.verbose_error"), ex.ToString());
 
-                return;
+                return false;
             }
 
+            cancellationToken.ThrowIfCancellationRequested();
             var created = new List<SearchResultItem>();
             var edges = res.data?.user?.videos?.edges;
             if (edges is not null)
@@ -527,27 +582,29 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 }
             }
 
-            var hasNext = false;
             string? newCursor = null;
             if (res.data?.user?.videos?.pageInfo?.hasNextPage == true)
                 newCursor = edges?.FirstOrDefault()?.cursor;
 
-            if (newCursor is not null)
-            {
-                hasNext = true;
-                if (!_cursors.Contains(newCursor))
-                    _cursors.Add(newCursor);
-            }
-
+            var applied = false;
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
+                if (!_searchRequests.IsCurrent(cancellationToken))
+                    return;
+
                 ClearResults();
                 AddResults(created);
-                _hasNextPage = hasNext;
+                _hasNextPage = newCursor is not null;
+                if (newCursor is not null && !_cursors.Contains(newCursor))
+                    _cursors.Add(newCursor);
+
+                applied = true;
             });
+
+            return applied;
         }
 
-        private async Task LoadClipsAsync(string cursor, int pageSize)
+        private async Task<bool> LoadClipsAsync(string cursor, int pageSize, CancellationToken cancellationToken)
         {
             GqlClipSearchResponse res;
             try
@@ -558,15 +615,20 @@ namespace TwitchDownloaderAvalonia.ViewModels
                     cursor,
                     pageSize);
             }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 await _dialogs.ShowErrorAsync(Loc.Get("search.clips_failed"), Loc.Get("search.clips_failed_message", ex.Message));
                 if (_settings.Current.VerboseErrors)
                     await _dialogs.ShowErrorAsync(Loc.Get("dialogs.verbose_error"), ex.ToString());
 
-                return;
+                return false;
             }
 
+            cancellationToken.ThrowIfCancellationRequested();
             var created = new List<SearchResultItem>();
             var edges = res.data?.user?.clips?.edges;
             if (edges is not null)
@@ -591,24 +653,26 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 }
             }
 
-            var hasNext = false;
             string? newCursor = null;
             if (res.data?.user?.clips?.pageInfo?.hasNextPage == true)
                 newCursor = edges?.FirstOrDefault(edge => edge.cursor != null)?.cursor;
 
-            if (newCursor is not null)
-            {
-                hasNext = true;
-                if (!_cursors.Contains(newCursor))
-                    _cursors.Add(newCursor);
-            }
-
+            var applied = false;
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
+                if (!_searchRequests.IsCurrent(cancellationToken))
+                    return;
+
                 ClearResults();
                 AddResults(created);
-                _hasNextPage = hasNext;
+                _hasNextPage = newCursor is not null;
+                if (newCursor is not null && !_cursors.Contains(newCursor))
+                    _cursors.Add(newCursor);
+
+                applied = true;
             });
+
+            return applied;
         }
 
         private SearchResultItem CreateItem(

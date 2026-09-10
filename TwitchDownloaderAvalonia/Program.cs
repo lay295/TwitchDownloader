@@ -1,5 +1,3 @@
-using Avalonia;
-
 namespace TwitchDownloaderAvalonia
 {
     internal sealed class Program

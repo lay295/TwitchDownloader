@@ -1,10 +1,5 @@
-using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using TwitchDownloaderAvalonia.Services;
 using TwitchDownloaderCore.Extensions;
 
 namespace TwitchDownloaderAvalonia.ViewModels
@@ -93,6 +88,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 if (result is null)
                 {
                     UpdateStatusText = null;
+                    _checkTask = null;
                     return;
                 }
 
@@ -111,6 +107,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
             {
                 UpdateStatusText = null;
                 HasUpdate = false;
+                _checkTask = null;
             }
             finally
             {
@@ -133,7 +130,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
         private string BuildDebugInfo()
         {
             var ffmpeg = _ffmpeg.IsAvailable() ? _ffmpeg.ResolvedPath : Loc.Get("about.ffmpeg_missing");
-            var avalonia = typeof(Avalonia.Application).Assembly.GetName().Version?.ToString(3);
+            var avalonia = typeof(Application).Assembly.GetName().Version?.ToString(3);
             var builder = new StringBuilder();
             builder.AppendLine($"{AppName} {_localVersion}");
             builder.AppendLine(Loc.Get("about.debug_os", $"{RuntimeInformation.OSDescription} {RuntimeInformation.OSArchitecture}"));
@@ -146,7 +143,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
         private string BuildRuntimeSummary()
         {
             var ffmpeg = _ffmpeg.IsAvailable() ? _ffmpeg.ResolvedPath : Loc.Get("about.ffmpeg_missing");
-            var avalonia = typeof(Avalonia.Application).Assembly.GetName().Version?.ToString(3) ?? string.Empty;
+            var avalonia = typeof(Application).Assembly.GetName().Version?.ToString(3) ?? string.Empty;
             return Loc.Get(
                 "about.runtime_summary",
                 $"{RuntimeInformation.OSDescription} {RuntimeInformation.OSArchitecture}",

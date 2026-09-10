@@ -154,7 +154,7 @@
                         <TextBlock
                             Classes="muted"
                             Margin="0,2,0,4"
-                            Text="{Binding SuggestedFileName, StringFormat='Suggested: {0}'}"
+                            Text="{Binding SuggestedFileDisplay}"
                             TextWrapping="Wrap"
                             IsVisible="{Binding HasSuggestedFileName}" />
 
@@ -202,7 +202,7 @@
                                         Orientation="Horizontal"
                                         Spacing="3"
                                         VerticalAlignment="Center">
-                                        <NumericUpDown Classes="time" Minimum="0" Maximum="48" FormatString="00" Increment="1"
+                                        <NumericUpDown Classes="time" Minimum="0" Maximum="{Binding TrimHourMaximum}" FormatString="00" Increment="1"
                                                        VerticalAlignment="Center"
                                                        IsEnabled="{Binding CanEditTrimStart}"
                                                        Value="{Binding StartHour, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
@@ -230,7 +230,7 @@
                                         Orientation="Horizontal"
                                         Spacing="3"
                                         VerticalAlignment="Center">
-                                        <NumericUpDown Classes="time" Minimum="0" Maximum="48" FormatString="00" Increment="1"
+                                        <NumericUpDown Classes="time" Minimum="0" Maximum="{Binding TrimHourMaximum}" FormatString="00" Increment="1"
                                                        VerticalAlignment="Center"
                                                        IsEnabled="{Binding CanEditTrimEnd}"
                                                        Value="{Binding EndHour, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />

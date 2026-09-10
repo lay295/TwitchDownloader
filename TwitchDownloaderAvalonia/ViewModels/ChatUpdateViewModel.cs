@@ -1,14 +1,4 @@
-using System.ComponentModel;
-using System.Globalization;
-using System.Text;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using TwitchDownloaderAvalonia.Services;
-using TwitchDownloaderCore;
 using TwitchDownloaderCore.Chat;
-using TwitchDownloaderCore.Models;
-using TwitchDownloaderCore.Options;
-using TwitchDownloaderCore.Services;
 using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderAvalonia.ViewModels
@@ -21,13 +11,18 @@ namespace TwitchDownloaderAvalonia.ViewModels
         private readonly FileCollisionService _collision;
         private readonly ThumbnailService _thumbnails;
         private readonly QueueService _queue;
+
+        private readonly bool _suppressSave;
+
         private QueueItemViewModel? _queued;
         private ChatRoot? _chatJson;
         private string _videoId = "-1";
         private DateTime _videoTime;
+        private bool _hasCreatedAt;
         private TimeSpan _videoLength;
         private double _chatStartSeconds;
         private int _viewCount;
+
         private string _game = string.Empty;
         private string _streamerId = string.Empty;
         private string _streamerName = string.Empty;
@@ -51,6 +46,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
             _collision = collision;
             _thumbnails = thumbnails;
             _queue = queue;
+            _suppressSave = true;
             OutputFormat = _settings.Current.ChatDownloadFormat;
             Compression = _settings.Current.ChatJsonCompression;
             TimestampStyle = _settings.Current.ChatTextTimestampStyle;
@@ -61,7 +57,9 @@ namespace TwitchDownloaderAvalonia.ViewModels
             StvEmotes = _settings.Current.StvEmotes;
             if (EmbedMissing && ReplaceEmbeds)
                 ReplaceEmbeds = false;
-            Status = "Idle";
+
+            _suppressSave = false;
+            Status = Loc.Get("status.idle");
         }
 
         [ObservableProperty]
@@ -122,7 +120,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
         public partial int EndSecond { get; set; }
 
         [ObservableProperty]
-        public partial decimal TrimHourMaximum { get; set; } = 48;
+        public partial decimal TrimHourMaximum { get; set; } = TrimLimits.DEFAULT_HOUR_MAXIMUM;
 
         [ObservableProperty]
         public partial string LengthText { get; set; } = "00:00:00";
@@ -154,13 +152,25 @@ namespace TwitchDownloaderAvalonia.ViewModels
             ? Loc.Get("common.hide_log")
             : Loc.Get("common.show_log");
 
+        public string SuggestedFileDisplay => !string.IsNullOrWhiteSpace(SuggestedFileName)
+            ? Loc.Get("common.suggested_file", SuggestedFileName)
+            : string.Empty;
+
         protected override void OnCultureChanged(object? sender, EventArgs e)
         {
-            Notify(nameof(LogToggleText));
+            if (InfoLoaded)
+            {
+                InfoCreatedAt = _hasCreatedAt
+                    ? _videoTime.ToString(CultureInfo.CurrentCulture)
+                    : Loc.Get("common.unknown");
+            }
+
+            Notify(nameof(LogToggleText), nameof(SuggestedFileDisplay));
         }
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(HasSuggestedFileName))]
+        [NotifyPropertyChangedFor(nameof(SuggestedFileDisplay))]
         public partial string SuggestedFileName { get; set; } = string.Empty;
 
         [ObservableProperty]
@@ -256,21 +266,21 @@ namespace TwitchDownloaderAvalonia.ViewModels
         partial void OnOutputFormatChanged(ChatFormat value)
         {
             _settings.Current.ChatDownloadFormat = value;
-            _settings.Save();
+            SaveSettings();
             UpdateSuggestedFileName();
         }
 
         partial void OnCompressionChanged(ChatCompression value)
         {
             _settings.Current.ChatJsonCompression = value;
-            _settings.Save();
+            SaveSettings();
             UpdateSuggestedFileName();
         }
 
         partial void OnTimestampStyleChanged(TimestampFormat value)
         {
             _settings.Current.ChatTextTimestampStyle = value;
-            _settings.Save();
+            SaveSettings();
         }
 
         partial void OnEmbedMissingChanged(bool value)
@@ -279,7 +289,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 ReplaceEmbeds = false;
 
             _settings.Current.ChatEmbedMissing = value;
-            _settings.Save();
+            SaveSettings();
             OnPropertyChanged(nameof(CanEditThirdPartyEmotes));
         }
 
@@ -289,26 +299,26 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 EmbedMissing = false;
 
             _settings.Current.ChatReplaceEmbeds = value;
-            _settings.Save();
+            SaveSettings();
             OnPropertyChanged(nameof(CanEditThirdPartyEmotes));
         }
 
         partial void OnBttvEmotesChanged(bool value)
         {
             _settings.Current.BttvEmotes = value;
-            _settings.Save();
+            SaveSettings();
         }
 
         partial void OnFfzEmotesChanged(bool value)
         {
             _settings.Current.FfzEmotes = value;
-            _settings.Save();
+            SaveSettings();
         }
 
         partial void OnStvEmotesChanged(bool value)
         {
             _settings.Current.StvEmotes = value;
-            _settings.Save();
+            SaveSettings();
         }
 
         partial void OnTrimStartChanged(bool value) => OnTrimEnabledChanged(value);
@@ -382,7 +392,8 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 : chat.video?.created_at ?? default;
 
             _videoTime = _settings.Current.UtcVideoTime ? videoCreatedAt : videoCreatedAt.ToLocalTime();
-            InfoCreatedAt = videoCreatedAt != default
+            _hasCreatedAt = videoCreatedAt != default;
+            InfoCreatedAt = _hasCreatedAt
                 ? _videoTime.ToString(CultureInfo.CurrentCulture)
                 : Loc.Get("common.unknown");
 
@@ -419,7 +430,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
 
             _videoLength = TimeSpan.FromSeconds(chat.video is not null && !double.IsNegative(chat.video.length) ? chat.video.length : 0);
             LengthText = _videoLength.TotalSeconds > 0 ? _videoLength.ToString("c") : Loc.Get("common.unknown");
-            TrimHourMaximum = _videoLength > TimeSpan.Zero ? (int)_videoLength.TotalHours : 48;
+            TrimHourMaximum = TrimLimits.HourMaximum(_videoLength);
             TrimStart = false;
             TrimEnd = false;
         }
@@ -439,13 +450,13 @@ namespace TwitchDownloaderAvalonia.ViewModels
                     {
                         AppendLog(Loc.Error(Loc.Get("update.thumbnail_missing")));
                         ThumbnailBytes = await _thumbnails.TryGetAsync(null);
-                        TrimHourMaximum = 48;
+                        TrimHourMaximum = TrimLimits.DEFAULT_HOUR_MAXIMUM;
                         return;
                     }
 
                     _videoLength = TimeSpan.FromSeconds(video.lengthSeconds);
                     LengthText = _videoLength.ToString("c");
-                    TrimHourMaximum = _videoLength > TimeSpan.Zero ? (int)_videoLength.TotalHours : 48;
+                    TrimHourMaximum = TrimLimits.HourMaximum(_videoLength);
                     _viewCount = video.viewCount;
                     _game = video.game?.displayName ?? _game;
                     ThumbnailBytes = await _thumbnails.TryGetAsync(video.thumbnailURLs.FirstOrDefault());
@@ -566,6 +577,14 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 string.IsNullOrEmpty(_clipperId) ? null : _clipperId) + extension;
         }
 
+        private void SaveSettings()
+        {
+            if (_suppressSave)
+                return;
+
+            _settings.Save();
+        }
+
         private void NotifyState()
         {
             OnPropertyChanged(nameof(CanBrowse));
@@ -606,7 +625,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 NotifyState();
         }
 
-        public void AppendLog(string message)
+        private void AppendLog(string message)
         {
             var builder = new StringBuilder(LogText);
             if (builder.Length > 0)

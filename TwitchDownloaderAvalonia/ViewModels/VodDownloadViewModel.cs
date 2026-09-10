@@ -1,17 +1,3 @@
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Globalization;
-using System.Text;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using TwitchDownloaderAvalonia.Models;
-using TwitchDownloaderAvalonia.Services;
-using TwitchDownloaderCore;
-using TwitchDownloaderCore.Models;
-using TwitchDownloaderCore.Options;
-using TwitchDownloaderCore.Services;
-using TwitchDownloaderCore.Tools;
-
 namespace TwitchDownloaderAvalonia.ViewModels
 {
     public partial class VodDownloadViewModel : ViewModelBase
@@ -23,11 +9,15 @@ namespace TwitchDownloaderAvalonia.ViewModels
         private readonly FileCollisionService _collision;
         private readonly ThumbnailService _thumbnails;
         private readonly QueueService _queue;
+
+        private readonly bool _suppressSave;
+
         private QueueItemViewModel? _queued;
         private long _videoId;
         private DateTime _videoTime;
         private TimeSpan _vodLength;
         private int _viewCount;
+
         private string _game = string.Empty;
         private string _streamerId = string.Empty;
         private string _streamerName = string.Empty;
@@ -51,9 +41,11 @@ namespace TwitchDownloaderAvalonia.ViewModels
             _collision = collision;
             _thumbnails = thumbnails;
             _queue = queue;
+            _suppressSave = true;
             DownloadThreads = Math.Clamp(_settings.Current.VodDownloadThreads, 1, 20);
             TrimMode = _settings.Current.VodTrimMode;
-            Status = "Idle";
+            _suppressSave = false;
+            Status = Loc.Get("status.idle");
         }
 
         public ObservableCollection<QualityOption> Qualities { get; } = [];
@@ -92,6 +84,9 @@ namespace TwitchDownloaderAvalonia.ViewModels
         public partial int EndSecond { get; set; }
 
         [ObservableProperty]
+        public partial decimal TrimHourMaximum { get; set; } = TrimLimits.DEFAULT_HOUR_MAXIMUM;
+
+        [ObservableProperty]
         public partial VideoTrimMode TrimMode { get; set; }
 
         [ObservableProperty]
@@ -124,13 +119,22 @@ namespace TwitchDownloaderAvalonia.ViewModels
             ? Loc.Get("common.hide_log")
             : Loc.Get("common.show_log");
 
+        public string SuggestedFileDisplay => !string.IsNullOrWhiteSpace(SuggestedFileName)
+            ? Loc.Get("common.suggested_file", SuggestedFileName)
+            : string.Empty;
+
         protected override void OnCultureChanged(object? sender, EventArgs e)
         {
-            Notify(nameof(LogToggleText));
+            if (InfoLoaded)
+                InfoCreatedAt = _videoTime.ToString(CultureInfo.CurrentCulture);
+
+            Notify(nameof(LogToggleText), nameof(SuggestedFileDisplay));
+            UpdateVideoSizeEstimates();
         }
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(HasSuggestedFileName))]
+        [NotifyPropertyChangedFor(nameof(SuggestedFileDisplay))]
         public partial string SuggestedFileName { get; set; } = string.Empty;
 
         [ObservableProperty]
@@ -192,6 +196,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
 
                 SelectedQuality = Qualities.FirstOrDefault();
                 _vodLength = TimeSpan.FromSeconds(video.lengthSeconds);
+                TrimHourMaximum = TrimLimits.HourMaximum(_vodLength);
                 LengthText = _vodLength.ToString("c");
                 _streamerName = video.owner?.displayName ?? Loc.Get("common.unknown_user");
                 _streamerId = video.owner?.id ?? string.Empty;
@@ -305,13 +310,13 @@ namespace TwitchDownloaderAvalonia.ViewModels
         partial void OnDownloadThreadsChanged(int value)
         {
             _settings.Current.VodDownloadThreads = Math.Clamp(value, 1, 20);
-            _settings.Save();
+            SaveSettings();
         }
 
         partial void OnTrimModeChanged(VideoTrimMode value)
         {
             _settings.Current.VodTrimMode = value;
-            _settings.Save();
+            SaveSettings();
         }
 
         partial void OnTrimStartChanged(bool value) => OnTrimEnabledChanged(value);
@@ -385,9 +390,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
             foreach (var item in Qualities)
             {
                 var sizeInBytes = VideoSizeEstimator.EstimateVideoSize(item.Quality.BitRate, trimStart, trimEnd);
-                item.DisplayName = sizeInBytes != 0
-                    ? $"{item.Quality.Name} - {VideoSizeEstimator.StringifyByteCount(sizeInBytes)}"
-                    : item.Quality.Name;
+                item.DisplayName = QualityLabels.WithSize(item.Quality.Name, sizeInBytes);
             }
         }
 
@@ -460,6 +463,14 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 Progress = _queued.Progress;
             if (e.PropertyName is null or nameof(QueueItemViewModel.CanCancel) or nameof(QueueItemViewModel.Status))
                 NotifyDownloadState();
+        }
+
+        private void SaveSettings()
+        {
+            if (_suppressSave)
+                return;
+
+            _settings.Save();
         }
 
         public void AppendLog(string message)

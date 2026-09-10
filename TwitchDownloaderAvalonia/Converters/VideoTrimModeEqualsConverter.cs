@@ -1,8 +1,3 @@
-using System.Globalization;
-using Avalonia.Data;
-using Avalonia.Data.Converters;
-using TwitchDownloaderCore.Models;
-
 namespace TwitchDownloaderAvalonia.Converters
 {
     public sealed class VideoTrimModeEqualsConverter : IValueConverter

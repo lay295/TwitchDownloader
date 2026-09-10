@@ -1,11 +1,3 @@
-using System.Diagnostics;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using TwitchDownloaderAvalonia.Converters;
-using TwitchDownloaderAvalonia.Models;
-using TwitchDownloaderAvalonia.Services;
-using TwitchDownloaderCore.Services;
-
 namespace TwitchDownloaderAvalonia.ViewModels
 {
     public sealed partial class SettingsViewModel : ViewModelBase

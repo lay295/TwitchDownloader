@@ -1,7 +1,3 @@
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using TwitchDownloaderAvalonia.Services;
-
 namespace TwitchDownloaderAvalonia.Models
 {
     public sealed partial class SearchResultItem : ObservableObject
@@ -89,6 +85,7 @@ namespace TwitchDownloaderAvalonia.Models
         {
             OnPropertyChanged(nameof(DurationText));
             OnPropertyChanged(nameof(ViewsText));
+            OnPropertyChanged(nameof(HeaderText));
         }
     }
 }

@@ -163,7 +163,7 @@
                         <TextBlock
                             Classes="muted"
                             Margin="0,6,0,4"
-                            Text="{Binding SuggestedFileName, StringFormat='Suggested: {0}'}"
+                            Text="{Binding SuggestedFileDisplay}"
                             TextWrapping="Wrap"
                             IsVisible="{Binding HasSuggestedFileName}" />
 

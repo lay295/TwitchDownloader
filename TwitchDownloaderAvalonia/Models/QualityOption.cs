@@ -1,5 +1,3 @@
-using CommunityToolkit.Mvvm.ComponentModel;
-using TwitchDownloaderCore.Models;
 using TwitchDownloaderCore.Models.Interfaces;
 
 namespace TwitchDownloaderAvalonia.Models

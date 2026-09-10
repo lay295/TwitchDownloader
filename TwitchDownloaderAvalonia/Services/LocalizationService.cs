@@ -1,5 +1,3 @@
-using System.ComponentModel;
-using System.Globalization;
 using Avalonia.Platform;
 using Tomlyn;
 using Tomlyn.Model;
@@ -40,26 +38,31 @@ namespace TwitchDownloaderAvalonia.Services
                 && value.Length > 0)
             {
 #if DEBUG
-                System.Diagnostics.Debug.WriteLine($"[i18n] missing {Culture}: {key}");
+                Debug.WriteLine($"[i18n] missing {Culture}: {key}");
 #endif
                 return value;
             }
 
 #if DEBUG
-            System.Diagnostics.Debug.WriteLine($"[i18n] missing key: {key}");
+            Debug.WriteLine($"[i18n] missing key: {key}");
 #endif
             return key;
         }
 
         public string Get(string key, params object[] args)
         {
-            var template = Get(key);
+            return Format(Get(key), key, args);
+        }
+
+        internal static string Format(string template, string key, params object[] args)
+        {
             try
             {
                 return string.Format(CultureInfo.CurrentCulture, template, args);
             }
-            catch (FormatException)
+            catch (FormatException ex)
             {
+                Debug.WriteLine($"[i18n] format {key}: {ex.Message}");
                 return template;
             }
         }

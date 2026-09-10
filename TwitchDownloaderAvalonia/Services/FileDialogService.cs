@@ -1,4 +1,3 @@
-using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 
 namespace TwitchDownloaderAvalonia.Services
@@ -81,7 +80,10 @@ namespace TwitchDownloaderAvalonia.Services
                 SuggestedStartLocation = start,
             });
 
-            return folders.Count > 0 ? folders[0].TryGetLocalPath() : null;
+            if (folders.Count > 0)
+                return folders[0].TryGetLocalPath();
+
+            return null;
         }
     }
 }

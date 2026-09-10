@@ -1,7 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using Avalonia.Threading;
-using TwitchDownloaderAvalonia.Models;
 using TwitchDownloaderCore.Interfaces;
 
 namespace TwitchDownloaderAvalonia.Services

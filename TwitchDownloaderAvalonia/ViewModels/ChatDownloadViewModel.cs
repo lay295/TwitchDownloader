@@ -1,15 +1,3 @@
-using System.ComponentModel;
-using System.Globalization;
-using System.Text;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using TwitchDownloaderAvalonia.Services;
-using TwitchDownloaderCore;
-using TwitchDownloaderCore.Models;
-using TwitchDownloaderCore.Options;
-using TwitchDownloaderCore.Services;
-using TwitchDownloaderCore.Tools;
-
 namespace TwitchDownloaderAvalonia.ViewModels
 {
     public partial class ChatDownloadViewModel : ViewModelBase
@@ -20,12 +8,16 @@ namespace TwitchDownloaderAvalonia.ViewModels
         private readonly FileCollisionService _collision;
         private readonly ThumbnailService _thumbnails;
         private readonly QueueService _queue;
+
+        private readonly bool _suppressSave;
+
         private QueueItemViewModel? _queued;
         private string _downloadId = string.Empty;
         private bool _isClip;
         private DateTime _videoTime;
         private TimeSpan _vodLength;
         private int _viewCount;
+
         private string _game = string.Empty;
         private string _streamerId = string.Empty;
         private string _streamerName = string.Empty;
@@ -49,6 +41,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
             _collision = collision;
             _thumbnails = thumbnails;
             _queue = queue;
+            _suppressSave = true;
             DownloadFormat = _settings.Current.ChatDownloadFormat;
             Compression = _settings.Current.ChatJsonCompression;
             TimestampStyle = _settings.Current.ChatTextTimestampStyle;
@@ -57,7 +50,8 @@ namespace TwitchDownloaderAvalonia.ViewModels
             FfzEmotes = _settings.Current.FfzEmotes;
             StvEmotes = _settings.Current.StvEmotes;
             DownloadThreads = Math.Clamp(_settings.Current.ChatDownloadThreads, 1, 20);
-            Status = "Idle";
+            _suppressSave = false;
+            Status = Loc.Get("status.idle");
         }
 
         [ObservableProperty]
@@ -117,7 +111,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
         public partial int EndSecond { get; set; }
 
         [ObservableProperty]
-        public partial decimal TrimHourMaximum { get; set; } = 48;
+        public partial decimal TrimHourMaximum { get; set; } = TrimLimits.DEFAULT_HOUR_MAXIMUM;
 
         [ObservableProperty]
         public partial string LengthText { get; set; } = "00:00:00";
@@ -149,13 +143,21 @@ namespace TwitchDownloaderAvalonia.ViewModels
             ? Loc.Get("common.hide_log")
             : Loc.Get("common.show_log");
 
+        public string SuggestedFileDisplay => !string.IsNullOrWhiteSpace(SuggestedFileName)
+            ? Loc.Get("common.suggested_file", SuggestedFileName)
+            : string.Empty;
+
         protected override void OnCultureChanged(object? sender, EventArgs e)
         {
-            Notify(nameof(LogToggleText));
+            if (InfoLoaded)
+                InfoCreatedAt = _videoTime.ToString(CultureInfo.CurrentCulture);
+
+            Notify(nameof(LogToggleText), nameof(SuggestedFileDisplay));
         }
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(HasSuggestedFileName))]
+        [NotifyPropertyChangedFor(nameof(SuggestedFileDisplay))]
         public partial string SuggestedFileName { get; set; } = string.Empty;
 
         [ObservableProperty]
@@ -266,52 +268,52 @@ namespace TwitchDownloaderAvalonia.ViewModels
         partial void OnDownloadFormatChanged(ChatFormat value)
         {
             _settings.Current.ChatDownloadFormat = value;
-            _settings.Save();
+            SaveSettings();
             UpdateSuggestedFileName();
         }
 
         partial void OnCompressionChanged(ChatCompression value)
         {
             _settings.Current.ChatJsonCompression = value;
-            _settings.Save();
+            SaveSettings();
             UpdateSuggestedFileName();
         }
 
         partial void OnTimestampStyleChanged(TimestampFormat value)
         {
             _settings.Current.ChatTextTimestampStyle = value;
-            _settings.Save();
+            SaveSettings();
         }
 
         partial void OnEmbedImagesChanged(bool value)
         {
             _settings.Current.ChatEmbedEmotes = value;
-            _settings.Save();
+            SaveSettings();
             OnPropertyChanged(nameof(CanEditThirdPartyEmotes));
         }
 
         partial void OnBttvEmotesChanged(bool value)
         {
             _settings.Current.BttvEmotes = value;
-            _settings.Save();
+            SaveSettings();
         }
 
         partial void OnFfzEmotesChanged(bool value)
         {
             _settings.Current.FfzEmotes = value;
-            _settings.Save();
+            SaveSettings();
         }
 
         partial void OnStvEmotesChanged(bool value)
         {
             _settings.Current.StvEmotes = value;
-            _settings.Save();
+            SaveSettings();
         }
 
         partial void OnDownloadThreadsChanged(int value)
         {
             _settings.Current.ChatDownloadThreads = Math.Clamp(value, 1, 20);
-            _settings.Save();
+            SaveSettings();
         }
 
         partial void OnTrimStartChanged(bool value) => OnTrimEnabledChanged(value);
@@ -370,7 +372,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 StartSecond = 0;
             }
 
-            TrimHourMaximum = _vodLength > TimeSpan.Zero ? (int)_vodLength.TotalHours : 48;
+            TrimHourMaximum = TrimLimits.HourMaximum(_vodLength);
             EndHour = (int)_vodLength.TotalHours;
             EndMinute = _vodLength.Minutes;
             EndSecond = _vodLength.Seconds;
@@ -543,7 +545,15 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 NotifyDownloadState();
         }
 
-        public void AppendLog(string message)
+        private void SaveSettings()
+        {
+            if (_suppressSave)
+                return;
+
+            _settings.Save();
+        }
+
+        private void AppendLog(string message)
         {
             var builder = new StringBuilder(LogText);
             if (builder.Length > 0)

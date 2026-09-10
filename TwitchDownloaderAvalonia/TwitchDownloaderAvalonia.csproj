@@ -38,4 +38,8 @@
   <ItemGroup>
     <ProjectReference Include="..\TwitchDownloaderCore\TwitchDownloaderCore.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="TwitchDownloaderAvalonia.Tests" />
+  </ItemGroup>
 </Project>

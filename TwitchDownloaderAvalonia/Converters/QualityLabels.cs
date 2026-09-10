@@ -1,5 +1,3 @@
-using TwitchDownloaderAvalonia.Services;
-
 namespace TwitchDownloaderAvalonia.Converters
 {
     public static class QualityLabels
@@ -13,5 +11,13 @@ namespace TwitchDownloaderAvalonia.Converters
             "Audio Only" => Loc.Get("quality.audio_only"),
             _ => value,
         };
+
+        public static string WithSize(string qualityName, long sizeInBytes)
+        {
+            var label = Get(qualityName);
+            return sizeInBytes != 0
+                ? $"{label} - {VideoSizeEstimator.StringifyByteCount(sizeInBytes)}"
+                : label;
+        }
     }
 }
