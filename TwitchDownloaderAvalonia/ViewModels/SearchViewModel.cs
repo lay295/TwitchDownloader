@@ -8,9 +8,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
         private readonly SettingsService _settings;
         private readonly DialogService _dialogs;
         private readonly ThumbnailService _thumbnails;
-        private readonly QueueService _queue;
-        private readonly FfmpegService _ffmpeg;
-        private readonly FileCollisionService _collision;
+        private readonly QueueEnqueueService _enqueue;
         private readonly Func<SearchResultItem, Task> _openItem;
         private readonly SearchRequestCoordinator _searchRequests = new();
         private readonly List<string> _cursors = [""];
@@ -28,18 +26,14 @@ namespace TwitchDownloaderAvalonia.ViewModels
             DialogService dialogs,
             ThumbnailService thumbnails,
             Func<SearchResultItem, Task> openItem,
-            QueueService queue,
-            FfmpegService ffmpeg,
-            FileCollisionService collision)
+            QueueEnqueueService enqueue)
         {
             _settings = settings;
             AppStatus = status;
             _dialogs = dialogs;
             _thumbnails = thumbnails;
             _openItem = openItem;
-            _queue = queue;
-            _ffmpeg = ffmpeg;
-            _collision = collision;
+            _enqueue = enqueue;
 
             VideoTypes = CreateVideoTypes();
             ClipPeriods = CreateClipPeriods();
@@ -133,6 +127,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
             var videoValue = SelectedVideoType?.Value;
             var clipValue = SelectedClipPeriod?.Value;
             var suppress = _suppressSearch;
+
             _suppressSearch = true;
             VideoTypes = CreateVideoTypes();
             ClipPeriods = CreateClipPeriods();
@@ -315,13 +310,16 @@ namespace TwitchDownloaderAvalonia.ViewModels
         private Task OpenSelectedAsync()
         {
             var item = _selected.Values.FirstOrDefault();
-            return item is null ? Task.CompletedTask : _openItem(item);
+            if (item is null)
+                return Task.CompletedTask;
+
+            return _openItem(item);
         }
 
         [RelayCommand(CanExecute = nameof(CanEnqueueSelected))]
         private Task EnqueueSelectedAsync()
         {
-            return EnqueueItemsAsync(_selected.Values.ToArray());
+            return EnqueueItemsAsync([.. _selected.Values]);
         }
 
         private Task EnqueueOneAsync(SearchResultItem item)
@@ -334,134 +332,9 @@ namespace TwitchDownloaderAvalonia.ViewModels
             if (items.Count == 0)
                 return;
 
-            var options = await _dialogs.ShowEnqueueOptionsAsync(items.Any(item => !item.IsClip));
-            if (options is null)
+            var queued = await _enqueue.EnqueueAsync([.. items.Select(QueueableMedia.FromSearch)]);
+            if (!queued)
                 return;
-
-            try
-            {
-                if (!Directory.Exists(options.Folder))
-                    TwitchHelper.CreateDirectory(options.Folder);
-            }
-            catch (Exception ex)
-            {
-                await _dialogs.ShowErrorAsync(Loc.Get("search.invalid_folder_title"), Loc.Get("search.invalid_folder"));
-                if (_settings.Current.VerboseErrors)
-                    await _dialogs.ShowErrorAsync(Loc.Get("dialogs.verbose_error"), ex.ToString());
-
-                return;
-            }
-
-            var collision = (FileInfo file) => _collision.HandleCollision(file);
-            var throttle = _settings.Current.DownloadThrottleEnabled ? _settings.Current.MaximumBandwidthKib : -1;
-            var tasks = new List<QueueItemViewModel>(items.Count * (options.DownloadChat ? 2 : 1));
-
-            foreach (var item in items)
-            {
-                if (item.IsClip)
-                {
-                    var clipOptions = new ClipDownloadOptions
-                    {
-                        Id = item.Id,
-                        Quality = options.Quality,
-                        Filename = Path.Combine(options.Folder, FilenameService.GetFilename(
-                            _settings.Current.TemplateClip,
-                            item.Title,
-                            item.Id,
-                            item.Time,
-                            item.StreamerName,
-                            item.StreamerId,
-                            TimeSpan.Zero,
-                            TimeSpan.FromSeconds(item.Length),
-                            TimeSpan.FromSeconds(item.Length),
-                            item.Views,
-                            item.Game,
-                            string.IsNullOrEmpty(item.ClipperName) ? null : item.ClipperName,
-                            string.IsNullOrEmpty(item.ClipperId) ? null : item.ClipperId) + ".mp4"),
-                        ThrottleKib = throttle,
-                        TempFolder = _settings.Current.TempPath,
-                        EncodeMetadata = _settings.Current.EncodeClipMetadata,
-                        FfmpegPath = _ffmpeg.ResolvedPath,
-                        FileCollisionCallback = collision,
-                    };
-
-                    tasks.Add(QueueItemViewModel.CreateClip(clipOptions, item.Title, item.ThumbnailBytes, _queue.LogLevel));
-                }
-                else if (long.TryParse(item.Id, out var videoId))
-                {
-                    var vodOptions = new VideoDownloadOptions
-                    {
-                        Oauth = _settings.Current.OAuth,
-                        TempFolder = _settings.Current.TempPath,
-                        Id = videoId,
-                        Quality = options.Quality,
-                        FfmpegPath = _ffmpeg.ResolvedPath,
-                        TrimBeginning = false,
-                        TrimEnding = false,
-                        DownloadThreads = Math.Clamp(_settings.Current.VodDownloadThreads, 1, 20),
-                        ThrottleKib = throttle,
-                        FileCollisionCallback = collision,
-                        CacheCleanerCallback = _ => [],
-                    };
-                    vodOptions.Filename = Path.Combine(options.Folder, FilenameService.GetFilename(
-                        _settings.Current.TemplateVod,
-                        item.Title,
-                        item.Id,
-                        item.Time,
-                        item.StreamerName,
-                        item.StreamerId,
-                        TimeSpan.Zero,
-                        TimeSpan.FromSeconds(item.Length),
-                        TimeSpan.FromSeconds(item.Length),
-                        item.Views,
-                        item.Game) + FilenameService.GuessVodFileExtension(vodOptions.Quality));
-
-                    tasks.Add(QueueItemViewModel.CreateVod(vodOptions, item.Title, item.ThumbnailBytes, _queue.LogLevel));
-                }
-
-                if (!options.DownloadChat)
-                    continue;
-
-                var chatOptions = new ChatDownloadOptions
-                {
-                    EmbedData = _settings.Current.ChatEmbedEmotes,
-                    BttvEmotes = _settings.Current.BttvEmotes,
-                    FfzEmotes = _settings.Current.FfzEmotes,
-                    StvEmotes = _settings.Current.StvEmotes,
-                    TimeFormat = _settings.Current.ChatTextTimestampStyle,
-                    Id = item.Id,
-                    TrimBeginning = false,
-                    TrimEnding = false,
-                    FileCollisionCallback = collision,
-                    DownloadFormat = _settings.Current.ChatDownloadFormat,
-                    Compression = _settings.Current.ChatDownloadFormat == ChatFormat.Json
-                        ? _settings.Current.ChatJsonCompression
-                        : ChatCompression.None,
-                    DownloadThreads = Math.Clamp(_settings.Current.ChatDownloadThreads, 1, 20),
-                    TempFolder = _settings.Current.TempPath,
-                };
-                chatOptions.Filename = Path.Combine(options.Folder, FilenameService.GetFilename(
-                    _settings.Current.TemplateChat,
-                    item.Title,
-                    item.Id,
-                    item.Time,
-                    item.StreamerName,
-                    item.StreamerId,
-                    TimeSpan.Zero,
-                    TimeSpan.FromSeconds(item.Length),
-                    TimeSpan.FromSeconds(item.Length),
-                    item.Views,
-                    item.Game,
-                    string.IsNullOrEmpty(item.ClipperName) ? null : item.ClipperName,
-                    string.IsNullOrEmpty(item.ClipperId) ? null : item.ClipperId) + chatOptions.FileExtension);
-
-                tasks.Add(QueueItemViewModel.CreateChat(chatOptions, item.Title, item.ThumbnailBytes, _queue.LogLevel));
-            }
-
-            if (tasks.Count == 0)
-                return;
-
-            _queue.EnqueueRange(tasks);
 
             foreach (var item in items)
                 item.IsSelected = false;

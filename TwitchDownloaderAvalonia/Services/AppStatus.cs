@@ -6,12 +6,8 @@ namespace TwitchDownloaderAvalonia.Services
         {
             ReduceMotion = settings.Current.ReduceMotion;
             Message = Loc.Get("status.idle");
-            LocalizationService.Current.CultureChanged += (_, _) =>
-            {
-                OnPropertyChanged(nameof(QueueChipText));
-                if (Kind == AppStatusKind.Idle && QueueCount == 0)
-                    Message = Loc.Get("status.idle");
-            };
+
+            LocalizationService.Current.CultureChanged += OnCultureChanged;
         }
 
         [ObservableProperty]
@@ -87,5 +83,12 @@ namespace TwitchDownloaderAvalonia.Services
         }
 
         public string QueueChipText => Loc.Get("status.queue_chip", QueueCount);
+
+        private void OnCultureChanged(object? sender, EventArgs e)
+        {
+            OnPropertyChanged(nameof(QueueChipText));
+            if (Kind == AppStatusKind.Idle && QueueCount == 0)
+                Message = Loc.Get("status.idle");
+        }
     }
 }

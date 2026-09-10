@@ -17,7 +17,7 @@ namespace TwitchDownloaderAvalonia.Services
             _dialogs = dialogs;
 
             Items.CollectionChanged += OnItemsChanged;
-            LocalizationService.Current.CultureChanged += (_, _) => RefreshAppStatus();
+            LocalizationService.Current.CultureChanged += OnCultureChanged;
         }
 
         public ObservableCollection<QueueItemViewModel> Items { get; } = [];
@@ -240,6 +240,8 @@ namespace TwitchDownloaderAvalonia.Services
             item.PropertyChanged -= OnItemPropertyChanged;
             item.Dispose();
         }
+
+        private void OnCultureChanged(object? sender, EventArgs e) => RefreshAppStatus();
 
         private void OnItemsChanged(object? sender, NotifyCollectionChangedEventArgs e) => RefreshDerived();
 

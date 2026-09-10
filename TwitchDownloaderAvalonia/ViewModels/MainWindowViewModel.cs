@@ -17,15 +17,18 @@ namespace TwitchDownloaderAvalonia.ViewModels
         {
             _ffmpeg = ffmpeg;
             Status = status;
+
+            var enqueue = new QueueEnqueueService(settings, dialogs, queue, ffmpeg, collision);
             Vod = new VodDownloadViewModel(settings, status, ffmpeg, dialogs, fileDialogs, collision, thumbnails, queue);
             Clip = new ClipDownloadViewModel(settings, status, ffmpeg, dialogs, fileDialogs, collision, thumbnails, queue);
             ChatDownload = new ChatDownloadViewModel(settings, status, dialogs, fileDialogs, collision, thumbnails, queue);
             ChatUpdate = new ChatUpdateViewModel(settings, status, dialogs, fileDialogs, collision, thumbnails, queue);
             ChatRender = new ChatRenderViewModel(settings, status, ffmpeg, dialogs, fileDialogs, collision, thumbnails, queue);
-            Search = new SearchViewModel(settings, status, dialogs, thumbnails, OpenSearchResultAsync, queue, ffmpeg, collision);
-            Queue = new QueueViewModel(status, queue);
+            Search = new SearchViewModel(settings, status, dialogs, thumbnails, OpenSearchResultAsync, enqueue);
+            Queue = new QueueViewModel(status, queue, dialogs, thumbnails, enqueue);
             SettingsPage = new SettingsViewModel(settings, status, fileDialogs, dialogs, collision, queue);
             About = new AboutViewModel(updates, dialogs, ffmpeg);
+
             CurrentPage = Vod;
             RefreshWindowTitle();
         }

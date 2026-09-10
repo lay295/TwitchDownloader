@@ -110,6 +110,32 @@ namespace TwitchDownloaderAvalonia.Services
             dialog.DataContext = new EnqueueOptionsViewModel(settings, files, includeAudioOnly, dialog.Close);
             return await dialog.ShowDialog<EnqueueOptions?>(_owner!);
         }
+
+        public async Task ShowUrlListAsync(ThumbnailService thumbnails, QueueEnqueueService enqueue)
+        {
+            if (_owner is null)
+                return;
+
+            if (Dispatcher.UIThread.CheckAccess())
+            {
+                await ShowUrlListCoreAsync(thumbnails, enqueue);
+                return;
+            }
+
+            await Dispatcher.UIThread.InvokeAsync(() => ShowUrlListCoreAsync(thumbnails, enqueue));
+        }
+
+        private async Task ShowUrlListCoreAsync(ThumbnailService thumbnails, QueueEnqueueService enqueue)
+        {
+            var dialog = new UrlListDialog();
+            var viewModel = new UrlListViewModel(settings, this, thumbnails, enqueue, queued => dialog.Close(queued));
+            dialog.DataContext = viewModel;
+            dialog.Closing += OnDialogClosing;
+            await dialog.ShowDialog(_owner!);
+            return;
+
+            void OnDialogClosing(object? sender, WindowClosingEventArgs e) => viewModel.NotifyClosed();
+        }
     }
 
     public enum CollisionChoice

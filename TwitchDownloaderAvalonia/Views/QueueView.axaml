@@ -13,9 +13,13 @@
     x:Class="TwitchDownloaderAvalonia.Views.QueueView"
     x:DataType="vm:QueueViewModel">
 
-    <Grid RowDefinitions="Auto,Auto,*">
+    <Grid RowDefinitions="Auto,*">
         <DockPanel Grid.Row="0" Margin="0,0,0,8">
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="6">
+                <Button
+                    Classes="secondary"
+                    Content="{loc:Translate Key=queue.url_list}"
+                    Command="{Binding AddUrlsCommand}" />
                 <Button
                     Content="{loc:Translate Key=queue.clear_finished}"
                     Command="{Binding ClearFinishedCommand}"
@@ -29,50 +33,7 @@
             <TextBlock Text="{loc:Translate Key=queue.tasks}" VerticalAlignment="Center" Classes="title" />
         </DockPanel>
 
-        <WrapPanel Grid.Row="1" Margin="0,0,0,10">
-            <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,6">
-                <TextBlock Classes="muted" VerticalAlignment="Center" Text="{loc:Translate Key=queue.limit_vod}" />
-                <NumericUpDown
-                    Classes="compact"
-                    Width="72"
-                    Minimum="1"
-                    Maximum="50"
-                    Increment="1"
-                    Value="{Binding Queue.LimitVod, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,6">
-                <TextBlock Classes="muted" VerticalAlignment="Center" Text="{loc:Translate Key=queue.limit_clip}" />
-                <NumericUpDown
-                    Classes="compact"
-                    Width="72"
-                    Minimum="1"
-                    Maximum="50"
-                    Increment="1"
-                    Value="{Binding Queue.LimitClip, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,6">
-                <TextBlock Classes="muted" VerticalAlignment="Center" Text="{loc:Translate Key=queue.limit_chat}" />
-                <NumericUpDown
-                    Classes="compact"
-                    Width="72"
-                    Minimum="1"
-                    Maximum="50"
-                    Increment="1"
-                    Value="{Binding Queue.LimitChat, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,0,6">
-                <TextBlock Classes="muted" VerticalAlignment="Center" Text="{loc:Translate Key=queue.limit_render}" />
-                <NumericUpDown
-                    Classes="compact"
-                    Width="72"
-                    Minimum="1"
-                    Maximum="50"
-                    Increment="1"
-                    Value="{Binding Queue.LimitRender, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
-            </StackPanel>
-        </WrapPanel>
-
-        <Border Grid.Row="2" Classes="card" Padding="10">
+        <Border Grid.Row="1" Classes="card" Padding="10">
             <Grid>
                 <ScrollViewer
                     HorizontalScrollBarVisibility="Disabled"
