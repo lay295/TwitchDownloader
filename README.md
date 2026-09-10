@@ -48,6 +48,14 @@ Open the repository solution [`TwitchDownloader.slnx`](TwitchDownloader.slnx) (C
 dotnet run --project TwitchDownloaderAvalonia
 ```
 
+The Windows zip from CI includes `ffmpeg.exe`. Linux and macOS builds download FFmpeg on first launch (or use `ffmpeg` from `PATH`). On Debian/Ubuntu, install the desktop libraries Avalonia needs:
+
+```
+sudo apt install libx11-6 libice6 libsm6 libfontconfig1
+```
+
+macOS zips are unsigned. Gatekeeper may block the first open until you allow the app in System Settings.
+
 ## Windows WPF
 
 ![](https://i.imgur.com/bLegxGX.gif)
@@ -237,8 +245,12 @@ To work on the Windows WPF GUI, open [`TwitchDownloaderWPF/TwitchDownloaderWPF.s
 4. a) Build the Avalonia GUI:
 
 ```
-dotnet publish TwitchDownloaderAvalonia -c Release
+dotnet publish TwitchDownloaderAvalonia -p:PublishProfile=<Profile>
 ```
+
+- Applicable Profiles: `Windows`, `Linux`, `MacOS`, `MacOSArm64`
+
+Linux also needs the packages listed under [Cross-platform Avalonia](#cross-platform-avalonia). The Windows profile is what CI uses when bundling FFmpeg.
 
 4. b) Build the Windows WPF GUI (Windows only):
 
@@ -257,7 +269,7 @@ dotnet publish TwitchDownloaderCLI -p:PublishProfile=<Profile>
 5. a) Navigate to the Avalonia GUI build folder:
 
 ```
-cd TwitchDownloaderAvalonia/bin/Release/net10.0/publish
+cd TwitchDownloaderAvalonia/bin/Release/net10.0/publish/<Profile>
 ```
 
 5. b) Navigate to the WPF GUI build folder:
