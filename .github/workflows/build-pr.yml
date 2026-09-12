@@ -4,7 +4,7 @@ on:
   push:
     branches: [ master ]
   pull_request:
-    types: [ opened, reopened ]
+    types: [ opened, reopened, synchronize ]
 
 jobs:
   run-tests:
@@ -19,6 +19,8 @@ jobs:
         run: dotnet test TwitchDownloaderCLI.Tests
       - name: Run TwitchDownloaderCore Tests
         run: dotnet test TwitchDownloaderCore.Tests
+      - name: Run TwitchDownloaderAvalonia Tests
+        run: dotnet test TwitchDownloaderAvalonia.Tests
 
   build-gui:
     runs-on: windows-latest
@@ -174,3 +176,115 @@ jobs:
       with:
         name: TwitchDownloaderCLI-MacOSArm64.zip
         path: TwitchDownloaderCLI-MacOSArm64.zip
+
+  build-gui-avalonia:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v7
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v6
+      with:
+        dotnet-version: 10.0.x
+    - name: Build Windows Avalonia GUI
+      run: dotnet publish TwitchDownloaderAvalonia -p:PublishProfile=Windows -p:DebugType=Portable
+
+    - name: Download FFmpeg To Workspace
+      uses: carlosperate/download-file-action@v2.0.3
+      with:
+        file-url: https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip
+        file-name: ffmpeg.zip
+
+    - name: Bundle FFmpeg
+      run: tar xfz ffmpeg.zip --strip-components=1; copy bin/ffmpeg.exe TwitchDownloaderAvalonia/bin/Release/net10.0/publish/Windows/ffmpeg.exe
+
+    - name: Verify Windows Avalonia publish
+      shell: pwsh
+      run: |
+        $publishDir = "TwitchDownloaderAvalonia/bin/Release/net10.0/publish/Windows"
+        if (-not (Test-Path "$publishDir/TwitchDownloaderAvalonia.exe")) { throw "Missing TwitchDownloaderAvalonia.exe" }
+        if (-not (Test-Path "$publishDir/ffmpeg.exe")) { throw "Missing ffmpeg.exe" }
+
+    - name: Zip Windows Avalonia GUI
+      uses: vimtor/action-zip@v1.3
+      with:
+        files: "TwitchDownloaderAvalonia/bin/Release/net10.0/publish/Windows"
+        dest: TwitchDownloaderAvalonia-Windows-x64.zip
+
+    - name: Upload Windows Avalonia GUI Artifact Asset
+      uses: actions/upload-artifact@v7
+      with:
+        name: TwitchDownloaderAvalonia-Windows-x64.zip
+        path: TwitchDownloaderAvalonia-Windows-x64.zip
+
+  build-gui-avalonia-linux:
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v7
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v6
+      with:
+        dotnet-version: 10.0.x
+    - name: Build Linux Avalonia GUI
+      run: dotnet publish TwitchDownloaderAvalonia -p:PublishProfile=Linux -p:DebugType=Portable
+
+    - name: Verify Linux Avalonia publish
+      run: |
+        publish_dir="TwitchDownloaderAvalonia/bin/Release/net10.0/publish/Linux"
+        chmod +x "$publish_dir/TwitchDownloaderAvalonia"
+        test -x "$publish_dir/TwitchDownloaderAvalonia"
+
+    - name: Zip Linux Avalonia GUI
+      uses: vimtor/action-zip@v1.3
+      with:
+        files: "TwitchDownloaderAvalonia/bin/Release/net10.0/publish/Linux"
+        dest: TwitchDownloaderAvalonia-Linux-x64.zip
+
+    - name: Upload Linux Avalonia GUI Artifact Asset
+      uses: actions/upload-artifact@v7
+      with:
+        name: TwitchDownloaderAvalonia-Linux-x64.zip
+        path: TwitchDownloaderAvalonia-Linux-x64.zip
+
+  build-gui-avalonia-mac:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v7
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v6
+      with:
+        dotnet-version: 10.0.x
+    - name: Build MacOS Avalonia GUI
+      run: dotnet publish TwitchDownloaderAvalonia -p:PublishProfile=MacOS -p:DebugType=Portable
+    - name: Build MacOSArm64 Avalonia GUI
+      run: dotnet publish TwitchDownloaderAvalonia -p:PublishProfile=MacOSArm64 -p:DebugType=Portable
+
+    - name: Verify MacOS Avalonia publish
+      run: |
+        chmod +x TwitchDownloaderAvalonia/bin/Release/net10.0/publish/MacOS/TwitchDownloaderAvalonia
+        chmod +x TwitchDownloaderAvalonia/bin/Release/net10.0/publish/MacOSArm64/TwitchDownloaderAvalonia
+        test -x TwitchDownloaderAvalonia/bin/Release/net10.0/publish/MacOS/TwitchDownloaderAvalonia
+        test -x TwitchDownloaderAvalonia/bin/Release/net10.0/publish/MacOSArm64/TwitchDownloaderAvalonia
+
+    - name: Zip MacOS Avalonia GUI
+      uses: vimtor/action-zip@v1.3
+      with:
+        files: "TwitchDownloaderAvalonia/bin/Release/net10.0/publish/MacOS"
+        dest: TwitchDownloaderAvalonia-MacOS-x64.zip
+
+    - name: Zip MacOSArm64 Avalonia GUI
+      uses: vimtor/action-zip@v1.3
+      with:
+        files: "TwitchDownloaderAvalonia/bin/Release/net10.0/publish/MacOSArm64"
+        dest: TwitchDownloaderAvalonia-MacOSArm64.zip
+
+    - name: Upload MacOS Avalonia GUI Artifact Asset
+      uses: actions/upload-artifact@v7
+      with:
+        name: TwitchDownloaderAvalonia-MacOS-x64.zip
+        path: TwitchDownloaderAvalonia-MacOS-x64.zip
+
+    - name: Upload MacOSArm64 Avalonia GUI Artifact Asset
+      uses: actions/upload-artifact@v7
+      with:
+        name: TwitchDownloaderAvalonia-MacOSArm64.zip
+        path: TwitchDownloaderAvalonia-MacOSArm64.zip

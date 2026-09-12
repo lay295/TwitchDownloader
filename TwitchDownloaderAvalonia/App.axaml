@@ -1,0 +1,52 @@
+<Application
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="TwitchDownloaderAvalonia.App"
+    xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
+    xmlns:views="using:TwitchDownloaderAvalonia.Views"
+    RequestedThemeVariant="Default">
+    <Application.DataTemplates>
+        <DataTemplate DataType="vm:VodDownloadViewModel">
+            <views:VodDownloadView />
+        </DataTemplate>
+        <DataTemplate DataType="vm:ClipDownloadViewModel">
+            <views:ClipDownloadView />
+        </DataTemplate>
+        <DataTemplate DataType="vm:ChatDownloadViewModel">
+            <views:ChatDownloadView />
+        </DataTemplate>
+        <DataTemplate DataType="vm:ChatUpdateViewModel">
+            <views:ChatUpdateView />
+        </DataTemplate>
+        <DataTemplate DataType="vm:ChatRenderViewModel">
+            <views:ChatRenderView />
+        </DataTemplate>
+        <DataTemplate DataType="vm:SearchViewModel">
+            <views:SearchView />
+        </DataTemplate>
+        <DataTemplate DataType="vm:QueueViewModel">
+            <views:QueueView />
+        </DataTemplate>
+        <DataTemplate DataType="vm:SettingsViewModel">
+            <views:SettingsView />
+        </DataTemplate>
+        <DataTemplate DataType="vm:AboutViewModel">
+            <views:AboutView />
+        </DataTemplate>
+    </Application.DataTemplates>
+
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="/Styles/Colors.axaml" />
+                <ResourceInclude Source="/Styles/Icons.axaml" />
+                <ResourceInclude Source="/Styles/ControlThemes.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+
+    <Application.Styles>
+        <SimpleTheme />
+        <StyleInclude Source="/Styles/Controls.axaml" />
+    </Application.Styles>
+</Application>

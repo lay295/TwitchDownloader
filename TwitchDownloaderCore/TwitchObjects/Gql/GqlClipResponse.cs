@@ -5,6 +5,7 @@
         public string id { get; set; }
         public string displayName { get; set; }
         public string login { get; set; }
+        public string profileImageURL { get; set; }
     }
 
     public class ClipCurator

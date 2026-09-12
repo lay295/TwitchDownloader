@@ -1,0 +1,310 @@
+<ContentPage
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
+    xmlns:models="using:TwitchDownloaderAvalonia.Models"
+    xmlns:c="using:TwitchDownloaderAvalonia.Converters"
+    xmlns:b="using:TwitchDownloaderAvalonia.Behaviors"
+    xmlns:loc="using:TwitchDownloaderAvalonia.Markup"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignWidth="740"
+    d:DesignHeight="720"
+    x:Class="TwitchDownloaderAvalonia.Views.SettingsView"
+    x:DataType="vm:SettingsViewModel">
+
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+        <StackPanel Spacing="12">
+            <Border Classes="card">
+                <StackPanel Spacing="12">
+                    <TextBlock Classes="title" Text="{loc:Translate Key=settings.appearance}" />
+
+                    <StackPanel Spacing="6">
+                        <TextBlock Classes="label" Text="{loc:Translate Key=settings.theme}" Margin="0" />
+                        <ComboBox
+                            HorizontalAlignment="Stretch"
+                            ItemsSource="{Binding ThemeOptions}"
+                            SelectedItem="{Binding SelectedThemeOption}" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="6">
+                        <TextBlock Classes="label" Text="{loc:Translate Key=settings.language}" Margin="0" />
+                        <ComboBox
+                            HorizontalAlignment="Stretch"
+                            ItemsSource="{Binding Cultures}"
+                            SelectedItem="{Binding SelectedCulture}" />
+                    </StackPanel>
+
+                    <CheckBox Content="{loc:Translate Key=settings.reduce_motion}" IsChecked="{Binding ReduceMotion}" />
+                    <CheckBox Content="{loc:Translate Key=settings.hide_donation}" IsChecked="{Binding HideDonation}" />
+
+                    <StackPanel Spacing="6">
+                        <TextBlock Classes="label" Text="{loc:Translate Key=settings.video_timestamps}" Margin="0" />
+                        <StackPanel Orientation="Horizontal" Spacing="16">
+                            <RadioButton
+                                Content="{loc:Translate Key=settings.time_utc}"
+                                GroupName="TimeFormat"
+                                IsChecked="{Binding UtcVideoTime}" />
+                            <RadioButton
+                                Content="{loc:Translate Key=settings.time_local}"
+                                GroupName="TimeFormat"
+                                IsChecked="{Binding UtcVideoTime, Converter={x:Static c:InverseBoolConverter.Instance}}" />
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+                <StackPanel Spacing="12">
+                    <TextBlock Classes="title" Text="{loc:Translate Key=settings.account}" />
+                    <TextBlock Classes="label" Text="{loc:Translate Key=settings.oauth}" Margin="0" />
+                    <TextBox
+                        PlaceholderText="{loc:Translate Key=settings.oauth_placeholder}"
+                        Text="{Binding OAuth}" />
+                    <TextBlock
+                        Classes="muted"
+                        Text="{loc:Translate Key=settings.oauth_hint}"
+                        TextWrapping="Wrap" />
+                    <Button
+                        Classes="link"
+                        HorizontalAlignment="Left"
+                        Command="{Binding OpenUrlCommand}"
+                        CommandParameter="https://www.youtube.com/watch?v=1MBsUoFGuls">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="{loc:Translate Key=settings.oauth_help}" VerticalAlignment="Center" />
+                            <PathIcon Data="{StaticResource IconExternal}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+                <StackPanel Spacing="12">
+                    <TextBlock Classes="title" Text="{loc:Translate Key=settings.files}" />
+
+                    <StackPanel Spacing="6">
+                        <TextBlock Classes="label" Text="{loc:Translate Key=settings.cache_folder}" Margin="0" />
+                        <Grid ColumnDefinitions="*,8,Auto,8,Auto">
+                            <TextBox
+                                PlaceholderText="{Binding TempPathPlaceholder}"
+                                Text="{Binding TempPath}" />
+                            <Button
+                                Grid.Column="2"
+                                Content="{loc:Translate Key=common.browse}"
+                                Command="{Binding BrowseTempPathCommand}" />
+                            <Button
+                                Grid.Column="4"
+                                Classes="secondary"
+                                Content="{loc:Translate Key=settings.clear_cache}"
+                                Command="{Binding ClearCacheCommand}" />
+                        </Grid>
+                    </StackPanel>
+
+                    <StackPanel Spacing="6">
+                        <TextBlock Classes="label" Text="{loc:Translate Key=settings.collision}" Margin="0" />
+                        <ComboBox
+                            HorizontalAlignment="Stretch"
+                            ItemsSource="{Binding CollisionOptions}"
+                            SelectedItem="{Binding SelectedCollisionOption}" />
+                        <TextBlock
+                            Classes="muted"
+                            Text="{loc:Translate Key=settings.collision_hint}"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="6">
+                        <TextBlock Classes="label" Text="{loc:Translate Key=settings.bandwidth}" Margin="0" />
+                        <DockPanel>
+                            <NumericUpDown
+                                DockPanel.Dock="Right"
+                                Classes="compact"
+                                Width="96"
+                                Minimum="1"
+                                Maximum="122070"
+                                Increment="256"
+                                IsEnabled="{Binding DownloadThrottleEnabled}"
+                                Value="{Binding MaximumBandwidthKib, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                            <TextBlock
+                                DockPanel.Dock="Right"
+                                Classes="muted"
+                                Text="{loc:Translate Key=settings.kib_s}"
+                                VerticalAlignment="Center"
+                                Margin="0,0,8,0" />
+                            <CheckBox
+                                Content="{loc:Translate Key=settings.limit_bandwidth}"
+                                IsChecked="{Binding DownloadThrottleEnabled}" />
+                        </DockPanel>
+                    </StackPanel>
+
+                    <CheckBox Content="{loc:Translate Key=settings.verbose_errors}" IsChecked="{Binding VerboseErrors}" />
+
+                    <StackPanel Spacing="6">
+                        <TextBlock Classes="label" Text="{loc:Translate Key=settings.log_levels}" Margin="0" />
+                        <WrapPanel>
+                            <CheckBox Content="{loc:Translate Key=settings.log_verbose}" Margin="0,0,16,6" IsChecked="{Binding LogVerbose}" />
+                            <CheckBox Content="{loc:Translate Key=settings.log_info}" Margin="0,0,16,6" IsChecked="{Binding LogInfo}" />
+                            <CheckBox Content="{loc:Translate Key=settings.log_warning}" Margin="0,0,16,6" IsChecked="{Binding LogWarning}" />
+                            <CheckBox Content="{loc:Translate Key=settings.log_error}" Margin="0,0,16,6" IsChecked="{Binding LogError}" />
+                            <CheckBox Content="{loc:Translate Key=settings.log_ffmpeg}" Margin="0,0,0,6" IsChecked="{Binding LogFfmpeg}" />
+                        </WrapPanel>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+                <StackPanel Spacing="12">
+                    <TextBlock Classes="title" Text="{loc:Translate Key=settings.templates}" />
+
+                    <Grid ColumnDefinitions="72,*" RowDefinitions="Auto,8,Auto,8,Auto">
+                        <TextBlock Classes="muted" Text="{loc:Translate Key=settings.template_vod}" VerticalAlignment="Center" />
+                        <TextBox
+                            Grid.Column="1"
+                            Text="{Binding TemplateVod}"
+                            b:DragText.AcceptDrop="True" />
+                        <TextBlock
+                            Grid.Row="2"
+                            Classes="muted"
+                            Text="{loc:Translate Key=settings.template_clip}"
+                            VerticalAlignment="Center" />
+                        <TextBox
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            Text="{Binding TemplateClip}"
+                            b:DragText.AcceptDrop="True" />
+                        <TextBlock
+                            Grid.Row="4"
+                            Classes="muted"
+                            Text="{loc:Translate Key=settings.template_chat}"
+                            VerticalAlignment="Center" />
+                        <TextBox
+                            Grid.Row="4"
+                            Grid.Column="1"
+                            Text="{Binding TemplateChat}"
+                            b:DragText.AcceptDrop="True" />
+                    </Grid>
+
+                    <TextBlock Classes="muted" Text="{loc:Translate Key=settings.templates_hint}" TextWrapping="Wrap" />
+                    <ItemsControl ItemsSource="{Binding FilenameParameters}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="models:FilenameParameter">
+                                <Button
+                                    Classes="chip"
+                                    Margin="0,0,6,6"
+                                    Content="{Binding Token}"
+                                    ToolTip.Tip="{Binding Tooltip}"
+                                    Cursor="SizeAll"
+                                    b:DragText.Payload="{Binding Token}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <WrapPanel>
+                        <TextBlock Classes="muted" Text="{loc:Translate Key=settings.date_format_docs}" VerticalAlignment="Center" />
+                        <Button
+                            Classes="link"
+                            Command="{Binding OpenUrlCommand}"
+                            CommandParameter="https://learn.microsoft.com/dotnet/standard/base-types/custom-date-and-time-format-strings">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock Text="{loc:Translate Key=settings.docs_link}" VerticalAlignment="Center" />
+                                <PathIcon Data="{StaticResource IconExternal}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </WrapPanel>
+                    <WrapPanel>
+                        <TextBlock Classes="muted" Text="{loc:Translate Key=settings.timespan_format_docs}" VerticalAlignment="Center" />
+                        <Button
+                            Classes="link"
+                            Command="{Binding OpenUrlCommand}"
+                            CommandParameter="https://learn.microsoft.com/dotnet/standard/base-types/custom-timespan-format-strings">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock Text="{loc:Translate Key=settings.docs_link}" VerticalAlignment="Center" />
+                                <PathIcon Data="{StaticResource IconExternal}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+                <StackPanel Spacing="12">
+                    <TextBlock Classes="title" Text="{loc:Translate Key=settings.queue}" />
+                    <TextBlock
+                        Classes="muted"
+                        Text="{loc:Translate Key=settings.queue_hint}"
+                        TextWrapping="Wrap" />
+                    <Grid ColumnDefinitions="*,8,Auto">
+                        <TextBox
+                            PlaceholderText="{loc:Translate Key=settings.download_folder}"
+                            Text="{Binding QueueFolder}" />
+                        <Button
+                            Grid.Column="2"
+                            Content="{loc:Translate Key=common.browse}"
+                            Command="{Binding BrowseQueueFolderCommand}" />
+                    </Grid>
+
+                    <TextBlock Classes="label" Text="{loc:Translate Key=settings.preferred_quality}" Margin="0" />
+                    <ComboBox
+                        HorizontalAlignment="Stretch"
+                        ItemsSource="{Binding QualityOptions}"
+                        SelectedItem="{Binding SelectedQualityOption}" />
+
+                    <TextBlock Classes="label" Text="{loc:Translate Key=settings.parallel_limits}" Margin="0" />
+                    <WrapPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,8">
+                            <TextBlock Classes="muted" VerticalAlignment="Center" Width="56" Text="{loc:Translate Key=queue.limit_vod}" />
+                            <NumericUpDown
+                                Classes="compact"
+                                Width="72"
+                                Minimum="1"
+                                Maximum="50"
+                                Increment="1"
+                                Value="{Binding Queue.LimitVod, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,8">
+                            <TextBlock Classes="muted" VerticalAlignment="Center" Width="56" Text="{loc:Translate Key=queue.limit_clip}" />
+                            <NumericUpDown
+                                Classes="compact"
+                                Width="72"
+                                Minimum="1"
+                                Maximum="50"
+                                Increment="1"
+                                Value="{Binding Queue.LimitClip, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,8">
+                            <TextBlock Classes="muted" VerticalAlignment="Center" Width="56" Text="{loc:Translate Key=queue.limit_chat}" />
+                            <NumericUpDown
+                                Classes="compact"
+                                Width="72"
+                                Minimum="1"
+                                Maximum="50"
+                                Increment="1"
+                                Value="{Binding Queue.LimitChat, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,8">
+                            <TextBlock Classes="muted" VerticalAlignment="Center" Width="56" Text="{loc:Translate Key=queue.limit_render}" />
+                            <NumericUpDown
+                                Classes="compact"
+                                Width="72"
+                                Minimum="1"
+                                Maximum="50"
+                                Increment="1"
+                                Value="{Binding Queue.LimitRender, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                        </StackPanel>
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
+
+            <Button
+                Classes="secondary"
+                HorizontalAlignment="Left"
+                Content="{loc:Translate Key=settings.restore_defaults}"
+                Command="{Binding RestoreDefaultsCommand}" />
+        </StackPanel>
+    </ScrollViewer>
+</ContentPage>

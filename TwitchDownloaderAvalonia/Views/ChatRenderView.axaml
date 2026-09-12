@@ -1,0 +1,595 @@
+<ContentPage
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
+    xmlns:chat="using:TwitchDownloaderCore.Chat"
+    xmlns:c="using:TwitchDownloaderAvalonia.Converters"
+    xmlns:loc="using:TwitchDownloaderAvalonia.Markup"
+    xmlns:anim="https://github.com/whistyun/AnimatedImage.Avalonia"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignWidth="860"
+    d:DesignHeight="720"
+    x:Class="TwitchDownloaderAvalonia.Views.ChatRenderView"
+    x:DataType="vm:ChatRenderViewModel">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <DockPanel Margin="0,0,0,12">
+            <Button
+                DockPanel.Dock="Right"
+                Classes="accent"
+                Content="{loc:Translate Key=common.browse}"
+                Command="{Binding BrowseCommand}"
+                IsEnabled="{Binding CanBrowse}" />
+            <TextBox
+                Margin="0,0,8,0"
+                PlaceholderText="{loc:Translate Key=render.file_placeholder}"
+                Text="{Binding InputFile}">
+                <TextBox.KeyBindings>
+                    <KeyBinding Gesture="Enter" Command="{Binding LoadTypedFileCommand}" />
+                </TextBox.KeyBindings>
+            </TextBox>
+        </DockPanel>
+
+        <Grid Grid.Row="1" ColumnDefinitions="300,*">
+            <Border Classes="card" Margin="0,0,12,0">
+                <DockPanel>
+                    <Viewbox
+                        DockPanel.Dock="Top"
+                        Stretch="Uniform"
+                        HorizontalAlignment="Stretch"
+                        Margin="0,0,0,10">
+                        <Border Classes="preview16x9">
+                            <Panel>
+                                <StackPanel
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Spacing="6"
+                                    IsVisible="{Binding !InfoLoaded}">
+                                    <Image
+                                        Width="48"
+                                        Height="48"
+                                        Stretch="Uniform"
+                                        anim:ImageBehavior.AnimatedSource="avares://TwitchDownloaderAvalonia/Assets/Status/ppHop.gif"
+                                        anim:ImageBehavior.RepeatBehavior="Forever"
+                                        IsVisible="{Binding AppStatus.ShowStatusImage}" />
+                                    <TextBlock
+                                        Classes="muted"
+                                        HorizontalAlignment="Center"
+                                        Text="{loc:Translate Key=common.no_thumbnail}"
+                                        IsVisible="{Binding AppStatus.ReduceMotion}" />
+                                </StackPanel>
+                                <Image
+                                    Source="{Binding ThumbnailBytes, Converter={x:Static c:ByteArrayToBitmapConverter.Instance}}"
+                                    Stretch="UniformToFill"
+                                    IsVisible="{Binding InfoLoaded}" />
+                            </Panel>
+                        </Border>
+                    </Viewbox>
+                    <StackPanel Spacing="10">
+                        <TextBlock
+                            Classes="title"
+                            Text="{Binding InfoTitle}"
+                            TextWrapping="Wrap"
+                            IsVisible="{Binding InfoLoaded}" />
+                        <TextBlock
+                            Classes="muted"
+                            Text="{loc:Translate Key=render.browse_hint}"
+                            TextWrapping="Wrap"
+                            IsVisible="{Binding !InfoLoaded}" />
+                        <StackPanel
+                            Orientation="Horizontal"
+                            Spacing="8"
+                            IsVisible="{Binding InfoLoaded}">
+                            <Border
+                                Width="28"
+                                Height="28"
+                                CornerRadius="14"
+                                ClipToBounds="True"
+                                Background="{DynamicResource CardMutedBrush}"
+                                IsVisible="{Binding HasStreamerAvatar}">
+                                <Image
+                                    Source="{Binding StreamerAvatarBytes, Converter={x:Static c:ByteArrayToBitmapConverter.Instance}}"
+                                    Stretch="UniformToFill" />
+                            </Border>
+                            <TextBlock
+                                Text="{Binding InfoStreamer}"
+                                TextWrapping="Wrap"
+                                VerticalAlignment="Center" />
+                        </StackPanel>
+                        <StackPanel Spacing="6" IsVisible="{Binding InfoLoaded}">
+                            <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto">
+                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <PathIcon
+                                        Width="14"
+                                        Height="14"
+                                        Data="{StaticResource IconClock}"
+                                        Foreground="{DynamicResource MutedForegroundBrush}" />
+                                    <TextBlock Classes="muted" Text="{loc:Translate Key=common.length}" VerticalAlignment="Center" />
+                                </StackPanel>
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Classes="muted"
+                                    HorizontalAlignment="Right"
+                                    Text="{Binding LengthText}" />
+                            </Grid>
+                            <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto">
+                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <PathIcon
+                                        Width="14"
+                                        Height="14"
+                                        Data="{StaticResource IconCalendar}"
+                                        Foreground="{DynamicResource MutedForegroundBrush}" />
+                                    <TextBlock Classes="muted" Text="{loc:Translate Key=common.created}" VerticalAlignment="Center" />
+                                </StackPanel>
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Classes="muted"
+                                    HorizontalAlignment="Right"
+                                    Text="{Binding InfoCreatedAt}" />
+                            </Grid>
+                        </StackPanel>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <Border Grid.Column="1" Classes="card">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Bottom" Spacing="10" Margin="0,12,0,0">
+                        <DockPanel Height="28" LastChildFill="True">
+                            <StackPanel
+                                DockPanel.Dock="Right"
+                                Orientation="Horizontal"
+                                Spacing="3"
+                                VerticalAlignment="Center">
+                                <NumericUpDown Classes="time" Minimum="0" Maximum="{Binding TrimHourMaximum}" FormatString="00" Increment="1"
+                                               VerticalAlignment="Center"
+                                               IsEnabled="{Binding CanEditTrimStart}"
+                                               Value="{Binding StartHour, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                                <TextBlock Classes="muted" Text=":" VerticalAlignment="Center" />
+                                <NumericUpDown Classes="time" Minimum="0" Maximum="59" FormatString="00" Increment="1"
+                                               VerticalAlignment="Center"
+                                               IsEnabled="{Binding CanEditTrimStart}"
+                                               Value="{Binding StartMinute, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                                <TextBlock Classes="muted" Text=":" VerticalAlignment="Center" />
+                                <NumericUpDown Classes="time" Minimum="0" Maximum="59" FormatString="00" Increment="1"
+                                               VerticalAlignment="Center"
+                                               IsEnabled="{Binding CanEditTrimStart}"
+                                               Value="{Binding StartSecond, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                            </StackPanel>
+                            <CheckBox
+                                Content="{loc:Translate Key=common.trim_start}"
+                                VerticalAlignment="Center"
+                                IsChecked="{Binding TrimStart}"
+                                IsEnabled="{Binding CanEditOptions}" />
+                        </DockPanel>
+
+                        <DockPanel Height="28" LastChildFill="True">
+                            <StackPanel
+                                DockPanel.Dock="Right"
+                                Orientation="Horizontal"
+                                Spacing="3"
+                                VerticalAlignment="Center">
+                                <NumericUpDown Classes="time" Minimum="0" Maximum="{Binding TrimHourMaximum}" FormatString="00" Increment="1"
+                                               VerticalAlignment="Center"
+                                               IsEnabled="{Binding CanEditTrimEnd}"
+                                               Value="{Binding EndHour, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                                <TextBlock Classes="muted" Text=":" VerticalAlignment="Center" />
+                                <NumericUpDown Classes="time" Minimum="0" Maximum="59" FormatString="00" Increment="1"
+                                               VerticalAlignment="Center"
+                                               IsEnabled="{Binding CanEditTrimEnd}"
+                                               Value="{Binding EndMinute, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                                <TextBlock Classes="muted" Text=":" VerticalAlignment="Center" />
+                                <NumericUpDown Classes="time" Minimum="0" Maximum="59" FormatString="00" Increment="1"
+                                               VerticalAlignment="Center"
+                                               IsEnabled="{Binding CanEditTrimEnd}"
+                                               Value="{Binding EndSecond, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+                            </StackPanel>
+                            <CheckBox
+                                Content="{loc:Translate Key=common.trim_end}"
+                                VerticalAlignment="Center"
+                                IsChecked="{Binding TrimEnd}"
+                                IsEnabled="{Binding CanEditOptions}" />
+                        </DockPanel>
+
+                        <TextBlock
+                            Classes="muted"
+                            Text="{Binding SuggestedFileDisplay}"
+                            TextWrapping="Wrap"
+                            IsVisible="{Binding HasSuggestedFileName}" />
+
+                        <Grid ColumnDefinitions="*,8,*" RowDefinitions="Auto">
+                            <Button
+                                Classes="accent"
+                                HorizontalAlignment="Stretch"
+                                Command="{Binding RenderCommand}"
+                                IsEnabled="{Binding CanRender}">
+                                <TextBlock Text="{loc:Translate Key=render.action}" HorizontalAlignment="Center" />
+                            </Button>
+                            <Button
+                                Grid.Column="2"
+                                Classes="secondary"
+                                HorizontalAlignment="Stretch"
+                                Content="{loc:Translate Key=common.cancel}"
+                                Command="{Binding CancelCommand}"
+                                IsEnabled="{Binding CanCancelQueued}" />
+                        </Grid>
+                    </StackPanel>
+
+                    <TabControl IsEnabled="{Binding CanEditOptions}">
+                        <TabItem Header="{loc:Translate Key=render.tab_general}">
+                            <ScrollViewer>
+                                <StackPanel Spacing="12" Margin="0,4,0,0">
+                                    <Grid ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="8" ColumnSpacing="12">
+                                        <TextBlock Classes="label" Text="{loc:Translate Key=render.width}" VerticalAlignment="Center" Margin="0" />
+                                        <NumericUpDown
+                                            Grid.Row="0"
+                                            Grid.Column="1"
+                                            Classes="compact"
+                                            Minimum="2"
+                                            Increment="2"
+                                            FormatString="0"
+                                            Value="{Binding ChatWidth, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Classes="label" Text="{loc:Translate Key=render.height}" VerticalAlignment="Center" Margin="0" />
+                                        <NumericUpDown
+                                            Grid.Row="1"
+                                            Grid.Column="1"
+                                            Classes="compact"
+                                            Minimum="2"
+                                            Increment="2"
+                                            FormatString="0"
+                                            Value="{Binding ChatHeight, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Classes="label" Text="{loc:Translate Key=render.font}" VerticalAlignment="Center" Margin="0" />
+                                        <ComboBox
+                                            Grid.Row="2"
+                                            Grid.Column="1"
+                                            ItemsSource="{Binding Fonts}"
+                                            SelectedItem="{Binding SelectedFont}" />
+
+                                        <TextBlock Grid.Row="3" Grid.Column="0" Classes="label" Text="{loc:Translate Key=render.font_size}" VerticalAlignment="Center" Margin="0" />
+                                        <NumericUpDown
+                                            Grid.Row="3"
+                                            Grid.Column="1"
+                                            Classes="compact"
+                                            Minimum="1"
+                                            Increment="1"
+                                            FormatString="0"
+                                            Value="{Binding FontSize, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+
+                                        <TextBlock Grid.Row="4" Grid.Column="0" Classes="label" Text="{loc:Translate Key=render.font_color}" VerticalAlignment="Center" Margin="0" />
+                                        <Grid Grid.Row="4" Grid.Column="1" ColumnDefinitions="*,8,Auto">
+                                            <TextBox Text="{Binding FontColorHex}" PlaceholderText="#FFFFFFFF" />
+                                            <Border
+                                                Grid.Column="2"
+                                                Classes="swatch"
+                                                Background="{Binding FontColorHex, Converter={x:Static c:HexToBrushConverter.Instance}}" />
+                                        </Grid>
+
+                                        <TextBlock Grid.Row="5" Grid.Column="0" Classes="label" Text="{loc:Translate Key=render.background}" VerticalAlignment="Center" Margin="0" />
+                                        <Grid Grid.Row="5" Grid.Column="1" ColumnDefinitions="*,8,Auto">
+                                            <TextBox Text="{Binding BackgroundColorHex}" PlaceholderText="#FF111111" />
+                                            <Border
+                                                Grid.Column="2"
+                                                Classes="swatch"
+                                                Background="{Binding BackgroundColorHex, Converter={x:Static c:HexToBrushConverter.Instance}}" />
+                                        </Grid>
+
+                                        <TextBlock Grid.Row="6" Grid.Column="0" Classes="label" Text="{loc:Translate Key=render.alt_background}" VerticalAlignment="Center" Margin="0" />
+                                        <Grid Grid.Row="6" Grid.Column="1" ColumnDefinitions="*,8,Auto">
+                                            <TextBox Text="{Binding AlternateBackgroundColorHex}" PlaceholderText="#FF191919" />
+                                            <Border
+                                                Grid.Column="2"
+                                                Classes="swatch"
+                                                Background="{Binding AlternateBackgroundColorHex, Converter={x:Static c:HexToBrushConverter.Instance}}" />
+                                        </Grid>
+                                    </Grid>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </TabItem>
+
+                        <TabItem Header="{loc:Translate Key=render.tab_rendering}">
+                            <ScrollViewer>
+                                <StackPanel Spacing="14" Margin="0,4,0,0">
+                                    <WrapPanel>
+                                        <CheckBox Content="{loc:Translate Key=render.outline}" Margin="0,0,16,8" IsChecked="{Binding Outline}" />
+                                        <CheckBox Content="{loc:Translate Key=render.timestamps}" Margin="0,0,16,8" IsChecked="{Binding Timestamp}" />
+                                        <CheckBox Content="{loc:Translate Key=render.sub_messages}" Margin="0,0,16,8" IsChecked="{Binding SubMessages}" />
+                                        <CheckBox Content="{loc:Translate Key=render.chat_badges}" Margin="0,0,16,8" IsChecked="{Binding ChatBadges}" />
+                                        <CheckBox Content="{loc:Translate Key=render.dispersion}" Margin="0,0,16,8" IsChecked="{Binding DisperseCommentOffsets}" ToolTip.Tip="{loc:Translate Key=render.dispersion_tip}" />
+                                        <CheckBox Content="{loc:Translate Key=chat.bttv}" Margin="0,0,16,8" IsChecked="{Binding BttvEmotes}" />
+                                        <CheckBox Content="{loc:Translate Key=chat.ffz}" Margin="0,0,16,8" IsChecked="{Binding FfzEmotes}" />
+                                        <CheckBox Content="{loc:Translate Key=chat.stv}" Margin="0,0,16,8" IsChecked="{Binding StvEmotes}" />
+                                        <CheckBox Content="{loc:Translate Key=render.user_avatars}" Margin="0,0,16,8" IsChecked="{Binding RenderUserAvatars}" />
+                                        <CheckBox Content="{loc:Translate Key=render.offline}" Margin="0,0,16,8" IsChecked="{Binding Offline}" ToolTip.Tip="{loc:Translate Key=render.offline_tip}" />
+                                    </WrapPanel>
+
+                                    <DockPanel LastChildFill="False">
+                                        <TextBlock Classes="label" Text="{loc:Translate Key=render.update_rate}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                        <NumericUpDown
+                                            Classes="compact"
+                                            Minimum="0"
+                                            Increment="0.1"
+                                            FormatString="0.##"
+                                            Value="{Binding UpdateRate, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                    </DockPanel>
+
+                                    <StackPanel Spacing="10">
+                                        <CheckBox
+                                            HorizontalAlignment="Stretch"
+                                            IsChecked="{Binding AlternateMessageBackgrounds}"
+                                            ToolTip.Tip="{loc:Translate Key=render.alt_message_backgrounds_tip}">
+                                            <TextBlock Text="{loc:Translate Key=render.alt_message_backgrounds}" TextWrapping="Wrap" />
+                                        </CheckBox>
+                                        <CheckBox
+                                            HorizontalAlignment="Stretch"
+                                            IsChecked="{Binding AdjustUsernameVisibility}">
+                                            <TextBlock Text="{loc:Translate Key=render.username_readability}" TextWrapping="Wrap" />
+                                        </CheckBox>
+                                    </StackPanel>
+
+                                    <StackPanel Spacing="8">
+                                        <TextBlock Classes="label" Text="{loc:Translate Key=render.badge_filter}" Margin="0" />
+                                        <TextBlock Classes="muted" TextWrapping="Wrap" Text="{loc:Translate Key=render.badge_filter_hint}" />
+                                        <WrapPanel>
+                                            <CheckBox Content="{loc:Translate Key=render.badge_broadcaster}" Margin="0,0,12,6" IsChecked="{Binding FilterBroadcaster}" />
+                                            <CheckBox Content="{loc:Translate Key=render.badge_mods}" Margin="0,0,12,6" IsChecked="{Binding FilterModerator}" />
+                                            <CheckBox Content="{loc:Translate Key=render.badge_vips}" Margin="0,0,12,6" IsChecked="{Binding FilterVip}" />
+                                            <CheckBox Content="{loc:Translate Key=render.badge_subs}" Margin="0,0,12,6" IsChecked="{Binding FilterSubscriber}" />
+                                            <CheckBox Content="{loc:Translate Key=render.badge_predictions}" Margin="0,0,12,6" IsChecked="{Binding FilterPredictions}" />
+                                            <CheckBox Content="{loc:Translate Key=render.badge_no_av}" Margin="0,0,12,6" IsChecked="{Binding FilterNoAudioVisual}" />
+                                            <CheckBox Content="{loc:Translate Key=render.badge_prime}" Margin="0,0,12,6" IsChecked="{Binding FilterPrimeGaming}" />
+                                            <CheckBox Content="{loc:Translate Key=render.badge_others}" Margin="0,0,12,6" IsChecked="{Binding FilterOther}" />
+                                        </WrapPanel>
+                                    </StackPanel>
+
+                                    <StackPanel Spacing="8">
+                                        <TextBlock Classes="label" Text="{loc:Translate Key=render.ignore_users}" Margin="0" ToolTip.Tip="{loc:Translate Key=render.ignore_users_tip}" />
+                                        <TextBox Text="{Binding IgnoreUsersList}" PlaceholderText="{loc:Translate Key=render.users_placeholder}" />
+                                        <TextBlock Classes="label" Text="{loc:Translate Key=render.banned_words}" Margin="0" ToolTip.Tip="{loc:Translate Key=render.banned_words_tip}" />
+                                        <TextBox Text="{Binding BannedWordsList}" PlaceholderText="{loc:Translate Key=render.words_placeholder}" />
+                                        <TextBlock Classes="label" Text="{loc:Translate Key=render.highlight_users}" Margin="0" ToolTip.Tip="{loc:Translate Key=render.highlight_users_tip}" />
+                                        <Grid ColumnDefinitions="*,8,Auto,8,Auto">
+                                            <TextBox Text="{Binding HighlightUsersList}" PlaceholderText="{loc:Translate Key=render.users_placeholder}" />
+                                            <TextBox
+                                                Grid.Column="2"
+                                                Width="110"
+                                                Text="{Binding HighlightUsersColorHex}"
+                                                PlaceholderText="#C8FF0064" />
+                                            <Border
+                                                Grid.Column="4"
+                                                Classes="swatch"
+                                                Background="{Binding HighlightUsersColorHex, Converter={x:Static c:HexToBrushConverter.Instance}}" />
+                                        </Grid>
+                                    </StackPanel>
+
+                                    <StackPanel Spacing="8">
+                                        <TextBlock Classes="label" Text="{loc:Translate Key=render.emoji_vendor}" Margin="0" />
+                                        <WrapPanel>
+                                            <RadioButton
+                                                Content="{loc:Translate Key=render.emoji_google}"
+                                                Margin="0,0,16,6"
+                                                GroupName="ChatRenderEmoji"
+                                                IsChecked="{Binding EmojiVendor, Converter={x:Static c:EnumEqualsConverter.Instance}, ConverterParameter={x:Static chat:EmojiVendor.GoogleNotoColor}, Mode=TwoWay}" />
+                                            <RadioButton
+                                                Content="{loc:Translate Key=render.emoji_twitter}"
+                                                Margin="0,0,16,6"
+                                                GroupName="ChatRenderEmoji"
+                                                IsChecked="{Binding EmojiVendor, Converter={x:Static c:EnumEqualsConverter.Instance}, ConverterParameter={x:Static chat:EmojiVendor.TwitterTwemoji}, Mode=TwoWay}" />
+                                            <RadioButton
+                                                Content="{loc:Translate Key=render.emoji_none}"
+                                                Margin="0,0,16,6"
+                                                GroupName="ChatRenderEmoji"
+                                                IsChecked="{Binding EmojiVendor, Converter={x:Static c:EnumEqualsConverter.Instance}, ConverterParameter={x:Static chat:EmojiVendor.None}, Mode=TwoWay}" />
+                                        </WrapPanel>
+                                    </StackPanel>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </TabItem>
+
+                        <TabItem Header="{loc:Translate Key=render.tab_scaling}">
+                            <ScrollViewer>
+                                <WrapPanel Margin="0,4,0,0">
+                                    <Grid Classes="scaleRow" ColumnDefinitions="*,8,Auto">
+                                        <TextBlock Classes="label" Text="{loc:Translate Key=render.scale_emote}" VerticalAlignment="Center" Margin="0" TextWrapping="Wrap" />
+                                        <NumericUpDown
+                                            Grid.Row="0" Grid.Column="2" Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                            Value="{Binding EmoteScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                    </Grid>
+                                    <Grid Classes="scaleRow" ColumnDefinitions="*,8,Auto">
+                                        <TextBlock Classes="label" Text="{loc:Translate Key=render.scale_badge}" VerticalAlignment="Center" Margin="0" TextWrapping="Wrap" />
+                                        <NumericUpDown
+                                            Grid.Row="0" Grid.Column="2" Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                            Value="{Binding BadgeScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                    </Grid>
+                                    <Grid Classes="scaleRow" ColumnDefinitions="*,8,Auto">
+                                        <TextBlock Classes="label" Text="{loc:Translate Key=render.scale_emoji}" VerticalAlignment="Center" Margin="0" TextWrapping="Wrap" />
+                                        <NumericUpDown
+                                            Grid.Row="0" Grid.Column="2" Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                            Value="{Binding EmojiScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                    </Grid>
+                                    <Grid Classes="scaleRow" ColumnDefinitions="*,8,Auto">
+                                        <TextBlock Classes="label" Text="{loc:Translate Key=render.scale_avatar}" VerticalAlignment="Center" Margin="0" TextWrapping="Wrap" />
+                                        <NumericUpDown
+                                            Grid.Row="0" Grid.Column="2" Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                            Value="{Binding AvatarScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                    </Grid>
+                                    <Grid Classes="scaleRow" ColumnDefinitions="*,8,Auto">
+                                        <TextBlock Classes="label" Text="{loc:Translate Key=render.scale_outline}" VerticalAlignment="Center" Margin="0" TextWrapping="Wrap" />
+                                        <NumericUpDown
+                                            Grid.Row="0" Grid.Column="2" Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                            Value="{Binding OutlineScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                    </Grid>
+                                    <Grid Classes="scaleRow" ColumnDefinitions="*,8,Auto">
+                                        <TextBlock
+                                            Classes="label" Text="{loc:Translate Key=render.scale_username}" VerticalAlignment="Center" Margin="0" TextWrapping="Wrap"
+                                            ToolTip.Tip="{loc:Translate Key=render.scale_username_tip}" />
+                                        <NumericUpDown
+                                            Grid.Row="0" Grid.Column="2" Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                            Value="{Binding UsernameFontScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                    </Grid>
+                                    <Grid Classes="scaleRow" ColumnDefinitions="*,8,Auto">
+                                        <TextBlock Classes="label" Text="{loc:Translate Key=render.scale_vertical}" VerticalAlignment="Center" Margin="0" TextWrapping="Wrap" />
+                                        <NumericUpDown
+                                            Grid.Row="0" Grid.Column="2" Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                            Value="{Binding VerticalSpacingScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                    </Grid>
+                                    <Grid Classes="scaleRow" ColumnDefinitions="*,8,Auto">
+                                        <TextBlock Classes="label" Text="{loc:Translate Key=render.scale_section}" VerticalAlignment="Center" Margin="0" TextWrapping="Wrap" />
+                                        <NumericUpDown
+                                            Grid.Row="0" Grid.Column="2" Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                            Value="{Binding SectionHeightScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                    </Grid>
+                                    <Grid Classes="scaleRow" ColumnDefinitions="*,8,Auto">
+                                        <TextBlock Classes="label" Text="{loc:Translate Key=render.scale_word}" VerticalAlignment="Center" Margin="0" TextWrapping="Wrap" />
+                                        <NumericUpDown
+                                            Grid.Row="0" Grid.Column="2" Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                            Value="{Binding WordSpacingScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                    </Grid>
+                                    <Grid Classes="scaleRow" ColumnDefinitions="*,8,Auto">
+                                        <TextBlock Classes="label" Text="{loc:Translate Key=render.scale_emote_spacing}" VerticalAlignment="Center" Margin="0" TextWrapping="Wrap" />
+                                        <NumericUpDown
+                                            Grid.Row="0" Grid.Column="2" Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                            Value="{Binding EmoteSpacingScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                    </Grid>
+                                    <Grid Classes="scaleRow" ColumnDefinitions="*,8,Auto">
+                                        <TextBlock Classes="label" Text="{loc:Translate Key=render.scale_stroke}" VerticalAlignment="Center" Margin="0" TextWrapping="Wrap" />
+                                        <NumericUpDown
+                                            Grid.Row="0" Grid.Column="2" Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                            Value="{Binding AccentStrokeScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                    </Grid>
+                                    <Grid Classes="scaleRow" ColumnDefinitions="*,8,Auto">
+                                        <TextBlock Classes="label" Text="{loc:Translate Key=render.scale_indent}" VerticalAlignment="Center" Margin="0" TextWrapping="Wrap" />
+                                        <NumericUpDown
+                                            Grid.Row="0" Grid.Column="2" Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                            Value="{Binding AccentIndentScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                    </Grid>
+                                    <Grid Classes="scaleRow" ColumnDefinitions="*,8,Auto">
+                                        <TextBlock Classes="label" Text="{loc:Translate Key=render.scale_padding}" VerticalAlignment="Center" Margin="0" TextWrapping="Wrap" />
+                                        <NumericUpDown
+                                            Grid.Row="0" Grid.Column="2" Classes="compact" Minimum="0.1" Increment="0.1" FormatString="0.##"
+                                            Value="{Binding SidePaddingScale, Converter={x:Static c:DoubleDecimalConverter.Instance}, TargetNullValue={x:Static c:DoubleDecimalConverter.Zero}, FallbackValue={x:Static c:DoubleDecimalConverter.Zero}}" />
+                                    </Grid>
+                                </WrapPanel>
+                            </ScrollViewer>
+                        </TabItem>
+
+                        <TabItem Header="{loc:Translate Key=render.tab_encoding}">
+                            <ScrollViewer>
+                                <StackPanel Spacing="12" Margin="0,4,0,0">
+                                    <Grid ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="8" ColumnSpacing="12">
+                                        <TextBlock Classes="label" Text="{loc:Translate Key=render.file_format}" VerticalAlignment="Center" Margin="0" />
+                                        <ComboBox
+                                            Grid.Row="0"
+                                            Grid.Column="1"
+                                            ItemsSource="{Binding Containers}"
+                                            SelectedItem="{Binding SelectedContainer}" />
+
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Classes="label" Text="{loc:Translate Key=render.codec}" VerticalAlignment="Center" Margin="0" />
+                                        <ComboBox
+                                            Grid.Row="1"
+                                            Grid.Column="1"
+                                            ItemsSource="{Binding Codecs}"
+                                            SelectedItem="{Binding SelectedCodec}" />
+
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Classes="label" Text="{loc:Translate Key=render.framerate}" VerticalAlignment="Center" Margin="0" />
+                                        <NumericUpDown
+                                            Grid.Row="2"
+                                            Grid.Column="1"
+                                            Classes="compact"
+                                            Minimum="1"
+                                            Increment="1"
+                                            FormatString="0"
+                                            Value="{Binding Framerate, Converter={x:Static c:IntDecimalConverter.Instance}, TargetNullValue={x:Static c:IntDecimalConverter.Zero}, FallbackValue={x:Static c:IntDecimalConverter.Zero}}" />
+
+                                        <CheckBox
+                                            Grid.Row="3"
+                                            Grid.Column="1"
+                                            Content="{loc:Translate Key=render.generate_mask}"
+                                            IsChecked="{Binding GenerateMask}" />
+                                        <CheckBox
+                                            Grid.Row="4"
+                                            Grid.Column="1"
+                                            Content="{loc:Translate Key=render.sharpening}"
+                                            IsChecked="{Binding Sharpening}" />
+                                    </Grid>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </TabItem>
+
+                        <TabItem Header="{loc:Translate Key=render.tab_ffmpeg}">
+                            <ScrollViewer>
+                                <StackPanel Spacing="10" Margin="0,4,0,0">
+                                    <TextBlock
+                                        Classes="muted"
+                                        FontWeight="SemiBold"
+                                        TextWrapping="Wrap"
+                                        Text="{loc:Translate Key=render.ffmpeg_warning}" />
+                                    <TextBlock Classes="label" Text="{loc:Translate Key=render.ffmpeg_input}" Margin="0" />
+                                    <TextBox
+                                        Text="{Binding FfmpegInputArgs}"
+                                        AcceptsReturn="False"
+                                        TextWrapping="Wrap" />
+                                    <TextBlock Classes="label" Text="{loc:Translate Key=render.ffmpeg_output}" Margin="0" />
+                                    <TextBox
+                                        Text="{Binding FfmpegOutputArgs}"
+                                        AcceptsReturn="False"
+                                        TextWrapping="Wrap" />
+                                    <Button
+                                        Classes="secondary"
+                                        HorizontalAlignment="Left"
+                                        Content="{loc:Translate Key=render.ffmpeg_reset}"
+                                        Command="{Binding ResetFfmpegArgsCommand}" />
+                                    <TextBlock
+                                        Classes="muted"
+                                        TextWrapping="Wrap"
+                                        Text="{loc:Translate Key=render.ffmpeg_params}" />
+                                    <Button
+                                        Classes="link"
+                                        HorizontalAlignment="Left"
+                                        Content="{loc:Translate Key=render.ffmpeg_docs}"
+                                        Command="{Binding OpenFfmpegDocsCommand}" />
+                                </StackPanel>
+                            </ScrollViewer>
+                        </TabItem>
+                    </TabControl>
+                </DockPanel>
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="2" Classes="card" Margin="0,12,0,0" Padding="12,8">
+            <StackPanel Spacing="8">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4">
+                        <Button
+                            Classes="link"
+                            Content="{loc:Translate Key=common.clear}"
+                            Command="{Binding ClearLogCommand}"
+                            IsVisible="{Binding IsLogExpanded}" />
+                        <Button
+                            Classes="link"
+                            Content="{Binding LogToggleText}"
+                            Command="{Binding ToggleLogCommand}" />
+                    </StackPanel>
+                    <TextBlock
+                        Classes="label"
+                        Text="{loc:Translate Key=common.log}"
+                        VerticalAlignment="Center"
+                        Margin="0" />
+                </DockPanel>
+                <TextBox
+                    Height="128"
+                    Text="{Binding LogText}"
+                    PlaceholderText="{loc:Translate Key=common.log_placeholder}"
+                    IsReadOnly="True"
+                    AcceptsReturn="True"
+                    TextWrapping="Wrap"
+                    FontFamily="Menlo, Consolas, monospace"
+                    FontSize="13"
+                    IsVisible="{Binding IsLogExpanded}" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</ContentPage>

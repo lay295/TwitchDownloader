@@ -1,0 +1,119 @@
+<ContentPage
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
+    xmlns:loc="using:TwitchDownloaderAvalonia.Markup"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignWidth="740"
+    d:DesignHeight="720"
+    x:Class="TwitchDownloaderAvalonia.Views.AboutView"
+    x:DataType="vm:AboutViewModel">
+
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+        <StackPanel Spacing="12">
+            <Border Classes="card">
+                <StackPanel Spacing="12">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Image
+                            Width="48"
+                            Height="48"
+                            Source="/Assets/icon.ico"
+                            VerticalAlignment="Top" />
+                        <StackPanel VerticalAlignment="Center" Spacing="2">
+                            <TextBlock Classes="title" FontSize="18" Text="{Binding AppName}" />
+                            <TextBlock Classes="muted" Text="{Binding VersionText}" />
+                            <StackPanel
+                                Orientation="Horizontal"
+                                Spacing="8"
+                                IsVisible="{Binding ShowUpdateStatus}">
+                                <TextBlock
+                                    Classes="muted"
+                                    VerticalAlignment="Center"
+                                    Text="{Binding UpdateStatusText}" />
+                                <Button
+                                    Classes="link"
+                                    VerticalAlignment="Center"
+                                    Content="{loc:Translate Key=about.view_release}"
+                                    IsVisible="{Binding HasUpdate}"
+                                    Command="{Binding OpenUrlCommand}"
+                                    CommandParameter="{Binding ChangelogUrl}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <TextBlock Text="{Binding Description}" TextWrapping="Wrap" />
+                    <TextBlock Classes="muted" Text="{Binding Copyright}" TextWrapping="Wrap" />
+                    <TextBlock Classes="muted" Text="{Binding FrontendNote}" TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+                <StackPanel Spacing="4">
+                    <TextBlock Classes="title" Text="{loc:Translate Key=about.links}" />
+                    <Button
+                        Classes="link"
+                        HorizontalAlignment="Left"
+                        Command="{Binding OpenUrlCommand}"
+                        CommandParameter="https://github.com/lay295/TwitchDownloader">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="{loc:Translate Key=about.repository}" VerticalAlignment="Center" />
+                            <PathIcon Data="{StaticResource IconExternal}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button
+                        Classes="link"
+                        HorizontalAlignment="Left"
+                        Command="{Binding OpenUrlCommand}"
+                        CommandParameter="https://github.com/lay295/TwitchDownloader/issues">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="{loc:Translate Key=about.report_issue}" VerticalAlignment="Center" />
+                            <PathIcon Data="{StaticResource IconExternal}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button
+                        Classes="link"
+                        HorizontalAlignment="Left"
+                        Command="{Binding OpenUrlCommand}"
+                        CommandParameter="https://github.com/lay295/TwitchDownloader/releases">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="{loc:Translate Key=about.releases}" VerticalAlignment="Center" />
+                            <PathIcon Data="{StaticResource IconExternal}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+                <StackPanel Spacing="8">
+                    <TextBlock Classes="title" Text="{loc:Translate Key=about.mit_license}" />
+                    <TextBlock
+                        Classes="muted"
+                        TextWrapping="Wrap"
+                        Text="{loc:Translate Key=about.license_blurb}" />
+                    <Expander Header="{loc:Translate Key=about.full_license}">
+                        <TextBlock
+                            Classes="muted"
+                            Margin="0,8,0,0"
+                            FontSize="12"
+                            TextWrapping="Wrap"
+                            Text="{Binding LicenseText}" />
+                    </Expander>
+                </StackPanel>
+            </Border>
+
+            <StackPanel Spacing="8">
+                <TextBlock
+                    Classes="muted"
+                    TextWrapping="Wrap"
+                    Text="{Binding RuntimeSummary}" />
+                <Button
+                    Classes="secondary"
+                    HorizontalAlignment="Left"
+                    Content="{loc:Translate Key=about.copy_debug}"
+                    Command="{Binding CopyDebugInfoCommand}" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</ContentPage>

@@ -390,7 +390,7 @@ namespace TwitchDownloaderCore
                 if (!renderOptions.SkipDriveWaiting)
                     DriveHelper.WaitForDrive(outputDrive, _progress);
 
-                var frameSpan = frame.GetPixelSpan();
+                var frameSpan = frame.GetPixelBytes();
                 ffmpegStream.Write(frameSpan);
 
                 if (maskProcess != null)

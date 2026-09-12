@@ -1,0 +1,154 @@
+<ContentPage
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
+    xmlns:c="using:TwitchDownloaderAvalonia.Converters"
+    xmlns:loc="using:TwitchDownloaderAvalonia.Markup"
+    xmlns:anim="https://github.com/whistyun/AnimatedImage.Avalonia"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignWidth="740"
+    d:DesignHeight="480"
+    x:Class="TwitchDownloaderAvalonia.Views.QueueView"
+    x:DataType="vm:QueueViewModel">
+
+    <Grid RowDefinitions="Auto,*">
+        <DockPanel Grid.Row="0" Margin="0,0,0,8">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="6">
+                <Button
+                    Classes="secondary"
+                    Content="{loc:Translate Key=queue.url_list}"
+                    Command="{Binding AddUrlsCommand}" />
+                <Button
+                    Content="{loc:Translate Key=queue.clear_finished}"
+                    Command="{Binding ClearFinishedCommand}"
+                    IsEnabled="{Binding Queue.HasFinishedItems}" />
+                <Button
+                    Classes="secondary"
+                    Content="{loc:Translate Key=queue.cancel_all}"
+                    Command="{Binding CancelAllCommand}"
+                    IsEnabled="{Binding Queue.CanCancelAll}" />
+            </StackPanel>
+            <TextBlock Text="{loc:Translate Key=queue.tasks}" VerticalAlignment="Center" Classes="title" />
+        </DockPanel>
+
+        <Border Grid.Row="1" Classes="card" Padding="10">
+            <Grid>
+                <ScrollViewer
+                    HorizontalScrollBarVisibility="Disabled"
+                    VerticalScrollBarVisibility="Auto"
+                    IsVisible="{Binding Queue.HasItems}">
+                    <ItemsControl ItemsSource="{Binding Queue.Items}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:QueueItemViewModel">
+                                <Border Classes="queueItem">
+                                    <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                                        <Border Classes="queueThumb" VerticalAlignment="Center">
+                                            <Panel>
+                                                <TextBlock
+                                                    Classes="muted"
+                                                    FontSize="11"
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"
+                                                    Text="{loc:Translate Key=queue.no_thumb}"
+                                                    IsVisible="{Binding !HasThumbnail}" />
+                                                <Image
+                                                    Stretch="UniformToFill"
+                                                    Source="{Binding ThumbnailBytes, Converter={x:Static c:ByteArrayToBitmapConverter.Instance}}"
+                                                    IsVisible="{Binding HasThumbnail}" />
+                                            </Panel>
+                                        </Border>
+
+                                        <Grid
+                                            Grid.Column="1"
+                                            Margin="10,0,8,0"
+                                            RowDefinitions="Auto,Auto,Auto"
+                                            VerticalAlignment="Center">
+                                            <TextBlock
+                                                Text="{Binding Title}"
+                                                TextTrimming="CharacterEllipsis"
+                                                VerticalAlignment="Center"
+                                                FontWeight="SemiBold" />
+                                            <TextBlock
+                                                Grid.Row="1"
+                                                Classes="muted"
+                                                Text="{Binding DisplayStatus}"
+                                                TextTrimming="CharacterEllipsis" />
+                                            <ProgressBar
+                                                Grid.Row="2"
+                                                Minimum="0"
+                                                Maximum="100"
+                                                Value="{Binding Progress}"
+                                                IsVisible="{Binding ShowProgress}" />
+                                        </Grid>
+
+                                        <Border
+                                            Grid.Column="2"
+                                            Classes="typeChip"
+                                            Margin="0,0,8,0"
+                                            VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding TaskType}" FontSize="11" />
+                                        </Border>
+
+                                        <StackPanel
+                                            Grid.Column="3"
+                                            Orientation="Horizontal"
+                                            Spacing="4"
+                                            VerticalAlignment="Center">
+                                            <Button
+                                                Content="{loc:Translate Key=queue.cancel}"
+                                                Command="{Binding CancelCommand}"
+                                                IsVisible="{Binding CanCancel}" />
+                                            <Button
+                                                Content="{loc:Translate Key=queue.retry}"
+                                                Command="{Binding RetryCommand}"
+                                                IsVisible="{Binding CanRetry}" />
+                                            <Button
+                                                Content="{loc:Translate Key=queue.error}"
+                                                Command="{Binding ShowErrorCommand}"
+                                                IsVisible="{Binding HasError}" />
+                                            <Button
+                                                Classes="icon"
+                                                Content="···"
+                                                VerticalAlignment="Center">
+                                                <Button.Flyout>
+                                                    <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                                        <MenuItem Header="{loc:Translate Key=queue.open_folder}" Command="{Binding OpenFolderCommand}" />
+                                                        <MenuItem Header="{loc:Translate Key=queue.copy_path}" Command="{Binding CopyPathCommand}" />
+                                                        <MenuItem Header="{loc:Translate Key=queue.move_up}" Command="{Binding MoveUpCommand}" />
+                                                        <MenuItem Header="{loc:Translate Key=queue.move_down}" Command="{Binding MoveDownCommand}" />
+                                                        <MenuItem Header="{loc:Translate Key=queue.remove}" Command="{Binding RemoveCommand}" />
+                                                    </MenuFlyout>
+                                                </Button.Flyout>
+                                            </Button>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <StackPanel
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Spacing="8"
+                    IsVisible="{Binding !Queue.HasItems}">
+                    <Image
+                        Width="48"
+                        Height="48"
+                        HorizontalAlignment="Center"
+                        Stretch="Uniform"
+                        anim:ImageBehavior.AnimatedSource="avares://TwitchDownloaderAvalonia/Assets/Status/ppHop.gif"
+                        anim:ImageBehavior.RepeatBehavior="Forever"
+                        IsVisible="{Binding AppStatus.ShowStatusImage}" />
+                    <TextBlock
+                        Classes="muted"
+                        HorizontalAlignment="Center"
+                        Text="{loc:Translate Key=queue.empty}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</ContentPage>

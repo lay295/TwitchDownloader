@@ -2,6 +2,8 @@
 
 A Windows WPF desktop application that implements the core functionality wrapped in various quality of life features.
 
+This project targets Windows only. Open [`TwitchDownloaderWPF.slnx`](TwitchDownloaderWPF.slnx) on Windows to work on it. For cross-platform development, open the repository root [`TwitchDownloader.slnx`](../TwitchDownloader.slnx) instead.
+
 This document is also available in:
 
 - [**German / Deutsch**](README_de.md)

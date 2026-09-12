@@ -1,0 +1,86 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+            <Color x:Key="ThemeBackgroundColor">#F4F2F7</Color>
+            <Color x:Key="ThemeAccentColor">#9146FF</Color>
+            <Color x:Key="ThemeForegroundColor">#18181B</Color>
+            <Color x:Key="ThemeBorderLowColor">#D9D4E3</Color>
+            <Color x:Key="ThemeControlMidColor">#FFFFFF</Color>
+            <Color x:Key="ThemeControlHighColor">#EBE6F2</Color>
+            <SolidColorBrush x:Key="ThemeBackgroundBrush" Color="{StaticResource ThemeBackgroundColor}" />
+            <SolidColorBrush x:Key="ThemeAccentBrush" Color="{StaticResource ThemeAccentColor}" />
+            <SolidColorBrush x:Key="ThemeAccentBrush2" Color="#CC9146FF" />
+            <SolidColorBrush x:Key="ThemeAccentBrush3" Color="#B39146FF" />
+            <SolidColorBrush x:Key="ThemeAccentBrush4" Color="#809146FF" />
+            <SolidColorBrush x:Key="ThemeControlHighlightMidBrush" Color="#E4DDF0" />
+            <SolidColorBrush x:Key="ThemeForegroundBrush" Color="{StaticResource ThemeForegroundColor}" />
+            <SolidColorBrush x:Key="ThemeBorderLowBrush" Color="{StaticResource ThemeBorderLowColor}" />
+            <SolidColorBrush x:Key="ThemeBorderMidBrush" Color="{StaticResource ThemeBorderLowColor}" />
+            <SolidColorBrush x:Key="ThemeBorderHighBrush" Color="#B8B0C8" />
+            <SolidColorBrush x:Key="ThemeControlMidBrush" Color="{StaticResource ThemeControlMidColor}" />
+            <SolidColorBrush x:Key="ThemeControlHighBrush" Color="{StaticResource ThemeControlHighColor}" />
+            <SolidColorBrush x:Key="HighlightBrush" Color="{StaticResource ThemeAccentColor}" />
+            <SolidColorBrush x:Key="HighlightForegroundBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#F4F2F7" />
+            <SolidColorBrush x:Key="WindowForegroundBrush" Color="#18181B" />
+            <SolidColorBrush x:Key="SidebarBackgroundBrush" Color="#EBE6F2" />
+            <SolidColorBrush x:Key="StatusBarBackgroundBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="CardBackgroundBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="CardMutedBrush" Color="#EFEAF6" />
+            <SolidColorBrush x:Key="InputBackgroundBrush" Color="#F7F5FA" />
+            <SolidColorBrush x:Key="BorderBrush" Color="#D9D4E3" />
+            <SolidColorBrush x:Key="AccentBrush" Color="#9146FF" />
+            <SolidColorBrush x:Key="AccentHoverBrush" Color="#772CE8" />
+            <SolidColorBrush x:Key="AccentForegroundBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="NavSelectedBrush" Color="#9146FF" />
+            <SolidColorBrush x:Key="NavHoverBrush" Color="#E4DDF0" />
+            <SolidColorBrush x:Key="CardSelectedBrush" Color="#E8DCFF" />
+            <SolidColorBrush x:Key="CardSelectedHoverBrush" Color="#DCC9FF" />
+            <SolidColorBrush x:Key="MutedForegroundBrush" Color="#6B6480" />
+            <Color x:Key="LiveBadgeColor">#EB0400</Color>
+            <SolidColorBrush x:Key="LiveBadgeBackgroundBrush" Color="{StaticResource LiveBadgeColor}" />
+            <SolidColorBrush x:Key="LiveBadgeForegroundBrush" Color="#FFFFFF" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+            <Color x:Key="ThemeBackgroundColor">#1C1C21</Color>
+            <Color x:Key="ThemeAccentColor">#9146FF</Color>
+            <Color x:Key="ThemeForegroundColor">#EFEFF1</Color>
+            <Color x:Key="ThemeBorderLowColor">#3A3A44</Color>
+            <Color x:Key="ThemeControlMidColor">#25252B</Color>
+            <Color x:Key="ThemeControlHighColor">#2E2E36</Color>
+            <SolidColorBrush x:Key="ThemeBackgroundBrush" Color="{StaticResource ThemeBackgroundColor}" />
+            <SolidColorBrush x:Key="ThemeAccentBrush" Color="{StaticResource ThemeAccentColor}" />
+            <SolidColorBrush x:Key="ThemeAccentBrush2" Color="#CC9146FF" />
+            <SolidColorBrush x:Key="ThemeAccentBrush3" Color="#B39146FF" />
+            <SolidColorBrush x:Key="ThemeAccentBrush4" Color="#809146FF" />
+            <SolidColorBrush x:Key="ThemeControlHighlightMidBrush" Color="#2A2A32" />
+            <SolidColorBrush x:Key="ThemeForegroundBrush" Color="{StaticResource ThemeForegroundColor}" />
+            <SolidColorBrush x:Key="ThemeBorderLowBrush" Color="{StaticResource ThemeBorderLowColor}" />
+            <SolidColorBrush x:Key="ThemeBorderMidBrush" Color="{StaticResource ThemeBorderLowColor}" />
+            <SolidColorBrush x:Key="ThemeBorderHighBrush" Color="#5A5A68" />
+            <SolidColorBrush x:Key="ThemeControlMidBrush" Color="{StaticResource ThemeControlMidColor}" />
+            <SolidColorBrush x:Key="ThemeControlHighBrush" Color="{StaticResource ThemeControlHighColor}" />
+            <SolidColorBrush x:Key="HighlightBrush" Color="{StaticResource ThemeAccentColor}" />
+            <SolidColorBrush x:Key="HighlightForegroundBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#1C1C21" />
+            <SolidColorBrush x:Key="WindowForegroundBrush" Color="#EFEFF1" />
+            <SolidColorBrush x:Key="SidebarBackgroundBrush" Color="#161619" />
+            <SolidColorBrush x:Key="StatusBarBackgroundBrush" Color="#25252B" />
+            <SolidColorBrush x:Key="CardBackgroundBrush" Color="#25252B" />
+            <SolidColorBrush x:Key="CardMutedBrush" Color="#2E2E36" />
+            <SolidColorBrush x:Key="InputBackgroundBrush" Color="#1C1C21" />
+            <SolidColorBrush x:Key="BorderBrush" Color="#3A3A44" />
+            <SolidColorBrush x:Key="AccentBrush" Color="#9146FF" />
+            <SolidColorBrush x:Key="AccentHoverBrush" Color="#A970FF" />
+            <SolidColorBrush x:Key="AccentForegroundBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="NavSelectedBrush" Color="#9146FF" />
+            <SolidColorBrush x:Key="NavHoverBrush" Color="#2A2A32" />
+            <SolidColorBrush x:Key="CardSelectedBrush" Color="#3A2754" />
+            <SolidColorBrush x:Key="CardSelectedHoverBrush" Color="#4A3380" />
+            <SolidColorBrush x:Key="MutedForegroundBrush" Color="#9B9BA8" />
+            <Color x:Key="LiveBadgeColor">#EB0400</Color>
+            <SolidColorBrush x:Key="LiveBadgeBackgroundBrush" Color="{StaticResource LiveBadgeColor}" />
+            <SolidColorBrush x:Key="LiveBadgeForegroundBrush" Color="#FFFFFF" />
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>

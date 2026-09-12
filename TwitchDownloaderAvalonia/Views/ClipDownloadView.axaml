@@ -1,0 +1,227 @@
+<ContentPage
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
+    xmlns:models="using:TwitchDownloaderAvalonia.Models"
+    xmlns:c="using:TwitchDownloaderAvalonia.Converters"
+    xmlns:loc="using:TwitchDownloaderAvalonia.Markup"
+    xmlns:anim="https://github.com/whistyun/AnimatedImage.Avalonia"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignWidth="760"
+    d:DesignHeight="560"
+    x:Class="TwitchDownloaderAvalonia.Views.ClipDownloadView"
+    x:DataType="vm:ClipDownloadViewModel">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <DockPanel Margin="0,0,0,12">
+            <Button
+                DockPanel.Dock="Right"
+                Classes="accent"
+                Content="{loc:Translate Key=common.get_info}"
+                Command="{Binding GetInfoCommand}"
+                IsEnabled="{Binding CanGetInfo}" />
+            <TextBox
+                Margin="0,0,8,0"
+                PlaceholderText="{loc:Translate Key=clip.url_placeholder}"
+                Text="{Binding ClipUrl}">
+                <TextBox.KeyBindings>
+                    <KeyBinding Gesture="Enter" Command="{Binding GetInfoCommand}" />
+                </TextBox.KeyBindings>
+            </TextBox>
+        </DockPanel>
+
+        <Grid Grid.Row="1" ColumnDefinitions="300,*">
+            <Border Classes="card" Margin="0,0,12,0">
+                <DockPanel>
+                    <Viewbox
+                        DockPanel.Dock="Top"
+                        Stretch="Uniform"
+                        HorizontalAlignment="Stretch"
+                        Margin="0,0,0,10">
+                        <Border Classes="preview16x9">
+                            <Panel>
+                                <StackPanel
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Spacing="6"
+                                    IsVisible="{Binding !InfoLoaded}">
+                                    <Image
+                                        Width="48"
+                                        Height="48"
+                                        Stretch="Uniform"
+                                        anim:ImageBehavior.AnimatedSource="avares://TwitchDownloaderAvalonia/Assets/Status/ppHop.gif"
+                                        anim:ImageBehavior.RepeatBehavior="Forever"
+                                        IsVisible="{Binding AppStatus.ShowStatusImage}" />
+                                    <TextBlock
+                                        Classes="muted"
+                                        HorizontalAlignment="Center"
+                                        Text="{loc:Translate Key=common.no_thumbnail}"
+                                        IsVisible="{Binding AppStatus.ReduceMotion}" />
+                                </StackPanel>
+                                <Image
+                                    Source="{Binding ThumbnailBytes, Converter={x:Static c:ByteArrayToBitmapConverter.Instance}}"
+                                    Stretch="UniformToFill"
+                                    IsVisible="{Binding InfoLoaded}" />
+                            </Panel>
+                        </Border>
+                    </Viewbox>
+                    <StackPanel Spacing="10">
+                        <TextBlock
+                            Classes="title"
+                            Text="{Binding InfoTitle}"
+                            TextWrapping="Wrap"
+                            IsVisible="{Binding InfoLoaded}" />
+                        <TextBlock
+                            Classes="muted"
+                            Text="{loc:Translate Key=common.get_info_hint}"
+                            TextWrapping="Wrap"
+                            IsVisible="{Binding !InfoLoaded}" />
+                        <StackPanel
+                            Orientation="Horizontal"
+                            Spacing="8"
+                            IsVisible="{Binding InfoLoaded}">
+                            <Border
+                                Width="28"
+                                Height="28"
+                                CornerRadius="14"
+                                ClipToBounds="True"
+                                Background="{DynamicResource CardMutedBrush}"
+                                IsVisible="{Binding HasStreamerAvatar}">
+                                <Image
+                                    Source="{Binding StreamerAvatarBytes, Converter={x:Static c:ByteArrayToBitmapConverter.Instance}}"
+                                    Stretch="UniformToFill" />
+                            </Border>
+                            <TextBlock
+                                Text="{Binding InfoStreamer}"
+                                TextWrapping="Wrap"
+                                VerticalAlignment="Center" />
+                        </StackPanel>
+                        <StackPanel Spacing="6" IsVisible="{Binding InfoLoaded}">
+                            <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto">
+                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <PathIcon
+                                        Width="14"
+                                        Height="14"
+                                        Data="{StaticResource IconClock}"
+                                        Foreground="{DynamicResource MutedForegroundBrush}" />
+                                    <TextBlock Classes="muted" Text="{loc:Translate Key=common.length}" VerticalAlignment="Center" />
+                                </StackPanel>
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Classes="muted"
+                                    HorizontalAlignment="Right"
+                                    Text="{Binding LengthText}" />
+                            </Grid>
+                            <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto">
+                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <PathIcon
+                                        Width="14"
+                                        Height="14"
+                                        Data="{StaticResource IconCalendar}"
+                                        Foreground="{DynamicResource MutedForegroundBrush}" />
+                                    <TextBlock Classes="muted" Text="{loc:Translate Key=common.created}" VerticalAlignment="Center" />
+                                </StackPanel>
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Classes="muted"
+                                    HorizontalAlignment="Right"
+                                    Text="{Binding InfoCreatedAt}" />
+                            </Grid>
+                        </StackPanel>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <Border Grid.Column="1" Classes="card">
+                <ScrollViewer VerticalAlignment="Top">
+                    <StackPanel Spacing="6" VerticalAlignment="Top">
+                        <TextBlock Classes="label" Text="{loc:Translate Key=common.quality}" />
+                        <ComboBox
+                            ItemsSource="{Binding Qualities}"
+                            SelectedItem="{Binding SelectedQuality}"
+                            IsEnabled="{Binding CanEditOptions}"
+                            PlaceholderText="{loc:Translate Key=common.get_info_first}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="models:ClipQualityOption">
+                                    <TextBlock Text="{Binding DisplayName}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <CheckBox
+                            Margin="0,8,0,0"
+                            Content="{loc:Translate Key=clip.encode_metadata}"
+                            IsChecked="{Binding EncodeMetadata}"
+                            IsEnabled="{Binding CanEditOptions}" />
+                        <TextBlock
+                            Classes="muted"
+                            Text="{loc:Translate Key=clip.encode_metadata_hint}"
+                            TextWrapping="Wrap" />
+
+                        <TextBlock
+                            Classes="muted"
+                            Margin="0,6,0,4"
+                            Text="{Binding SuggestedFileDisplay}"
+                            TextWrapping="Wrap"
+                            IsVisible="{Binding HasSuggestedFileName}" />
+
+                        <Grid ColumnDefinitions="*,8,*" RowDefinitions="Auto" Margin="0,8,0,0">
+                            <Button
+                                Classes="accent"
+                                HorizontalAlignment="Stretch"
+                                Command="{Binding DownloadCommand}"
+                                IsEnabled="{Binding CanDownload}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <PathIcon Data="{StaticResource IconDownload}" />
+                                    <TextBlock Text="{loc:Translate Key=common.download}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                            <Button
+                                Grid.Column="2"
+                                Classes="secondary"
+                                HorizontalAlignment="Stretch"
+                                Content="{loc:Translate Key=common.cancel}"
+                                Command="{Binding CancelCommand}"
+                                IsEnabled="{Binding CanCancelQueued}" />
+                        </Grid>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+
+        <Border Grid.Row="2" Classes="card" Margin="0,12,0,0" Padding="12,8">
+            <StackPanel Spacing="8">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4">
+                        <Button
+                            Classes="link"
+                            Content="{loc:Translate Key=common.clear}"
+                            Command="{Binding ClearLogCommand}"
+                            IsVisible="{Binding IsLogExpanded}" />
+                        <Button
+                            Classes="link"
+                            Content="{Binding LogToggleText}"
+                            Command="{Binding ToggleLogCommand}" />
+                    </StackPanel>
+                    <TextBlock
+                        Classes="label"
+                        Text="{loc:Translate Key=common.log}"
+                        VerticalAlignment="Center"
+                        Margin="0" />
+                </DockPanel>
+                <TextBox
+                    Height="128"
+                    Text="{Binding LogText}"
+                    PlaceholderText="{loc:Translate Key=common.log_placeholder}"
+                    IsReadOnly="True"
+                    AcceptsReturn="True"
+                    TextWrapping="Wrap"
+                    FontFamily="Menlo, Consolas, monospace"
+                    FontSize="13"
+                    IsVisible="{Binding IsLogExpanded}" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</ContentPage>
