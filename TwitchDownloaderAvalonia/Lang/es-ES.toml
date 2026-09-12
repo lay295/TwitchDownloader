@@ -79,6 +79,7 @@ insufficient_access = "Acceso insuficiente. El VOD puede ser solo para suscripto
 get_info_failed = "No se puede obtener información de vídeo. Asegúrese de que el enlace/ID es correcto e inténtelo de nuevo."
 invalid_trim = "Entradas de recorte no válidas"
 unmanaged_caches = "Se encontraron {0} cachés de vídeo no administradas; puedes borrarlas más tarde en la carpeta de caché."
+live = "LIVE"
 
 [clip]
 subtitle = "Descarga clips de Twitch."
@@ -427,6 +428,12 @@ overwrite = "Sobrescribir"
 rename = "Renombrar"
 also_download_chat = "Descargar también el chat"
 chat_uses_page_settings = "El chat usa el formato, la compresión y los emotes de la página Chat."
+enqueue_options = "Opciones de cola"
+download_video = "Descargar vídeo"
+download_chat = "Descargar chat"
+delay_download = "Retrasar la descarga hasta que finalice la emisión"
+render_chat = "Renderizar chat"
+render_uses_page_settings = "El renderizado usa los ajustes de la página Renderizar chat."
 
 [quality]
 source = "Origen"

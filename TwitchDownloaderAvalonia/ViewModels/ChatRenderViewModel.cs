@@ -2,7 +2,6 @@ using System.Text.Json;
 using SkiaSharp;
 using TwitchDownloaderCore.Chat;
 using TwitchDownloaderCore.TwitchObjects;
-using Color = Avalonia.Media.Color;
 
 namespace TwitchDownloaderAvalonia.ViewModels
 {
@@ -766,21 +765,14 @@ namespace TwitchDownloaderAvalonia.ViewModels
 
         private ChatRenderOptions BuildOptions(string outputFile)
         {
-            var background = RequireColor(BackgroundColorHex);
-            var alternate = RequireColor(AlternateBackgroundColorHex);
-            var fontColor = RequireColor(FontColorHex);
-            var highlight = RequireColor(HighlightUsersColorHex);
-
-            var inputArgs = Sharpening
-                ? FfmpegInputArgs + " -filter_complex \"smartblur=lr=1:ls=-1.0\""
-                : FfmpegInputArgs;
-
-            return new ChatRenderOptions
+            return ChatRenderOptionsFactory.Create(new ChatRenderBuildArgs
             {
-                OutputFile = outputFile,
                 InputFile = InputFile,
-                BackgroundColor = background,
-                AlternateBackgroundColor = alternate,
+                OutputFile = outputFile,
+                BackgroundColorHex = BackgroundColorHex,
+                AlternateBackgroundColorHex = AlternateBackgroundColorHex,
+                FontColorHex = FontColorHex,
+                HighlightUsersColorHex = HighlightUsersColorHex,
                 AlternateMessageBackgrounds = AlternateMessageBackgrounds,
                 ChatHeight = ChatHeight,
                 ChatWidth = ChatWidth,
@@ -803,34 +795,28 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 AccentStrokeScale = AccentStrokeScale,
                 VerticalSpacingScale = VerticalSpacingScale,
                 UsernameFontScale = UsernameFontScale,
-                HighlightUserColor = highlight,
-                HighlightUsersArray = SplitCsv(HighlightUsersList),
-                IgnoreUsersArray = SplitCsv(IgnoreUsersList),
-                BannedWordsArray = SplitCsv(BannedWordsList),
+                OutlineScale = OutlineScale,
+                HighlightUsersList = HighlightUsersList,
+                IgnoreUsersList = IgnoreUsersList,
+                BannedWordsList = BannedWordsList,
                 Timestamp = Timestamp,
-                MessageColor = fontColor.WithAlpha(255),
                 Framerate = Framerate,
-                InputArgs = inputArgs,
-                OutputArgs = FfmpegOutputArgs,
-                MessageFontStyle = SKFontStyle.Normal,
-                UsernameFontStyle = SKFontStyle.Bold,
+                FfmpegInputArgs = FfmpegInputArgs,
+                FfmpegOutputArgs = FfmpegOutputArgs,
+                Sharpening = Sharpening,
                 GenerateMask = GenerateMask,
-                OutlineSize = 4 * OutlineScale,
-                FfmpegPath = _ffmpeg.ResolvedPath,
                 TempFolder = _settings.Current.TempPath,
                 SubMessages = SubMessages,
                 ChatBadges = ChatBadges,
                 Offline = Offline,
                 RenderUserAvatars = RenderUserAvatars,
-                AllowUnlistedEmotes = true,
                 DisperseCommentOffsets = DisperseCommentOffsets,
                 AdjustUsernameVisibility = AdjustUsernameVisibility,
                 EmojiVendor = EmojiVendor,
                 ChatBadgeMask = BuildBadgeMask(),
                 StartOverride = TrimStart ? (int)Math.Round(StartTime.TotalSeconds) : -1,
                 EndOverride = TrimEnd ? (int)Math.Round(EndTime.TotalSeconds) : -1,
-                FileCollisionCallback = file => _collision.HandleCollision(file),
-            };
+            }, _ffmpeg.ResolvedPath, file => _collision.HandleCollision(file)!);
         }
 
         private void LoadFromSettings()
@@ -1146,22 +1132,9 @@ namespace TwitchDownloaderAvalonia.ViewModels
 
         private static string JoinCsv(string value) => string.Join(",", SplitCsv(value));
 
-        private static SKColor RequireColor(string hex)
-        {
-            if (!TryParseColor(hex, out var color))
-                throw new InvalidOperationException(Loc.Get("render.invalid_colors"));
-
-            return color;
-        }
-
         private static bool TryParseColor(string hex, out SKColor color)
         {
-            color = SKColors.Transparent;
-            if (string.IsNullOrWhiteSpace(hex) || !Color.TryParse(hex.Trim(), out var parsed))
-                return false;
-
-            color = new SKColor(parsed.R, parsed.G, parsed.B, parsed.A);
-            return true;
+            return ChatRenderOptionsFactory.TryParseColor(hex, out color);
         }
     }
 }

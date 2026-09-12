@@ -79,6 +79,7 @@ insufficient_access = "アクセス権が不足しています。サブスクラ
 get_info_failed = "ビデオの情報を取得できません。 リンク/IDを再度確認して再度試してください。"
 invalid_trim = "不正なトリミング入力"
 unmanaged_caches = "{0} 件の未管理ビデオキャッシュが見つかりました。後でキャッシュフォルダーから削除できます。"
+live = "LIVE"
 
 [clip]
 subtitle = "Twitch のクリップをダウンロード。"
@@ -427,6 +428,12 @@ overwrite = "上書き"
 rename = "名前を変更"
 also_download_chat = "チャットもダウンロード"
 chat_uses_page_settings = "チャットはチャットページの形式・圧縮・エモート設定を使います。"
+enqueue_options = "キューのオプション"
+download_video = "ビデオのダウンロード"
+download_chat = "チャットのダウンロード"
+delay_download = "配信が終了するまでダウンロードを遅らせる"
+render_chat = "チャットのレンダリング"
+render_uses_page_settings = "レンダーはチャットレンダーページの設定を使います。"
 
 [quality]
 source = "ソース"

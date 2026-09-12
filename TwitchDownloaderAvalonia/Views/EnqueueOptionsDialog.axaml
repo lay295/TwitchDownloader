@@ -2,11 +2,13 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
+    xmlns:core="using:TwitchDownloaderCore.Models"
+    xmlns:c="using:TwitchDownloaderAvalonia.Converters"
     xmlns:loc="using:TwitchDownloaderAvalonia.Markup"
     x:Class="TwitchDownloaderAvalonia.Views.EnqueueOptionsDialog"
     x:DataType="vm:EnqueueOptionsViewModel"
-    Title="{loc:Translate Key=search.add_to_queue}"
-    Width="480"
+    Title="{loc:Translate Key=dialogs.enqueue_options}"
+    Width="520"
     SizeToContent="Height"
     WindowStartupLocation="CenterOwner"
     CanResize="False"
@@ -15,26 +17,106 @@
         <TextBlock Classes="label" Text="{loc:Translate Key=settings.download_folder}" Margin="0" />
         <Grid ColumnDefinitions="*,8,Auto">
             <TextBox
+                AutomationProperties.Name="{loc:Translate Key=settings.download_folder}"
                 PlaceholderText="{loc:Translate Key=dialogs.choose_folder}"
                 Text="{Binding Folder}" />
             <Button
                 Grid.Column="2"
                 Content="{loc:Translate Key=common.browse}"
+                AutomationProperties.Name="{loc:Translate Key=common.browse}"
                 Command="{Binding BrowseCommand}" />
         </Grid>
 
-        <TextBlock Classes="label" Text="{loc:Translate Key=settings.preferred_quality}" Margin="0" />
-        <ComboBox
-            HorizontalAlignment="Stretch"
-            ItemsSource="{Binding QualityOptions}"
-            SelectedItem="{Binding SelectedQualityOption}" />
+        <CheckBox
+            Content="{loc:Translate Key=dialogs.download_video}"
+            AutomationProperties.Name="{loc:Translate Key=dialogs.download_video}"
+            IsChecked="{Binding DownloadVideo}" />
+        <StackPanel Spacing="8" Margin="20,0,0,0" IsEnabled="{Binding IsQualityEnabled}">
+            <TextBlock Classes="label" Text="{loc:Translate Key=settings.preferred_quality}" Margin="0" />
+            <ComboBox
+                HorizontalAlignment="Stretch"
+                AutomationProperties.Name="{loc:Translate Key=settings.preferred_quality}"
+                ItemsSource="{Binding QualityOptions}"
+                SelectedItem="{Binding SelectedQualityOption}" />
+        </StackPanel>
+        <CheckBox
+            Margin="24,0,0,0"
+            Content="{loc:Translate Key=dialogs.delay_download}"
+            AutomationProperties.Name="{loc:Translate Key=dialogs.delay_download}"
+            IsVisible="{Binding ShowDelayControls}"
+            IsEnabled="{Binding IsDelayVideoEnabled}"
+            IsChecked="{Binding DelayVideo}" />
 
         <CheckBox
-            Content="{loc:Translate Key=dialogs.also_download_chat}"
+            Content="{loc:Translate Key=dialogs.download_chat}"
+            AutomationProperties.Name="{loc:Translate Key=dialogs.download_chat}"
             IsChecked="{Binding DownloadChat}" />
+        <StackPanel Spacing="8" Margin="20,0,0,0" IsEnabled="{Binding IsChatOptionsEnabled}">
+            <TextBlock Classes="label" Text="{loc:Translate Key=chat.format}" Margin="0" />
+            <StackPanel Orientation="Horizontal" Spacing="16">
+                <RadioButton
+                    Content="{loc:Translate Key=chat.format_json}"
+                    GroupName="EnqueueChatFormat"
+                    IsChecked="{Binding ChatFormat, Converter={x:Static c:EnumEqualsConverter.Instance}, ConverterParameter={x:Static core:ChatFormat.Json}, Mode=TwoWay}" />
+                <RadioButton
+                    Content="{loc:Translate Key=chat.format_text}"
+                    GroupName="EnqueueChatFormat"
+                    IsChecked="{Binding ChatFormat, Converter={x:Static c:EnumEqualsConverter.Instance}, ConverterParameter={x:Static core:ChatFormat.Text}, Mode=TwoWay}" />
+                <RadioButton
+                    Content="{loc:Translate Key=chat.format_html}"
+                    GroupName="EnqueueChatFormat"
+                    IsChecked="{Binding ChatFormat, Converter={x:Static c:EnumEqualsConverter.Instance}, ConverterParameter={x:Static core:ChatFormat.Html}, Mode=TwoWay}" />
+            </StackPanel>
+
+            <StackPanel Spacing="8" IsVisible="{Binding ShowCompression}">
+                <TextBlock Classes="label" Text="{loc:Translate Key=chat.compression}" Margin="0" />
+                <StackPanel Orientation="Horizontal" Spacing="16">
+                    <RadioButton
+                        Content="{loc:Translate Key=chat.compression_none}"
+                        GroupName="EnqueueChatCompression"
+                        IsChecked="{Binding ChatCompression, Converter={x:Static c:EnumEqualsConverter.Instance}, ConverterParameter={x:Static core:ChatCompression.None}, Mode=TwoWay}" />
+                    <RadioButton
+                        Content="{loc:Translate Key=chat.compression_gzip}"
+                        GroupName="EnqueueChatCompression"
+                        IsChecked="{Binding ChatCompression, Converter={x:Static c:EnumEqualsConverter.Instance}, ConverterParameter={x:Static core:ChatCompression.Gzip}, Mode=TwoWay}" />
+                </StackPanel>
+            </StackPanel>
+
+            <CheckBox
+                Content="{loc:Translate Key=chat.embed_images}"
+                AutomationProperties.Name="{loc:Translate Key=chat.embed_images}"
+                IsEnabled="{Binding IsEmbedEnabled}"
+                IsChecked="{Binding EmbedImages}" />
+            <StackPanel Orientation="Horizontal" Spacing="16">
+                <CheckBox
+                    Content="{loc:Translate Key=chat.bttv}"
+                    IsEnabled="{Binding IsThirdPartyEmbedEnabled}"
+                    IsChecked="{Binding Bttv}" />
+                <CheckBox
+                    Content="{loc:Translate Key=chat.ffz}"
+                    IsEnabled="{Binding IsThirdPartyEmbedEnabled}"
+                    IsChecked="{Binding Ffz}" />
+                <CheckBox
+                    Content="{loc:Translate Key=chat.stv}"
+                    IsEnabled="{Binding IsThirdPartyEmbedEnabled}"
+                    IsChecked="{Binding Stv}" />
+            </StackPanel>
+            <CheckBox
+                Content="{loc:Translate Key=dialogs.delay_download}"
+                AutomationProperties.Name="{loc:Translate Key=dialogs.delay_download}"
+                IsVisible="{Binding ShowDelayControls}"
+                IsEnabled="{Binding IsDelayChatEnabled}"
+                IsChecked="{Binding DelayChat}" />
+        </StackPanel>
+
+        <CheckBox
+            Content="{loc:Translate Key=dialogs.render_chat}"
+            AutomationProperties.Name="{loc:Translate Key=dialogs.render_chat}"
+            IsEnabled="{Binding IsRenderEnabled}"
+            IsChecked="{Binding RenderChat}" />
         <TextBlock
             Classes="muted"
-            Text="{loc:Translate Key=dialogs.chat_uses_page_settings}"
+            Text="{loc:Translate Key=dialogs.render_uses_page_settings}"
             TextWrapping="Wrap" />
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,8,0,0">

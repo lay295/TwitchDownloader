@@ -79,6 +79,7 @@ insufficient_access = "访问权限不足。该 VOD 可能仅限订阅者，请�
 get_info_failed = "无法获取视频信息。请仔细检查链接 / ID 并重试。"
 invalid_trim = "裁剪输入无效"
 unmanaged_caches = "发现 {0} 个未管理的视频缓存，稍后可从缓存文件夹中删除。"
+live = "LIVE"
 
 [clip]
 subtitle = "下载 Twitch 剪辑。"
@@ -427,6 +428,12 @@ overwrite = "覆盖"
 rename = "重新命名"
 also_download_chat = "同时下载聊天"
 chat_uses_page_settings = "聊天使用“聊天”页面中的格式、压缩和表情设置。"
+enqueue_options = "队列选项"
+download_video = "下载视频"
+download_chat = "下载聊天"
+delay_download = "下载推迟至直播结束"
+render_chat = "渲染聊天"
+render_uses_page_settings = "渲染使用“聊天渲染”页面中的设置。"
 
 [quality]
 source = "原画"

@@ -93,21 +93,21 @@ namespace TwitchDownloaderAvalonia.Services
             return await dialog.ShowDialog<CollisionPromptResult>(_owner!);
         }
 
-        public async Task<EnqueueOptions?> ShowEnqueueOptionsAsync(bool includeAudioOnly)
+        public async Task<EnqueueOptions?> ShowEnqueueOptionsAsync(bool hasVods, bool hasRecordingVods)
         {
             if (_owner is null)
                 return null;
 
             if (Dispatcher.UIThread.CheckAccess())
-                return await ShowEnqueueOptionsCoreAsync(includeAudioOnly);
+                return await ShowEnqueueOptionsCoreAsync(hasVods, hasRecordingVods);
 
-            return await Dispatcher.UIThread.InvokeAsync(() => ShowEnqueueOptionsCoreAsync(includeAudioOnly));
+            return await Dispatcher.UIThread.InvokeAsync(() => ShowEnqueueOptionsCoreAsync(hasVods, hasRecordingVods));
         }
 
-        private async Task<EnqueueOptions?> ShowEnqueueOptionsCoreAsync(bool includeAudioOnly)
+        private async Task<EnqueueOptions?> ShowEnqueueOptionsCoreAsync(bool hasVods, bool hasRecordingVods)
         {
             var dialog = new EnqueueOptionsDialog();
-            dialog.DataContext = new EnqueueOptionsViewModel(settings, files, includeAudioOnly, dialog.Close);
+            dialog.DataContext = new EnqueueOptionsViewModel(settings, files, hasVods, hasRecordingVods, dialog.Close);
             return await dialog.ShowDialog<EnqueueOptions?>(_owner!);
         }
 

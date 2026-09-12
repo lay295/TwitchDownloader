@@ -149,6 +149,9 @@ namespace TwitchDownloaderAvalonia.ViewModels
         public partial bool InfoLoaded { get; set; }
 
         [ObservableProperty]
+        public partial bool IsRecording { get; set; }
+
+        [ObservableProperty]
         public partial bool IsBusy { get; private set; }
 
         public bool CanGetInfo => !IsBusy;
@@ -208,6 +211,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 InfoCreatedAt = _videoTime.ToString(CultureInfo.CurrentCulture);
                 _viewCount = video.viewCount;
                 _game = video.game?.displayName ?? Loc.Get("common.unknown_game");
+                IsRecording = string.Equals(video.status, "RECORDING", StringComparison.OrdinalIgnoreCase);
 
                 var urlTimeCodeMatch = TwitchRegex.UrlTimeCode.Match(VideoUrl);
                 if (urlTimeCodeMatch.Success)

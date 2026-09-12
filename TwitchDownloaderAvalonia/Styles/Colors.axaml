@@ -37,6 +37,9 @@
             <SolidColorBrush x:Key="CardSelectedBrush" Color="#E8DCFF" />
             <SolidColorBrush x:Key="CardSelectedHoverBrush" Color="#DCC9FF" />
             <SolidColorBrush x:Key="MutedForegroundBrush" Color="#6B6480" />
+            <Color x:Key="LiveBadgeColor">#EB0400</Color>
+            <SolidColorBrush x:Key="LiveBadgeBackgroundBrush" Color="{StaticResource LiveBadgeColor}" />
+            <SolidColorBrush x:Key="LiveBadgeForegroundBrush" Color="#FFFFFF" />
         </ResourceDictionary>
         <ResourceDictionary x:Key="Dark">
             <Color x:Key="ThemeBackgroundColor">#1C1C21</Color>
@@ -75,6 +78,9 @@
             <SolidColorBrush x:Key="CardSelectedBrush" Color="#3A2754" />
             <SolidColorBrush x:Key="CardSelectedHoverBrush" Color="#4A3380" />
             <SolidColorBrush x:Key="MutedForegroundBrush" Color="#9B9BA8" />
+            <Color x:Key="LiveBadgeColor">#EB0400</Color>
+            <SolidColorBrush x:Key="LiveBadgeBackgroundBrush" Color="{StaticResource LiveBadgeColor}" />
+            <SolidColorBrush x:Key="LiveBadgeForegroundBrush" Color="#FFFFFF" />
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 </ResourceDictionary>

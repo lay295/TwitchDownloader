@@ -119,6 +119,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
                     Views = video.viewCount,
                     Game = video.game?.displayName ?? Loc.Get("common.unknown_game"),
                     IsClip = false,
+                    IsRecording = string.Equals(video.status, "RECORDING", StringComparison.OrdinalIgnoreCase),
                     StreamerName = video.owner?.displayName ?? Loc.Get("common.unknown_user"),
                     StreamerId = video.owner?.id ?? string.Empty,
                     ThumbnailBytes = thumbnail,

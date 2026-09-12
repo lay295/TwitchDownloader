@@ -79,6 +79,7 @@ insufficient_access = "Yetersiz erişim. VOD yalnızca abonelere açık olabilir
 get_info_failed = "Video bilgileri alınamıyor. Lütfen Bağlantının/Kimliğin doğru olduğundan emin olun ve tekrar deneyin."
 invalid_trim = "Geçersiz Kırpma Girişleri"
 unmanaged_caches = "{0} yönetilmeyen video önbelleği bulundu; daha sonra önbellek klasöründen silinebilir."
+live = "LIVE"
 
 [clip]
 subtitle = "Twitch kliplerini indirin."
@@ -427,6 +428,12 @@ overwrite = "Overwrite"
 rename = "Rename"
 also_download_chat = "Sohbeti de indir"
 chat_uses_page_settings = "Sohbet; biçim, sıkıştırma ve ifade ayarlarını Sohbet sayfasından kullanır."
+enqueue_options = "Kuyruk seçenekleri"
+download_video = "Videoyu indir"
+download_chat = "Sohbeti indir"
+delay_download = "Yayın bitene kadar indirmeyi geciktir"
+render_chat = "Sohbeti oluştur"
+render_uses_page_settings = "Oluşturma, Sohbet Oluşturma sayfası ayarlarını kullanır."
 
 [quality]
 source = "Kaynak"

@@ -422,6 +422,21 @@
         <Setter Property="HorizontalAlignment" Value="Center" />
     </Style>
 
+    <Style Selector="Border.liveBadge">
+        <Setter Property="Background" Value="{DynamicResource LiveBadgeBackgroundBrush}" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="Padding" Value="6,2" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="MinHeight" Value="18" />
+    </Style>
+
+    <Style Selector="Border.liveBadge TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource LiveBadgeForegroundBrush}" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="LineHeight" Value="14" />
+    </Style>
+
     <Style Selector="Border.card">
         <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />

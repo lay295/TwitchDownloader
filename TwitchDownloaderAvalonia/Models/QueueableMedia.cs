@@ -9,6 +9,7 @@ namespace TwitchDownloaderAvalonia.Models
         public required int Views { get; init; }
         public required string Game { get; init; }
         public required bool IsClip { get; init; }
+        public bool IsRecording { get; init; }
         public required string StreamerName { get; init; }
         public required string StreamerId { get; init; }
         public string ClipperName { get; init; } = string.Empty;
@@ -24,6 +25,7 @@ namespace TwitchDownloaderAvalonia.Models
             Views = item.Views,
             Game = item.Game,
             IsClip = item.IsClip,
+            IsRecording = item.IsRecording,
             StreamerName = item.StreamerName,
             StreamerId = item.StreamerId,
             ClipperName = item.ClipperName,

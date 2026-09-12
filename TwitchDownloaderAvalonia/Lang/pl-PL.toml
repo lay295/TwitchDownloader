@@ -79,6 +79,7 @@ insufficient_access = "Niewystarczający dostęp. VOD może być dostępny tylko
 get_info_failed = "Nie można uzyskać informacji o wideo. Sprawdź ponownie czy Link/ID jest poprawny i spróbuj ponownie."
 invalid_trim = "Nieprawidłowe Dane Ucięcia"
 unmanaged_caches = "Znaleziono {0} niezarządzanych pamięci podręcznych wideo. Możesz je później usunąć z folderu cache."
+live = "LIVE"
 
 [clip]
 subtitle = "Pobieraj klipy z Twitcha."
@@ -427,6 +428,12 @@ overwrite = "Overwrite"
 rename = "Rename"
 also_download_chat = "Pobierz również czat"
 chat_uses_page_settings = "Czat używa formatu, kompresji i ustawień emotek ze strony Czat."
+enqueue_options = "Opcje kolejki"
+download_video = "Pobierz wideo"
+download_chat = "Pobierz czat"
+delay_download = "Opóźnij pobieranie do zakończenia transmisji"
+render_chat = "Renderuj czat"
+render_uses_page_settings = "Renderowanie używa ustawień strony Renderuj czat."
 
 [quality]
 source = "Źródło"

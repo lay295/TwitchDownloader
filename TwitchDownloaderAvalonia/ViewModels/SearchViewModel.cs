@@ -451,7 +451,8 @@ namespace TwitchDownloaderAvalonia.ViewModels
                         video.node.viewCount,
                         video.node.game?.displayName,
                         video.node.previewThumbnailURL,
-                        isClip: false));
+                        isClip: false,
+                        isRecording: string.Equals(video.node.status, "RECORDING", StringComparison.OrdinalIgnoreCase)));
                 }
             }
 
@@ -558,7 +559,8 @@ namespace TwitchDownloaderAvalonia.ViewModels
             string? thumbnailUrl,
             bool isClip,
             string? clipperName = null,
-            string? clipperId = null)
+            string? clipperId = null,
+            bool isRecording = false)
         {
             var item = new SearchResultItem
             {
@@ -570,6 +572,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 Game = game ?? Loc.Get("common.unknown_game"),
                 ThumbnailUrl = thumbnailUrl ?? string.Empty,
                 IsClip = isClip,
+                IsRecording = isRecording,
                 StreamerName = _currentChannel?.displayName ?? _currentChannel?.login ?? Loc.Get("common.unknown_user"),
                 StreamerId = _currentChannel?.id ?? string.Empty,
                 ClipperName = clipperName ?? string.Empty,

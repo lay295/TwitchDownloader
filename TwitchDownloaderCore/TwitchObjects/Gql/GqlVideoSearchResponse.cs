@@ -14,6 +14,7 @@
         public string previewThumbnailURL { get; set; }
         public DateTime createdAt { get; set; }
         public int viewCount { get; set; }
+        public string status { get; set; }
         public VideoNodeGame game { get; set; }
     }
 

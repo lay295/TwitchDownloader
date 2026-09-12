@@ -98,6 +98,12 @@
                                 Text="{Binding InfoStreamer}"
                                 TextWrapping="Wrap"
                                 VerticalAlignment="Center" />
+                            <Border
+                                Classes="liveBadge"
+                                IsVisible="{Binding IsRecording}"
+                                AutomationProperties.Name="{loc:Translate Key=vod.live}">
+                                <TextBlock Text="{loc:Translate Key=vod.live}" />
+                            </Border>
                         </StackPanel>
                         <StackPanel Spacing="6" IsVisible="{Binding InfoLoaded}">
                             <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto">

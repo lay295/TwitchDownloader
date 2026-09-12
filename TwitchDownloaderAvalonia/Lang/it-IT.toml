@@ -79,6 +79,7 @@ insufficient_access = "Accesso insufficiente. Il VOD potrebbe essere solo per gl
 get_info_failed = "Impossibile ottenere informazioni sul video. Assicurati che il collegamento/ID sia corretto e riprova."
 invalid_trim = "Voci di ritaglio non valide"
 unmanaged_caches = "Sono state trovate {0} cache video non gestite; puoi eliminarle in seguito dalla cartella della cache."
+live = "LIVE"
 
 [clip]
 subtitle = "Scarica i clip di Twitch."
@@ -427,6 +428,12 @@ overwrite = "Overwrite"
 rename = "Rename"
 also_download_chat = "Scarica anche la chat"
 chat_uses_page_settings = "La chat usa formato, compressione e impostazioni delle emote della pagina Chat."
+enqueue_options = "Opzioni della coda"
+download_video = "Scarica video"
+download_chat = "Scarica chat"
+delay_download = "Ritarda il download fino alla fine della trasmissione"
+render_chat = "Renderizza chat"
+render_uses_page_settings = "Il rendering usa le impostazioni della pagina Renderizza chat."
 
 [quality]
 source = "Sorgente"

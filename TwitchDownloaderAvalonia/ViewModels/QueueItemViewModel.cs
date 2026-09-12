@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using TwitchDownloaderCore.Extensions;
 
 namespace TwitchDownloaderAvalonia.ViewModels
 {
@@ -52,6 +53,7 @@ namespace TwitchDownloaderAvalonia.ViewModels
         public string SourceId { get; }
         public byte[]? ThumbnailBytes { get; }
         public QueueItemViewModel? DependantTask { get; }
+        internal object Options => _options;
         public bool HasThumbnail => ThumbnailBytes is { Length: > 0 };
 
         public string OutputFile => _options switch
@@ -164,7 +166,6 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 return;
             }
 
-            ChangeStatus(QueueItemStatus.Running);
             var progress = new AvaloniaTaskProgress(
                 _logLevel,
                 percent => Progress = percent,
@@ -176,6 +177,25 @@ namespace TwitchDownloaderAvalonia.ViewModels
 
             try
             {
+                if (TryGetDelayVideoId(out var videoId))
+                {
+                    var delayed = await DelayUntilVideoOfflineAsync(videoId, progress, _tokenSource.Token);
+                    if (!delayed)
+                    {
+                        ChangeStatus(QueueItemStatus.Failed);
+                        CanReinitialize = true;
+                        return;
+                    }
+
+                    if (_tokenSource.IsCancellationRequested)
+                    {
+                        ChangeStatus(QueueItemStatus.Canceled);
+                        CanReinitialize = true;
+                        return;
+                    }
+                }
+
+                ChangeStatus(QueueItemStatus.Running);
                 await Task.Run(async () => await ExecuteCoreAsync(progress, _tokenSource.Token));
 
                 if (_tokenSource.IsCancellationRequested)
@@ -411,6 +431,49 @@ namespace TwitchDownloaderAvalonia.ViewModels
                 options.InputFile,
                 logLevel,
                 dependantTask);
+        }
+
+        private bool TryGetDelayVideoId(out long videoId)
+        {
+            switch (_options)
+            {
+                case VideoDownloadOptions { DelayDownload: true } vod:
+                    videoId = vod.Id;
+                    return true;
+                case ChatDownloadOptions { DelayDownload: true } chat when long.TryParse(chat.Id, out videoId):
+                    return true;
+                default:
+                    videoId = 0;
+                    return false;
+            }
+        }
+
+        private async Task<bool> DelayUntilVideoOfflineAsync(
+            long videoId,
+            AvaloniaTaskProgress progress,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                ChangeStatus(QueueItemStatus.Waiting);
+                using var videoMonitor = new LiveVideoMonitor(videoId, progress);
+                while (await videoMonitor.IsVideoRecording(cancellationToken))
+                {
+                    var waitTime = Random.Shared.NextDouble(8, 14);
+                    await Task.Delay(TimeSpan.FromSeconds(waitTime), cancellationToken);
+                }
+            }
+            catch (Exception ex) when (ex is OperationCanceledException or TaskCanceledException && cancellationToken.IsCancellationRequested)
+            {
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Exception = ex;
+                return false;
+            }
+
+            return true;
         }
 
         private async Task ExecuteCoreAsync(AvaloniaTaskProgress progress, CancellationToken cancellationToken)

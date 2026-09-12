@@ -15,6 +15,7 @@ namespace TwitchDownloaderAvalonia.Models
         public required string Game { get; init; }
         public required string ThumbnailUrl { get; init; }
         public required bool IsClip { get; init; }
+        public bool IsRecording { get; init; }
         public required string StreamerName { get; init; }
         public required string StreamerId { get; init; }
         public string ClipperName { get; init; } = string.Empty;
