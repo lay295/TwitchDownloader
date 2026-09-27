@@ -361,7 +361,7 @@ Other = `1`, Broadcaster = `2`, Moderator = `4`, VIP = `8`, Subscriber = `16`, P
 **-u / --id (REQUIRED)** The ID or URL of the VOD or clip to print the stream info about.
 
 **-f / --format**
-(Default: `Table`) The format in which the information should be printed. Valid values are: `Raw`, `Table`, and `M3U` / `M3U8`.
+(Default: `Table`) The format in which the information should be printed. Valid values are: `Raw`, `Table`, `Json`, and `M3U` / `M3U8`.
 
 When using table format, use a terminal that supports ANSI escape sequences for best results.
 
