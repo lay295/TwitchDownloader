@@ -48,25 +48,30 @@ namespace TwitchDownloaderCore.Tools
             for (int i = 0; i < playlist.Streams.Length; i++)
             {
                 M3U8.Stream stream = playlist.Streams[i];
-                if (stream.ProgramDateTime < _expectedNextPart)
+
+                var partsGap = stream.ProgramDateTime - _expectedNextPart;
+                if (partsGap < TimeSpan.Zero)
                     continue;
 
-                // Streams might rarely have a gap of a few microseconds
-                if (stream.ProgramDateTime - _expectedNextPart > TimeSpan.FromMicroseconds(10))
+                if (partsGap > TimeSpan.Zero)
                 {
-                    logger.LogWarning($"Parts from {_expectedNextPart.ToString("yyyy-MM-ddTHH-mm-ss.fffffff")} to {stream.ProgramDateTime.ToString("yyyy-MM-ddTHH-mm-ss.fffffff")} are missing from the live feed.");
-
                     ProcessedParts[_expectedNextPart] = new PartState()
                     {
                         ProgramDateTime = _expectedNextPart,
-                        Duration = stream.ProgramDateTime - _expectedNextPart,
+                        Duration = partsGap,
                         FileName = "",
                         Path = "",
                         IsDownloaded = false
                     };
-                    lock (TimeWriteLock)
+
+                    // Streams might rarely have a gap of a few microseconds, no need to warn the user
+                    if (partsGap > TimeSpan.FromMicroseconds(10))
                     {
-                        TotalMissingTime += stream.ProgramDateTime - _expectedNextPart;
+                        logger.LogWarning($"Parts from {_expectedNextPart.ToString("yyyy-MM-ddTHH-mm-ss.fffffff")} to {stream.ProgramDateTime.ToString("yyyy-MM-ddTHH-mm-ss.fffffff")} are missing from the live feed.");
+                        lock (TimeWriteLock)
+                        {
+                            TotalMissingTime += partsGap;
+                        }
                     }
                 }
 
