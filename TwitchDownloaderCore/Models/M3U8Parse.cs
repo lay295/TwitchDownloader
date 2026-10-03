@@ -18,6 +18,7 @@ namespace TwitchDownloaderCore.Models
             var streams = new List<Stream>();
 
             Stream.ExtStreamInfo currentExtStreamInfo = null;
+            Stream.ExtMediaInfo currentExtMediaInfo = null;
 
             Metadata.Builder metadataBuilder = new();
             DateTimeOffset currentExtProgramDateTime = default;
@@ -34,13 +35,13 @@ namespace TwitchDownloaderCore.Models
                 if (line[0] != '#')
                 {
                     var path = Path.Combine(basePath, line);
-                    streams.Add(new Stream(currentExtStreamInfo, currentExtPartInfo, currentExtProgramDateTime, currentByteRange, path));
-                    ClearStreamMetadata(out currentExtStreamInfo, out currentExtProgramDateTime, out currentByteRange, out currentExtPartInfo);
+                    streams.Add(new Stream(currentExtStreamInfo, currentExtMediaInfo, currentExtPartInfo, currentExtProgramDateTime, currentByteRange, path));
+                    ClearStreamMetadata(out currentExtStreamInfo, out currentExtMediaInfo, out currentExtProgramDateTime, out currentByteRange, out currentExtPartInfo);
 
                     continue;
                 }
 
-                if (!ParseM3U8Key(line, metadataBuilder, ref currentExtStreamInfo, ref currentExtProgramDateTime, ref currentByteRange, ref currentExtPartInfo))
+                if (!ParseM3U8Key(line, metadataBuilder, ref currentExtStreamInfo, ref currentExtMediaInfo, ref currentExtProgramDateTime, ref currentByteRange, ref currentExtPartInfo))
                 {
                     break;
                 }
@@ -59,6 +60,7 @@ namespace TwitchDownloaderCore.Models
             var streams = new List<Stream>();
 
             Stream.ExtStreamInfo currentExtStreamInfo = null;
+            Stream.ExtMediaInfo currentExtMediaInfo = null;
 
             Metadata.Builder metadataBuilder = new();
             DateTimeOffset currentExtProgramDateTime = default;
@@ -93,8 +95,8 @@ namespace TwitchDownloaderCore.Models
                 if (workingSlice[0] != '#')
                 {
                     var path = Path.Combine(basePath, workingSlice.ToString());
-                    streams.Add(new Stream(currentExtStreamInfo, currentExtPartInfo, currentExtProgramDateTime, currentByteRange, path));
-                    ClearStreamMetadata(out currentExtStreamInfo, out currentExtProgramDateTime, out currentByteRange, out currentExtPartInfo);
+                    streams.Add(new Stream(currentExtStreamInfo, currentExtMediaInfo, currentExtPartInfo, currentExtProgramDateTime, currentByteRange, path));
+                    ClearStreamMetadata(out currentExtStreamInfo, out currentExtMediaInfo, out currentExtProgramDateTime, out currentByteRange, out currentExtPartInfo);
 
                     if (lineEnd == -1)
                         break;
@@ -102,7 +104,7 @@ namespace TwitchDownloaderCore.Models
                     continue;
                 }
 
-                if (!ParseM3U8Key(workingSlice, metadataBuilder, ref currentExtStreamInfo, ref currentExtProgramDateTime, ref currentByteRange, ref currentExtPartInfo))
+                if (!ParseM3U8Key(workingSlice, metadataBuilder, ref currentExtStreamInfo, ref currentExtMediaInfo, ref currentExtProgramDateTime, ref currentByteRange, ref currentExtPartInfo))
                 {
                     break;
                 }
@@ -116,22 +118,27 @@ namespace TwitchDownloaderCore.Models
             return new M3U8(metadataBuilder.ToMetadata(), streams.ToArray());
         }
 
-        private static void ClearStreamMetadata(out Stream.ExtStreamInfo currentExtStreamInfo, out DateTimeOffset currentExtProgramDateTime,
+        private static void ClearStreamMetadata(out Stream.ExtStreamInfo currentExtStreamInfo, out Stream.ExtMediaInfo currentExtMediaInfo, out DateTimeOffset currentExtProgramDateTime,
             out ByteRange currentByteRange, out Stream.ExtPartInfo currentExtPartInfo)
         {
             currentExtStreamInfo = null;
+            currentExtMediaInfo = null;
             currentExtProgramDateTime = default;
             currentByteRange = default;
             currentExtPartInfo = null;
         }
 
-        private static bool ParseM3U8Key(ReadOnlySpan<char> text, Metadata.Builder metadataBuilder, ref Stream.ExtStreamInfo extStreamInfo,
+        private static bool ParseM3U8Key(ReadOnlySpan<char> text, Metadata.Builder metadataBuilder, ref Stream.ExtStreamInfo extStreamInfo, ref Stream.ExtMediaInfo extMediaInfo,
             ref DateTimeOffset extProgramDateTime, ref ByteRange byteRange, ref Stream.ExtPartInfo extPartInfo)
         {
             const string END_LIST_KEY = "#EXT-X-ENDLIST";
             if (text.StartsWith(Stream.ExtStreamInfo.STREAM_INFO_KEY))
             {
                 extStreamInfo = Stream.ExtStreamInfo.Parse(text);
+            }
+            else if (text.StartsWith(Stream.ExtMediaInfo.MEDIA_INFO_KEY))
+            {
+                extMediaInfo = Stream.ExtMediaInfo.Parse(text);
             }
             else if (text.StartsWith(Stream.PROGRAM_DATE_TIME_KEY))
             {

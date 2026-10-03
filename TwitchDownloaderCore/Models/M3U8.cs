@@ -152,11 +152,11 @@ namespace TwitchDownloaderCore.Models
             }
         }
 
-        public partial record Stream(Stream.ExtStreamInfo StreamInfo, Stream.ExtPartInfo PartInfo, DateTimeOffset ProgramDateTime, ByteRange ByteRange, string Path)
+        public partial record Stream(Stream.ExtStreamInfo StreamInfo, Stream.ExtMediaInfo MediaInfo, Stream.ExtPartInfo PartInfo, DateTimeOffset ProgramDateTime, ByteRange ByteRange, string Path)
         {
-            public Stream(ExtStreamInfo streamInfo, string path) : this(streamInfo, null, default, default, path) { }
+            public Stream(ExtStreamInfo streamInfo, string path) : this(streamInfo, null, null, default, default, path) { }
 
-            public Stream(ExtPartInfo partInfo, DateTimeOffset programDateTime, ByteRange byteRange, string path) : this(null, partInfo, programDateTime, byteRange, path) { }
+            public Stream(ExtPartInfo partInfo, DateTimeOffset programDateTime, ByteRange byteRange, string path) : this(null, null, partInfo, programDateTime, byteRange, path) { }
 
             public bool IsPlaylist { get; } = Path.AsSpan().EndsWith(".m3u8") || Path.AsSpan().EndsWith(".m3u");
 

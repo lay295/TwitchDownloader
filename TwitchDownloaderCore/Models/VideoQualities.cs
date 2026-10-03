@@ -141,7 +141,7 @@ namespace TwitchDownloaderCore.Models
                 Framerate = x.FrameRate,
                 Name = x.Name,
                 Path = null,
-                Video = string.Join(',', x.FilterReasons)
+                Video = string.Join(',', x.AuthorizationReasons.Concat(x.FilterReasons))
             }).ToList(), x => !string.IsNullOrEmpty(x.Name) ? x.Name : x.Video, (quality, name) => new StreamVideoQuality(quality, name))
                 .OrderByDescending(x => x.Resolution.Height)
                 .ThenByDescending(x => x.Framerate)
@@ -154,7 +154,7 @@ namespace TwitchDownloaderCore.Models
                 Codecs = x.StreamInfo.Codecs,
                 Resolution = x.StreamInfo.Resolution,
                 Framerate = x.StreamInfo.Framerate,
-                Name = x.StreamInfo.IvsName,
+                Name = x.MediaInfo.Name,
                 Path = x.Path,
                 Video = x.StreamInfo.Video
             }).ToList(), x => !string.IsNullOrEmpty(x.Name) ? x.Name : x.Video, (quality, name) => new StreamVideoQuality(quality, name))

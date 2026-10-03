@@ -133,12 +133,13 @@ namespace TwitchDownloaderCore
                                 var elapsedTime = TimeSpan.FromSeconds((double)playlist.FileMetadata.TwitchElapsedSeconds);
                                 if (elapsedTime > TimeSpan.Zero)
                                 {
-                                    _progress.LogInfo($"Stream was live for {(int)totalTime.TotalHours}h{totalTime.Minutes:00}m{totalTime.Seconds:00}s. {(int)elapsedTime.TotalHours}h{elapsedTime.Minutes:00}m{elapsedTime.Seconds:00}s will be missing from stream download.");
+                                    _progress.LogInfo($"The stream was live for {(int)totalTime.TotalHours}h{totalTime.Minutes:00}m{totalTime.Seconds:00}s. {(int)elapsedTime.TotalHours}h{elapsedTime.Minutes:00}m{elapsedTime.Seconds:00}s will be missing from the stream download.");
                                 }
                                 else
                                 {
-                                    _progress.LogInfo($"Stream was live for {(int)totalTime.TotalHours}h{totalTime.Minutes:00}m{totalTime.Seconds:00}s");
+                                    _progress.LogInfo($"The stream was live for {(int)totalTime.TotalHours}h{totalTime.Minutes:00}m{totalTime.Seconds:00}s");
                                 }
+                                _progress.LogVerbose($"Downloading at {quality.Name}");
                             }
 
                             if (downloadState.HeaderFile is null && playlist.FileMetadata.Map?.Uri is not null)
@@ -318,7 +319,15 @@ namespace TwitchDownloaderCore
             var (availableQualities, unavailableQualities) = VideoQualities.FromStreamM3U8(m3u8);
             var allQualities = new StreamVideoQualities([.. availableQualities.Qualities, .. unavailableQualities.Qualities]);
 
+            _progress.LogVerbose("Available qualities: " + string.Join(',', availableQualities.Select(x => x.Name)));
+
             var quality = allQualities.GetQuality(_downloadOptions.Quality);
+
+            if (quality is null)
+            {
+                quality = availableQualities.BestQuality();
+                _progress.LogWarning($"Unknown quality: {_downloadOptions.Quality}. Switching to {quality.Name}");
+            }
             if (quality.Path is null)
             {
                 var fallback = availableQualities.GetQuality(_downloadOptions.Quality);
