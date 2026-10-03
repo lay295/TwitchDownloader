@@ -119,5 +119,13 @@ namespace TwitchDownloaderCore.Tools
 
             return path[path.LastIndexOf('.')..queryIndex];
         }
+
+        /// <summary>
+        /// Get the file name associated with a stream part
+        /// </summary>
+        public static string GetStreamPartFileName(M3U8.Stream stream)
+        {
+            return stream.ProgramDateTime.ToString("yyyy-MM-ddTHH-mm-ss.fffffff") + GetStreamPartFileExtension(stream.Path);
+        }
     }
 }

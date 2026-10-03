@@ -92,7 +92,7 @@ namespace TwitchDownloaderCore
                 downloadThreads[i] = new StreamDownloadThread(downloadState, _httpClient, autoResetEvents[i], _cacheDir, _progress, cancellationToken);
             }
 
-            var concatListPath = Path.Combine(_cacheDir, "concat.txt");
+            List<(string fileName, decimal duration)> parts = [];
 
             PlaybackAccessToken accessToken = null;
             DateTime accessTokenExpirationTime = DateTime.MinValue;
@@ -147,9 +147,11 @@ namespace TwitchDownloaderCore
                                 downloadState.HeaderFile = await GetHeaderFile(playlist, cancellationToken);
                             }
 
-                            var completedParts = downloadState.AppendSegment(playlist);
+                            downloadState.AppendSegment(playlist);
                             foreach (var autoResetEvent in autoResetEvents)
                                 autoResetEvent.Set();
+
+                            parts.AddRange(playlist.Streams.Select(stream => (DownloadTools.GetStreamPartFileName(stream), stream.PartInfo.Duration)));
 
                             if (!progressTemplateIncludesMissingTime && downloadState.TotalMissingTime > TimeSpan.Zero)
                             {
@@ -160,9 +162,6 @@ namespace TwitchDownloaderCore
                                     downloadState.TotalMissingTime);
                                 progressTemplateIncludesMissingTime = true;
                             }
-
-                            await using var fs = new FileStream(concatListPath, FileMode.Append, FileAccess.Write, FileShare.Read);
-                            await FfmpegConcatList.SerializeAsync(fs, completedParts.Select(x => (x.FileName, (decimal)x.Duration.TotalSeconds, GetStreamIds(x.Path))), cancellationToken);
 
                             isFirstIteration = false;
                             retryTime = TimeSpan.Zero;
@@ -209,9 +208,25 @@ namespace TwitchDownloaderCore
             await Task.WhenAll(downloadThreads.Select(x => x.ThreadTask));
             cancellationToken.ThrowIfCancellationRequested();
 
-            var lastParts = downloadState.GetLastParts();
+            // Adjust parts duration if the next is missing
+            for (int i = 1; i < parts.Count; i++)
+            {
+                if (!File.Exists(Path.Combine(_cacheDir, parts[i].fileName)))
+                {
+                    parts[i - 1] = (parts[i - 1].fileName, parts[i - 1].duration + parts[i].duration);
+                    parts.RemoveAt(i);
+                    i--;
+                }
+            }
+            if (!File.Exists(Path.Combine(_cacheDir, parts[0].fileName)))
+            {
+                downloadState.TotalMissingTime -= TimeSpan.FromSeconds((double)parts[0].duration);
+                parts.RemoveAt(0);
+            }
+
+            var concatListPath = Path.Combine(_cacheDir, "concat.txt");
             await using var concatFs = new FileStream(concatListPath, FileMode.Append, FileAccess.Write, FileShare.Read);
-            await FfmpegConcatList.SerializeAsync(concatFs, lastParts.Select(x => (x.FileName, (decimal)x.Duration.TotalSeconds, GetStreamIds(x.Path))), cancellationToken);
+            await FfmpegConcatList.SerializeAsync(concatFs, parts.Select(x => (x.fileName, x.duration, GetStreamIds(x.fileName))), cancellationToken);
 
             if (downloadState.TotalDownloadedTime <= TimeSpan.Zero)
             {

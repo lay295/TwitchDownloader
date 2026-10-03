@@ -57,9 +57,6 @@ namespace TwitchDownloaderCore.Tools
                         }
                         else
                         {
-                            videoPart.IsDownloaded = true;
-                            _downloadState.ProcessedParts[videoPart.ProgramDateTime] = videoPart;
-
                             lock (_downloadState.TimeWriteLock)
                             {
                                 _downloadState.TotalDownloadedTime += videoPart.Duration;
@@ -76,14 +73,10 @@ namespace TwitchDownloaderCore.Tools
                         _progress.LogWarning($"Part {videoPart.FileName} could not be downloaded and will be missing from the finalized video.");
                         _progress.LogVerbose($"Error while downloading {videoPart.FileName}: {ex.Message}");
 
-                        videoPart.IsDownloaded = false;
-                        _downloadState.ProcessedParts[videoPart.ProgramDateTime] = videoPart;
-
                         lock (_downloadState.TimeWriteLock)
                         {
                             _downloadState.TotalMissingTime += videoPart.Duration;
                         }
-
                         _progress.ReportProgress((int)_downloadState.TotalDownloadedTime.TotalHours, _downloadState.TotalDownloadedTime, _downloadState.TotalMissingTime);
                     }
 
