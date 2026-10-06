@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Web;
 using TwitchDownloaderCLI.Models;
 using TwitchDownloaderCLI.Modes.Arguments;
@@ -58,7 +59,7 @@ namespace TwitchDownloaderCLI.Modes
                     HandleVodM3U8(playlistString);
                     break;
                 case InfoPrintFormat.Json:
-                    HandleVodJson();
+                    HandleVodJson(videoInfo, chapters, playlistString);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -105,24 +106,21 @@ namespace TwitchDownloaderCLI.Modes
 
         private static void HandleVodTable(GqlVideoResponse videoInfo, GqlVideoChapterResponse chapters, string playlistString)
         {
-            var m3u8 = M3U8.Parse(playlistString);
-            var qualities = VideoQualities.FromM3U8(m3u8);
-
             const string DEFAULT_STRING = "-";
-            var infoVideo = videoInfo.data.video;
+            var vodInfo = CreateVodInfo(videoInfo, chapters, playlistString);
 
             var infoTableTitle = new TableTitle("Video Info");
             var infoTable = new Table()
                 .Title(infoTableTitle)
                 .AddColumn(new TableColumn("Key"))
                 .AddColumn(new TableColumn("Value"))
-                .AddRow(new Markup("Streamer"), GetUserNameParagraph(infoVideo.owner?.displayName, infoVideo.owner?.login, DEFAULT_STRING))
-                .AddRow("Title", Markup.Escape(infoVideo.title))
-                .AddRow("Length", StringifyTimestamp(TimeSpan.FromSeconds(infoVideo.lengthSeconds)))
-                .AddRow("Category", Markup.Escape(infoVideo.game?.displayName ?? DEFAULT_STRING))
-                .AddRow("Views", infoVideo.viewCount.ToString("N0", CultureInfo.CurrentCulture))
-                .AddRow("Created at", $"{infoVideo.createdAt.ToUniversalTime():yyyy-MM-dd hh:mm:ss} UTC")
-                .AddRow("Description", Markup.Escape(infoVideo.description?.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd() ?? DEFAULT_STRING));
+                .AddRow(new Markup("Streamer"), GetUserNameParagraph(vodInfo.VideoInfo.DisplayName, vodInfo.VideoInfo.Login, DEFAULT_STRING))
+                .AddRow("Title", Markup.Escape(vodInfo.VideoInfo.Title))
+                .AddRow("Length", StringifyTimestamp(vodInfo.VideoInfo.Length))
+                .AddRow("Category", Markup.Escape(vodInfo.VideoInfo.Category))
+                .AddRow("Views", vodInfo.VideoInfo.Views)
+                .AddRow("Created at", StringifyCreatedAt(vodInfo.VideoInfo.CreatedAt))
+                .AddRow("Description", Markup.Escape(vodInfo.VideoInfo.Description));
 
             AnsiConsole.Write(infoTable);
 
@@ -134,7 +132,7 @@ namespace TwitchDownloaderCLI.Modes
                 .AddColumn(new TableColumn("FPS").RightAligned())
                 .AddColumn(new TableColumn("Codecs").RightAligned());
 
-            var hasBitrate = qualities.Any(x => x.BitRate != 0);
+            var hasBitrate = vodInfo.Qualities.Any(x => x.Bitrate is not null);
             if (hasBitrate)
             {
                 streamTable
@@ -142,31 +140,21 @@ namespace TwitchDownloaderCLI.Modes
                     .AddColumn(new TableColumn("File size").RightAligned());
             }
 
-            foreach (var quality in qualities)
+            foreach (var stream in vodInfo.Qualities)
             {
-                var streamInfo = quality.Item.StreamInfo;
-
-                var name = quality.Name;
-                var resolution = streamInfo.Resolution.StringifyOrDefault(x => x.ToString(), DEFAULT_STRING);
-                var fps = streamInfo.Framerate.StringifyOrDefault(x => $"{x:F0}", DEFAULT_STRING);
-                var codecs = streamInfo.Codecs.StringifyOrDefault(x => string.Join(", ", x), DEFAULT_STRING);
-
                 if (hasBitrate)
                 {
-                    var videoLength = TimeSpan.FromSeconds(infoVideo.lengthSeconds);
-                    var bitrate = quality.BitRate.StringifyOrDefault(x => $"{x / 1000}kbps", DEFAULT_STRING);
-                    var fileSize = quality.BitRate.StringifyOrDefault(x => $"~{VideoSizeEstimator.StringifyByteCount(VideoSizeEstimator.EstimateVideoSize(x, TimeSpan.Zero, videoLength))}", DEFAULT_STRING);
-                    streamTable.AddRow(name, resolution, fps, codecs, bitrate, fileSize);
+                    streamTable.AddRow(stream.Name, stream.Resolution, stream.Fps, stream.Codecs, stream.Bitrate, stream.FileSize);
                 }
                 else
                 {
-                    streamTable.AddRow(name, resolution, fps, codecs);
+                    streamTable.AddRow(stream.Name, stream.Resolution, stream.Fps, stream.Codecs);
                 }
             }
 
             AnsiConsole.Write(streamTable);
 
-            if (chapters.data.video.moments.edges.Count == 0)
+            if (vodInfo.Chapters.Length == 0)
                 return;
 
             var chapterTableTitle = new TableTitle("Video Chapters");
@@ -178,17 +166,14 @@ namespace TwitchDownloaderCLI.Modes
                 .AddColumn(new TableColumn("End").RightAligned())
                 .AddColumn(new TableColumn("Length").RightAligned());
 
-            foreach (var chapter in chapters.data.video.moments.edges)
+            foreach (var chapter in vodInfo.Chapters)
             {
-                var category = Markup.Escape(chapter.node.details.game?.displayName ?? DEFAULT_STRING);
-                var type = chapter.node._type;
-                var start = TimeSpan.FromMilliseconds(chapter.node.positionMilliseconds);
-                var length = TimeSpan.FromMilliseconds(chapter.node.durationMilliseconds);
-                var end = start + length;
-                var startString = StringifyTimestamp(start);
-                var endString = StringifyTimestamp(end);
-                var lengthString = StringifyTimestamp(length);
-                chapterTable.AddRow(category, type, startString, endString, lengthString);
+                chapterTable.AddRow(
+                    Markup.Escape(chapter.Category),
+                    chapter.Type,
+                    StringifyTimestamp(chapter.Start),
+                    StringifyTimestamp(chapter.End),
+                    StringifyTimestamp(chapter.Length));
             }
 
             AnsiConsole.Write(chapterTable);
@@ -201,9 +186,57 @@ namespace TwitchDownloaderCLI.Modes
             Console.Write(m3u8.ToString());
         }
 
-        private static void HandleVodJson()
+        private static void HandleVodJson(GqlVideoResponse videoInfo, GqlVideoChapterResponse chapters, string playlistString)
         {
-            throw new NotImplementedException("JSON format is not yet supported");
+            SerializeJson(CreateVodInfo(videoInfo, chapters, playlistString));
+        }
+
+        private static VodInfo CreateVodInfo(GqlVideoResponse videoInfo, GqlVideoChapterResponse chapters, string playlistString)
+        {
+            const string DEFAULT_STRING = "-";
+            var infoVideo = videoInfo.data.video;
+            var displayName = infoVideo.owner?.displayName;
+            var login = infoVideo.owner?.login;
+            var qualities = VideoQualities.FromM3U8(M3U8.Parse(playlistString));
+            var hasBitrate = qualities.Any(x => x.BitRate != 0);
+            var videoLength = TimeSpan.FromSeconds(infoVideo.lengthSeconds);
+
+            var qualityInfos = qualities.Select(quality =>
+            {
+                var streamInfo = quality.Item.StreamInfo;
+                return new VodQualityInfo(
+                    quality.Name,
+                    streamInfo.Resolution.StringifyOrDefault(x => x.ToString(), DEFAULT_STRING),
+                    streamInfo.Framerate.StringifyOrDefault(x => $"{x:F0}", DEFAULT_STRING),
+                    streamInfo.Codecs.StringifyOrDefault(x => string.Join(", ", x), DEFAULT_STRING),
+                    hasBitrate ? quality.BitRate.StringifyOrDefault(x => $"{x / 1000}kbps", DEFAULT_STRING) : null,
+                    hasBitrate ? quality.BitRate.StringifyOrDefault(x => $"~{VideoSizeEstimator.StringifyByteCount(VideoSizeEstimator.EstimateVideoSize(x, TimeSpan.Zero, videoLength))}", DEFAULT_STRING) : null);
+            }).ToArray();
+
+            var videoChapters = chapters.data.video.moments.edges.Select(chapter =>
+            {
+                var start = TimeSpan.FromMilliseconds(chapter.node.positionMilliseconds);
+                var length = TimeSpan.FromMilliseconds(chapter.node.durationMilliseconds);
+                return new VodChapterInfo(
+                    chapter.node.details.game?.displayName ?? DEFAULT_STRING,
+                    chapter.node._type,
+                    start,
+                    start + length,
+                    length);
+            }).ToArray();
+
+            var videoDetails = new VideoInfo(
+                FormatUser(displayName, login, DEFAULT_STRING),
+                infoVideo.title,
+                videoLength,
+                infoVideo.game?.displayName ?? DEFAULT_STRING,
+                infoVideo.viewCount.ToString("N0", CultureInfo.CurrentCulture),
+                infoVideo.createdAt,
+                infoVideo.description?.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd() ?? DEFAULT_STRING,
+                displayName,
+                login);
+
+            return new VodInfo(videoDetails, qualityInfos, videoChapters);
         }
 
         private static void HandleClip(InfoArgs inputOptions, ITaskProgress progress)
@@ -222,7 +255,7 @@ namespace TwitchDownloaderCLI.Modes
                     HandleClipM3U8(clipRenderStatus);
                     break;
                 case InfoPrintFormat.Json:
-                    HandleClipJson();
+                    HandleClipJson(clipRenderStatus);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -263,28 +296,26 @@ namespace TwitchDownloaderCLI.Modes
         private static void HandleClipTable(GqlShareClipRenderStatusResponse clipRenderStatus)
         {
             const string DEFAULT_STRING = "-";
-            var infoClip = clipRenderStatus.data.clip;
-            var qualities = VideoQualities.FromClip(infoClip);
+            var clipInfo = CreateClipInfo(clipRenderStatus);
 
             var infoTableTitle = new TableTitle("Clip Info");
             var infoTable = new Table()
                 .Title(infoTableTitle)
                 .AddColumn(new TableColumn("Key"))
                 .AddColumn(new TableColumn("Value"))
-                .AddRow(new Markup("Streamer"), GetUserNameParagraph(infoClip.broadcaster?.displayName, infoClip.broadcaster?.login, DEFAULT_STRING))
-                .AddRow("Title", Markup.Escape(infoClip.title))
-                .AddRow("Length", StringifyTimestamp(TimeSpan.FromSeconds(infoClip.durationSeconds)))
-                .AddRow(new Markup("Clipped by"), GetUserNameParagraph(infoClip.curator?.displayName, infoClip.curator?.login, DEFAULT_STRING))
-                .AddRow("Category", Markup.Escape(infoClip.game?.displayName ?? DEFAULT_STRING))
-                .AddRow("Views", infoClip.viewCount.ToString("N0", CultureInfo.CurrentCulture))
-                .AddRow("Created at", $"{infoClip.createdAt.ToUniversalTime():yyyy-MM-dd hh:mm:ss} UTC");
+                .AddRow(new Markup("Streamer"), GetUserNameParagraph(clipInfo.VideoInfo.DisplayName, clipInfo.VideoInfo.Login, DEFAULT_STRING))
+                .AddRow("Title", Markup.Escape(clipInfo.VideoInfo.Title))
+                .AddRow("Length", StringifyTimestamp(clipInfo.VideoInfo.Length))
+                .AddRow(new Markup("Clipped by"), GetUserNameParagraph(clipInfo.VideoInfo.ClippedByDisplayName, clipInfo.VideoInfo.ClippedByLogin, DEFAULT_STRING))
+                .AddRow("Category", Markup.Escape(clipInfo.VideoInfo.Category))
+                .AddRow("Views", clipInfo.VideoInfo.Views)
+                .AddRow("Created at", StringifyCreatedAt(clipInfo.VideoInfo.CreatedAt));
 
-            if (infoClip.video != null)
+            if (clipInfo.VideoInfo.VodId is not null)
             {
-                var videoOffset = infoClip.videoOffsetSeconds.StringifyOrDefault(x => StringifyTimestamp(TimeSpan.FromSeconds(x)), DEFAULT_STRING);
                 infoTable
-                    .AddRow("VOD ID", infoClip.video.id)
-                    .AddRow("VOD offset", videoOffset);
+                    .AddRow("VOD ID", clipInfo.VideoInfo.VodId)
+                    .AddRow("VOD offset", StringifyTimestamp(clipInfo.VideoInfo.VodOffset.Value));
             }
 
             AnsiConsole.Write(infoTable);
@@ -296,7 +327,7 @@ namespace TwitchDownloaderCLI.Modes
                 .AddColumn(new TableColumn("Resolution"))
                 .AddColumn(new TableColumn("FPS").RightAligned());
 
-            var hasBitrate = qualities.Any(x => x.BitRate != 0);
+            var hasBitrate = clipInfo.Qualities.Any(x => x.Bitrate is not null);
             if (hasBitrate)
             {
                 qualityTable
@@ -304,22 +335,15 @@ namespace TwitchDownloaderCLI.Modes
                     .AddColumn(new TableColumn("File size").RightAligned());
             }
 
-            foreach (var quality in qualities.Qualities)
+            foreach (var quality in clipInfo.Qualities)
             {
-                var name = quality.Name;
-                var resolution = quality.Resolution.HasWidth ? quality.Resolution.ToString() : quality.Resolution.Height.ToString();
-                var fps = quality.Framerate.StringifyOrDefault(x => $"{x:F0}", DEFAULT_STRING);
-
                 if (hasBitrate)
                 {
-                    var videoLength = TimeSpan.FromSeconds(infoClip.durationSeconds);
-                    var bitrate = quality.BitRate.StringifyOrDefault(x => $"{x / 1000}kbps", DEFAULT_STRING);
-                    var fileSize = quality.BitRate.StringifyOrDefault(x => $"~{VideoSizeEstimator.StringifyByteCount(VideoSizeEstimator.EstimateVideoSize(x, TimeSpan.Zero, videoLength))}", DEFAULT_STRING);
-                    qualityTable.AddRow(name, resolution, fps, bitrate, fileSize);
+                    qualityTable.AddRow(quality.Name, quality.Resolution, quality.Fps, quality.Bitrate, quality.FileSize);
                 }
                 else
                 {
-                    qualityTable.AddRow(name, resolution, fps);
+                    qualityTable.AddRow(quality.Name, quality.Resolution, quality.Fps);
                 }
             }
 
@@ -363,9 +387,47 @@ namespace TwitchDownloaderCLI.Modes
             Console.Write(m3u8.ToString());
         }
 
-        private static void HandleClipJson()
+        private static void HandleClipJson(GqlShareClipRenderStatusResponse clipRenderStatus)
         {
-            throw new NotImplementedException("JSON format is not yet supported");
+            SerializeJson(CreateClipInfo(clipRenderStatus));
+        }
+
+        private static ClipInfo CreateClipInfo(GqlShareClipRenderStatusResponse clipRenderStatus)
+        {
+            const string DEFAULT_STRING = "-";
+            var infoClip = clipRenderStatus.data.clip;
+            var qualities = VideoQualities.FromClip(infoClip);
+            var hasBitrate = qualities.Any(x => x.BitRate != 0);
+            var videoLength = TimeSpan.FromSeconds(infoClip.durationSeconds);
+            var displayName = infoClip.broadcaster?.displayName;
+            var login = infoClip.broadcaster?.login;
+            var clippedByDisplayName = infoClip.curator?.displayName;
+            var clippedByLogin = infoClip.curator?.login;
+
+            var clipQualities = qualities.Qualities.Select(quality => new ClipQualityInfo(
+                quality.Name,
+                quality.Resolution.HasWidth ? quality.Resolution.ToString() : quality.Resolution.Height.ToString(),
+                quality.Framerate.StringifyOrDefault(x => $"{x:F0}", DEFAULT_STRING),
+                hasBitrate ? quality.BitRate.StringifyOrDefault(x => $"{x / 1000}kbps", DEFAULT_STRING) : null,
+                hasBitrate ? quality.BitRate.StringifyOrDefault(x => $"~{VideoSizeEstimator.StringifyByteCount(VideoSizeEstimator.EstimateVideoSize(x, TimeSpan.Zero, videoLength))}", DEFAULT_STRING) : null))
+                .ToArray();
+
+            var videoInfo = new ClipVideoInfo(
+                FormatUser(displayName, login, DEFAULT_STRING),
+                infoClip.title,
+                videoLength,
+                FormatUser(clippedByDisplayName, clippedByLogin, DEFAULT_STRING),
+                infoClip.game?.displayName ?? DEFAULT_STRING,
+                infoClip.viewCount.ToString("N0", CultureInfo.CurrentCulture),
+                infoClip.createdAt,
+                infoClip.video?.id,
+                infoClip.video is null || infoClip.videoOffsetSeconds is null ? null : TimeSpan.FromSeconds(infoClip.videoOffsetSeconds.Value),
+                displayName,
+                login,
+                clippedByDisplayName,
+                clippedByLogin);
+
+            return new ClipInfo(videoInfo, clipQualities);
         }
 
         private static string StringifyOrDefault<T>(this T value, Func<T, string> stringify, string defaultString) where T : IEquatable<T>
@@ -412,6 +474,79 @@ namespace TwitchDownloaderCLI.Modes
                 < TimeSpan.TicksPerHour => timeSpan.ToString(@"m\:ss"),
                 _ => TimeSpanHFormat.ReusableInstance.Format(@"H\:mm\:ss", timeSpan)
             };
+        }
+
+        private static string StringifyCreatedAt(DateTimeOffset timestamp)
+            => $"{timestamp.ToUniversalTime():yyyy-MM-dd hh:mm:ss} UTC";
+
+        private static string FormatUser(string displayName, string login, string defaultName)
+            => string.IsNullOrWhiteSpace(displayName)
+                ? (string.IsNullOrWhiteSpace(login) ? defaultName : login)
+                : string.IsNullOrWhiteSpace(login) || displayName.All(char.IsAscii)
+                    ? displayName
+                    : $"{displayName} ({login})";
+
+        private static void SerializeJson<T>(T value)
+            => JsonSerializer.Serialize(Console.OpenStandardOutput(), value, new JsonSerializerOptions
+                {
+                    WriteIndented = false,
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+                    Converters = { new InfoTimeSpanConverter(), new InfoDateTimeOffsetConverter() },
+                });
+
+        private sealed record VodInfo(VideoInfo VideoInfo, VodQualityInfo[] Qualities, VodChapterInfo[] Chapters);
+
+        private sealed record VideoInfo(
+            string Streamer,
+            string Title,
+            TimeSpan Length,
+            string Category,
+            string Views,
+            DateTimeOffset CreatedAt,
+            string Description,
+            [property: JsonIgnore] string DisplayName,
+            [property: JsonIgnore] string Login);
+
+        private sealed record VodQualityInfo(string Name, string Resolution, string Fps, string Codecs, string Bitrate, string FileSize);
+
+        private sealed record VodChapterInfo(string Category, string Type, TimeSpan Start, TimeSpan End, TimeSpan Length);
+
+        private sealed record ClipInfo(ClipVideoInfo VideoInfo, ClipQualityInfo[] Qualities);
+
+        private sealed record ClipVideoInfo(
+            string Streamer,
+            string Title,
+            TimeSpan Length,
+            string ClippedBy,
+            string Category,
+            string Views,
+            DateTimeOffset CreatedAt,
+            string VodId,
+            TimeSpan? VodOffset,
+            [property: JsonIgnore] string DisplayName,
+            [property: JsonIgnore] string Login,
+            [property: JsonIgnore] string ClippedByDisplayName,
+            [property: JsonIgnore] string ClippedByLogin);
+
+        private sealed record ClipQualityInfo(string Name, string Resolution, string Fps, string Bitrate, string FileSize);
+
+        private sealed class InfoTimeSpanConverter : JsonConverter<TimeSpan>
+        {
+            public override TimeSpan Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
+                throw new NotSupportedException();
+
+            public override void Write(Utf8JsonWriter writer, TimeSpan value, JsonSerializerOptions options) =>
+                writer.WriteStringValue(StringifyTimestamp(value));
+        }
+
+        private sealed class InfoDateTimeOffsetConverter : JsonConverter<DateTimeOffset>
+        {
+            public override DateTimeOffset Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) =>
+                throw new NotSupportedException();
+
+            public override void Write(Utf8JsonWriter writer, DateTimeOffset value, JsonSerializerOptions options) =>
+                writer.WriteStringValue(StringifyCreatedAt(value));
         }
 
         private static Paragraph GetUserNameParagraph([AllowNull] string displayName, [AllowNull] string login, string @default)
