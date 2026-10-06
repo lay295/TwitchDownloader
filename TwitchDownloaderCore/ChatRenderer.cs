@@ -390,7 +390,7 @@ namespace TwitchDownloaderCore
                 if (!renderOptions.SkipDriveWaiting)
                     DriveHelper.WaitForDrive(outputDrive, _progress);
 
-                var frameSpan = frame.GetPixelSpan();
+                var frameSpan = frame.GetPixelBytes();
                 ffmpegStream.Write(frameSpan);
 
                 if (maskProcess != null)
@@ -2133,20 +2133,12 @@ namespace TwitchDownloaderCore
 
         private (int startTick, int totalTicks) GetVideoTicks()
         {
-            if (renderOptions.StartOverride != -1 && renderOptions.EndOverride != -1)
-            {
-                int startSeconds = renderOptions.StartOverride;
-                int videoStartTick = startSeconds * renderOptions.Framerate;
-                int totalTicks = renderOptions.EndOverride * renderOptions.Framerate - videoStartTick;
-                return (videoStartTick, totalTicks);
-            }
-            else
-            {
-                int startSeconds = (int)Math.Floor(chatRoot.video.start);
-                int videoStartTick = startSeconds * renderOptions.Framerate;
-                int totalTicks = (int)Math.Ceiling(chatRoot.video.end * renderOptions.Framerate) - videoStartTick;
-                return (videoStartTick, totalTicks);
-            }
+            return ChatRenderVideoTicks.Calculate(
+                renderOptions.StartOverride,
+                renderOptions.EndOverride,
+                chatRoot.video.start,
+                chatRoot.video.end,
+                renderOptions.Framerate);
         }
 
         private SKPaint GetCachedPaint(SKColor color)

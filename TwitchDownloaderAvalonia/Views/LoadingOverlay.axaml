@@ -1,0 +1,33 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:anim="https://github.com/whistyun/AnimatedImage.Avalonia"
+    xmlns:loc="using:TwitchDownloaderAvalonia.Markup"
+    xmlns:a="using:TwitchDownloaderAvalonia.Abstractions"
+    x:Class="TwitchDownloaderAvalonia.Views.LoadingOverlay"
+    x:DataType="a:IBusyPage"
+    IsVisible="{Binding IsBusy}"
+    IsHitTestVisible="True">
+
+    <Panel>
+        <Border Classes="loadingScrim" />
+        <StackPanel
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Spacing="8">
+            <Image
+                Width="48"
+                Height="48"
+                HorizontalAlignment="Center"
+                Stretch="Uniform"
+                anim:ImageBehavior.AnimatedSource="avares://TwitchDownloaderAvalonia/Assets/Status/ppOverheat.gif"
+                anim:ImageBehavior.RepeatBehavior="Forever"
+                IsVisible="{Binding AppStatus.ShowStatusImage}" />
+            <TextBlock
+                Classes="muted"
+                HorizontalAlignment="Center"
+                TextAlignment="Center"
+                Text="{loc:Translate Key=common.loading}" />
+        </StackPanel>
+    </Panel>
+</UserControl>

@@ -1,0 +1,87 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets/icon.ico</ApplicationIcon>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <Version>1.56.5</Version>
+    <Copyright>Copyright © lay295 and contributors</Copyright>
+    <Description>Download and render Twitch VODs, clips, and chats</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <LangVersion>default</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" Exclude="Assets\icon.icns" />
+    <AvaloniaResource Include="Lang\**" />
+    <None Include="Assets\icon.icns" CopyToOutputDirectory="Never" />
+    <None Include="MacOS\**" CopyToOutputDirectory="Never" />
+    <EmbeddedResource Include="..\LICENSE.txt" LogicalName="TwitchDownloaderAvalonia.LICENSE.txt" />
+    <EmbeddedResource Include="Themes\README.txt" LogicalName="TwitchDownloaderAvalonia.Themes.README.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="12.1.2" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.1.2" />
+    <PackageReference Include="Avalonia.Themes.Simple" Version="12.1.2" />
+    <PackageReference Include="AnimatedImage.Avalonia" Version="2.1.4" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.2" />
+    <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.3">
+      <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+      <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.12" />
+    <PackageReference Include="Tomlyn" Version="2.10.1" />
+    <PackageReference Include="Xabe.FFmpeg.Downloader" Version="6.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TwitchDownloaderCore\TwitchDownloaderCore.csproj" />
+    <ProjectReference Include="..\TwitchDownloaderAvalonia.Update\TwitchDownloaderAvalonia.Update.csproj" />
+    <ProjectReference Include="..\TwitchDownloaderAvalonia.Updater\TwitchDownloaderAvalonia.Updater.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="TwitchDownloaderAvalonia.Tests" />
+  </ItemGroup>
+
+  <Target Name="CopyUpdaterToOutput" AfterTargets="Build" Condition="'$(RuntimeIdentifier)' == ''">
+    <PropertyGroup>
+      <_UpdaterOut>$(MSBuildProjectDirectory)\..\TwitchDownloaderAvalonia.Updater\bin\$(Configuration)\$(TargetFramework)\</_UpdaterOut>
+    </PropertyGroup>
+    <ItemGroup>
+      <_UpdaterFiles Include="$(_UpdaterOut)**\*.*" />
+    </ItemGroup>
+    <Copy
+      SourceFiles="@(_UpdaterFiles)"
+      DestinationFiles="@(_UpdaterFiles->'$(OutputPath)updater\%(RecursiveDir)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="true"
+      Condition="Exists('$(_UpdaterOut)')" />
+  </Target>
+
+  <Target Name="PublishUpdater" AfterTargets="Publish" Condition="'$(RuntimeIdentifier)' != ''">
+    <PropertyGroup>
+      <_UpdaterPublishDir Condition="$([System.IO.Path]::IsPathRooted('$(PublishDir)'))">$(PublishDir)</_UpdaterPublishDir>
+      <_UpdaterPublishDir Condition="'$(_UpdaterPublishDir)' == ''">$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\$(PublishDir)'))</_UpdaterPublishDir>
+      <_UpdaterPublishProps>Configuration=$(Configuration);RuntimeIdentifier=$(RuntimeIdentifier);SelfContained=$(SelfContained);PublishSingleFile=$(PublishSingleFile);IncludeNativeLibrariesForSelfExtract=$(IncludeNativeLibrariesForSelfExtract);IncludeAllContentForSelfExtract=$(IncludeAllContentForSelfExtract);UseAppHost=$(UseAppHost);DebugType=$(DebugType);PublishDir=$(_UpdaterPublishDir);Version=$(Version);PublishTrimmed=false</_UpdaterPublishProps>
+    </PropertyGroup>
+    <MSBuild
+      Projects="$(MSBuildProjectDirectory)\..\TwitchDownloaderAvalonia.Updater\TwitchDownloaderAvalonia.Updater.csproj"
+      Targets="Restore"
+      Properties="$(_UpdaterPublishProps)" />
+    <MSBuild
+      Projects="$(MSBuildProjectDirectory)\..\TwitchDownloaderAvalonia.Updater\TwitchDownloaderAvalonia.Updater.csproj"
+      Targets="Publish"
+      Properties="$(_UpdaterPublishProps)" />
+  </Target>
+</Project>

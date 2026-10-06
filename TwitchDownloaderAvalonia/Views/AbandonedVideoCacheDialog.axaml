@@ -1,0 +1,165 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
+    xmlns:loc="using:TwitchDownloaderAvalonia.Markup"
+    x:Class="TwitchDownloaderAvalonia.Views.AbandonedVideoCacheDialog"
+    x:DataType="vm:AbandonedVideoCacheViewModel"
+    Title="{loc:Translate Key=cache.title}"
+    Width="800"
+    Height="450"
+    MinWidth="500"
+    MinHeight="350"
+    WindowStartupLocation="CenterOwner"
+    ShowInTaskbar="False">
+    <Window.Styles>
+        <Style Selector="Border.cacheHeader">
+            <Setter Property="Background" Value="{DynamicResource CardMutedBrush}" />
+            <Setter Property="Padding" Value="12,10" />
+        </Style>
+        <Style Selector="Border.cacheRow">
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+        </Style>
+        <Style Selector="Border.cacheRow:pointerover">
+            <Setter Property="Background" Value="{DynamicResource CardMutedBrush}" />
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="*,Auto" Margin="16" Grid.IsSharedSizeScope="True">
+        <Border Classes="card" Padding="0" ClipToBounds="True">
+            <Grid RowDefinitions="Auto,*">
+                <Border Classes="cacheHeader" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="CacheDelete" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="CacheAge" />
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="CacheSize" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                            Classes="label"
+                            Margin="0"
+                            VerticalAlignment="Center"
+                            Text="{loc:Translate Key=cache.delete}" />
+                        <TextBlock
+                            Grid.Column="1"
+                            Classes="label"
+                            Margin="12,0"
+                            VerticalAlignment="Center"
+                            Text="{loc:Translate Key=cache.path}" />
+                        <TextBlock
+                            Grid.Column="2"
+                            Classes="label"
+                            MinWidth="96"
+                            Margin="12,0,0,0"
+                            VerticalAlignment="Center"
+                            Text="{loc:Translate Key=cache.age}" />
+                        <TextBlock
+                            Grid.Column="3"
+                            Classes="label"
+                            MinWidth="72"
+                            Margin="12,0,0,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Text="{loc:Translate Key=cache.size}" />
+                    </Grid>
+                </Border>
+
+                <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
+                    <ItemsControl ItemsSource="{Binding Items}">
+                        <ItemsControl.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem
+                                    Header="{loc:Translate Key=common.select_all}"
+                                    Command="{Binding SelectAllCommand}" />
+                            </ContextMenu>
+                        </ItemsControl.ContextMenu>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:AbandonedVideoCacheItem">
+                                <Border Classes="cacheRow">
+                                    <Border.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem
+                                                Header="{loc:Translate Key=cache.open_folder}"
+                                                Command="{Binding OpenFolderCommand}" />
+                                            <MenuItem
+                                                Header="{loc:Translate Key=cache.copy_path}"
+                                                Command="{Binding CopyPathCommand}" />
+                                        </ContextMenu>
+                                    </Border.ContextMenu>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="CacheDelete" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="CacheAge" />
+                                            <ColumnDefinition Width="Auto" SharedSizeGroup="CacheSize" />
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            AutomationProperties.Name="{Binding Path}"
+                                            IsChecked="{Binding ShouldDelete}" />
+                                        <StackPanel
+                                            Grid.Column="1"
+                                            Margin="12,0"
+                                            VerticalAlignment="Center"
+                                            Spacing="2"
+                                            ClipToBounds="True">
+                                            <TextBlock
+                                                FontWeight="SemiBold"
+                                                TextTrimming="CharacterEllipsis"
+                                                ToolTip.Tip="{Binding Path}"
+                                                Text="{Binding FolderName}" />
+                                            <TextBlock
+                                                Classes="muted"
+                                                FontSize="12"
+                                                TextTrimming="CharacterEllipsis"
+                                                ToolTip.Tip="{Binding Path}"
+                                                Text="{Binding Path}" />
+                                        </StackPanel>
+                                        <TextBlock
+                                            Grid.Column="2"
+                                            MinWidth="96"
+                                            Margin="12,0,0,0"
+                                            VerticalAlignment="Center"
+                                            Text="{Binding AgeText}" />
+                                        <TextBlock
+                                            Grid.Column="3"
+                                            MinWidth="72"
+                                            Margin="12,0,0,0"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Center"
+                                            Text="{Binding SizeText}" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto" Margin="0,12,0,0">
+            <Button
+                MinWidth="80"
+                Content="{loc:Translate Key=common.select_all}"
+                AutomationProperties.Name="{loc:Translate Key=common.select_all}"
+                Command="{Binding SelectAllCommand}" />
+            <Button
+                Grid.Column="1"
+                Classes="accent"
+                MinWidth="80"
+                HorizontalAlignment="Center"
+                Content="{loc:Translate Key=common.accept}"
+                AutomationProperties.Name="{loc:Translate Key=common.accept}"
+                Command="{Binding AcceptCommand}" />
+            <TextBlock
+                Grid.Column="2"
+                Classes="muted"
+                VerticalAlignment="Center"
+                Text="{Binding TotalSizeText}" />
+        </Grid>
+    </Grid>
+</Window>

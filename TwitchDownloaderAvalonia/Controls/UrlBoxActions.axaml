@@ -1,0 +1,25 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:loc="using:TwitchDownloaderAvalonia.Markup"
+    xmlns:a="using:TwitchDownloaderAvalonia.Abstractions"
+    x:Class="TwitchDownloaderAvalonia.Controls.UrlBoxActions"
+    x:DataType="a:IUrlBoxHost">
+    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+        <Button
+            Classes="urlAction"
+            Focusable="False"
+            ToolTip.Tip="{loc:Translate Key=common.paste}"
+            Command="{Binding PasteCommand}">
+            <PathIcon Width="12" Height="12" Data="{StaticResource IconPaste}" />
+        </Button>
+        <Button
+            Classes="urlAction"
+            Focusable="False"
+            ToolTip.Tip="{loc:Translate Key=common.clear}"
+            IsVisible="{Binding $parent[TextBox].Text, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+            Command="{Binding ClearCommand}">
+            <PathIcon Width="12" Height="12" Data="{StaticResource IconClear}" />
+        </Button>
+    </StackPanel>
+</UserControl>

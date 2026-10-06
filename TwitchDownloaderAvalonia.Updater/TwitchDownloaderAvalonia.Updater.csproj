@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationIcon>..\TwitchDownloaderAvalonia\Assets\icon.ico</ApplicationIcon>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <Version>1.56.5</Version>
+    <RootNamespace>TwitchDownloaderAvalonia.Updater</RootNamespace>
+    <LangVersion>default</LangVersion>
+    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64;osx-arm64</RuntimeIdentifiers>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Include="..\TwitchDownloaderAvalonia\Styles\Colors.axaml" Link="Styles\Colors.axaml" />
+    <AvaloniaResource Include="..\TwitchDownloaderAvalonia\Styles\Icons.axaml" Link="Styles\Icons.axaml" />
+    <AvaloniaResource Include="..\TwitchDownloaderAvalonia\Styles\ControlThemes.axaml" Link="Styles\ControlThemes.axaml" />
+    <AvaloniaResource Include="..\TwitchDownloaderAvalonia\Styles\Controls.axaml" Link="Styles\Controls.axaml" />
+    <AvaloniaResource Include="..\TwitchDownloaderAvalonia\Lang\**\*.toml" Link="Lang\%(RecursiveDir)%(Filename)%(Extension)" />
+    <AvaloniaResource Include="..\TwitchDownloaderAvalonia\Assets\icon.ico" Link="Assets\icon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="12.1.2" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.1.2" />
+    <PackageReference Include="Avalonia.Themes.Simple" Version="12.1.2" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.2" />
+    <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.3" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="Markdig" Version="0.41.3" />
+    <PackageReference Include="Tomlyn" Version="2.10.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TwitchDownloaderAvalonia.Update\TwitchDownloaderAvalonia.Update.csproj" />
+  </ItemGroup>
+</Project>

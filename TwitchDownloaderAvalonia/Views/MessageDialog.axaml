@@ -1,0 +1,29 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
+    xmlns:loc="using:TwitchDownloaderAvalonia.Markup"
+    x:Class="TwitchDownloaderAvalonia.Views.MessageDialog"
+    x:DataType="vm:MessageDialogViewModel"
+    Title="{Binding Title}"
+    Width="460"
+    SizeToContent="Height"
+    WindowStartupLocation="CenterOwner"
+    CanResize="False"
+    ShowInTaskbar="False">
+    <StackPanel Margin="16" Spacing="12">
+        <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button
+                Content="{loc:Translate Key=common.cancel}"
+                MinWidth="80"
+                IsVisible="{Binding ShowCancel}"
+                Command="{Binding CancelCommand}" />
+            <Button
+                Classes="accent"
+                Content="{loc:Translate Key=dialogs.ok}"
+                MinWidth="80"
+                Command="{Binding OkCommand}" />
+        </StackPanel>
+    </StackPanel>
+</Window>

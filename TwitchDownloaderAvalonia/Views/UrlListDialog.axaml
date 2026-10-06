@@ -1,0 +1,40 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
+    xmlns:loc="using:TwitchDownloaderAvalonia.Markup"
+    x:Class="TwitchDownloaderAvalonia.Views.UrlListDialog"
+    x:DataType="vm:UrlListViewModel"
+    Title="{loc:Translate Key=queue.url_list_title}"
+    Width="520"
+    Height="440"
+    MinWidth="420"
+    MinHeight="320"
+    WindowStartupLocation="CenterOwner"
+    ShowInTaskbar="False">
+    <Grid Margin="16" RowDefinitions="Auto,8,*,16,Auto">
+        <TextBlock
+            Classes="label"
+            Margin="0"
+            Text="{loc:Translate Key=queue.url_list_hint}" />
+        <TextBox
+            Grid.Row="2"
+            AcceptsReturn="True"
+            TextWrapping="Wrap"
+            VerticalContentAlignment="Top"
+            Text="{Binding UrlText}"
+            IsEnabled="{Binding !IsBusy}" />
+        <StackPanel
+            Grid.Row="4"
+            Orientation="Horizontal"
+            HorizontalAlignment="Right"
+            Spacing="8">
+            <Button Content="{loc:Translate Key=common.cancel}" MinWidth="100" Command="{Binding CancelCommand}" />
+            <Button
+                Classes="accent"
+                Content="{loc:Translate Key=search.add_to_queue}"
+                MinWidth="120"
+                Command="{Binding AddCommand}" />
+        </StackPanel>
+    </Grid>
+</Window>

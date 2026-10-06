@@ -1,0 +1,29 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:TwitchDownloaderAvalonia.ViewModels"
+    xmlns:loc="using:TwitchDownloaderAvalonia.Markup"
+    x:Class="TwitchDownloaderAvalonia.Views.CollisionDialog"
+    x:DataType="vm:CollisionDialogViewModel"
+    Title="{loc:Translate Key=dialogs.collision_title}"
+    Width="460"
+    SizeToContent="Height"
+    WindowStartupLocation="CenterOwner"
+    CanResize="False"
+    ShowInTaskbar="False">
+    <StackPanel Margin="16" Spacing="12">
+        <TextBlock
+            Text="{Binding HeaderText}"
+            TextWrapping="Wrap"
+            FontWeight="SemiBold" />
+        <TextBlock
+            Text="{Binding FullPath}"
+            TextWrapping="Wrap" />
+        <CheckBox Content="{loc:Translate Key=dialogs.collision_remember}" IsChecked="{Binding Remember}" />
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button Content="{loc:Translate Key=dialogs.overwrite}" MinWidth="100" Command="{Binding OverwriteCommand}" />
+            <Button Content="{loc:Translate Key=dialogs.rename}" MinWidth="100" Command="{Binding RenameCommand}" />
+            <Button Content="{loc:Translate Key=common.cancel}" MinWidth="100" Command="{Binding CancelCommand}" />
+        </StackPanel>
+    </StackPanel>
+</Window>

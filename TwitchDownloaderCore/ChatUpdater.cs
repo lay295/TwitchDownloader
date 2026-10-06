@@ -50,7 +50,13 @@ namespace TwitchDownloaderCore
 
         private async Task UpdateAsyncImpl(FileInfo outputFileInfo, FileStream outputFs, CancellationToken cancellationToken)
         {
-            chatRoot.FileInfo = new() { Version = ChatRootVersion.CurrentVersion, CreatedAt = chatRoot.FileInfo.CreatedAt, UpdatedAt = DateTime.Now };
+            chatRoot.FileInfo = new ChatRootInfo
+            {
+                Version = ChatRootVersion.CurrentVersion,
+                CreatedAt = chatRoot.FileInfo?.CreatedAt is { Ticks: > 0 } createdAt ? createdAt : DateTime.Now,
+                UpdatedAt = DateTime.Now,
+            };
+
             if (!Path.GetExtension(_updateOptions.InputFile.Replace(".gz", ""))!.Equals(".json", StringComparison.OrdinalIgnoreCase))
             {
                 throw new NotSupportedException("Only JSON chat files can be used as update input. HTML support may come in the future.");
@@ -126,10 +132,12 @@ namespace TwitchDownloaderCore
             _progress.SetStatus($"Updating Video Info [{currentStep}/{totalSteps}]");
             _progress.ReportProgress(currentStep * 100 / totalSteps);
 
-            if (string.IsNullOrWhiteSpace(chatRoot.video.id))
+            if (string.IsNullOrWhiteSpace(chatRoot.video?.id))
             {
                 return;
             }
+
+            chatRoot.video.chapters ??= [];
 
             if (chatRoot.video.id.All(char.IsDigit))
             {
@@ -148,13 +156,13 @@ namespace TwitchDownloaderCore
                 }
 
                 chatRoot.video.title = videoInfo.title;
-                chatRoot.video.description = videoInfo.description.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd();
+                chatRoot.video.description = videoInfo.description?.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd();
                 chatRoot.video.created_at = videoInfo.createdAt;
                 chatRoot.video.length = videoInfo.lengthSeconds;
                 chatRoot.video.viewCount = videoInfo.viewCount;
-                chatRoot.video.game = videoInfo.game?.displayName;
+                chatRoot.video.game = videoInfo.game?.displayName ?? "Unknown";
 
-                var chaptersInfo = (await TwitchHelper.GetOrGenerateVideoChapters(videoId, videoInfo, _progress)).data.video.moments.edges;
+                var chaptersInfo = (await TwitchHelper.GetOrGenerateVideoChapters(videoId, videoInfo, _progress)).data?.video?.moments?.edges ?? [];
 
                 // Test if chat was downloaded before the end of stream, append new chapters if so
                 var lastChapter = chatRoot.video.chapters.LastOrDefault();
@@ -165,6 +173,9 @@ namespace TwitchDownloaderCore
                     chatRoot.video.chapters.Remove(lastChapter);
                     foreach (var responseChapter in chaptersInfo.Skip(chatRoot.video.chapters.Count))
                     {
+                        if (responseChapter?.node is null)
+                            continue;
+
                         chatRoot.video.chapters.Add(new VideoChapter
                         {
                             id = responseChapter.node.id,
@@ -174,9 +185,9 @@ namespace TwitchDownloaderCore
                             description = responseChapter.node.description,
                             subDescription = responseChapter.node.subDescription,
                             thumbnailUrl = responseChapter.node.thumbnailURL,
-                            gameId = responseChapter.node.details.game?.id,
-                            gameDisplayName = responseChapter.node.details.game?.displayName,
-                            gameBoxArtUrl = responseChapter.node.details.game?.boxArtURL
+                            gameId = responseChapter.node.details?.game?.id,
+                            gameDisplayName = responseChapter.node.details?.game?.displayName,
+                            gameBoxArtUrl = responseChapter.node.details?.game?.boxArtURL,
                         });
                     }
                 }
@@ -195,6 +206,12 @@ namespace TwitchDownloaderCore
                     return;
                 }
 
+                if (clipRenderStatus is null)
+                {
+                    _progress.LogInfo("Unable to fetch clip info, deleted possibly?");
+                    return;
+                }
+
                 chatRoot.clipper ??= new Clipper
                 {
                     name = clipRenderStatus.curator?.displayName,
@@ -206,7 +223,7 @@ namespace TwitchDownloaderCore
                 chatRoot.video.created_at = clipRenderStatus.createdAt;
                 chatRoot.video.length = clipRenderStatus.durationSeconds;
                 chatRoot.video.viewCount = clipRenderStatus.viewCount;
-                chatRoot.video.game = clipRenderStatus.game.displayName;
+                chatRoot.video.game = clipRenderStatus.game?.displayName ?? "Unknown";
 
                 if (chatRoot.video.chapters is not { Count: > 0 })
                 {
