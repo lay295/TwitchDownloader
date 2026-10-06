@@ -168,6 +168,18 @@ namespace TwitchDownloaderWPF.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool GiphyGifs {
+            get {
+                return ((bool)(this["GiphyGifs"]));
+            }
+            set {
+                this["GiphyGifs"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("255")]
         public byte BackgroundColorA {
             get {

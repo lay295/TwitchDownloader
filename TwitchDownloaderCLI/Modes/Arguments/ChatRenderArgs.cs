@@ -45,6 +45,15 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("stv", Default = true, HelpText = "Enable 7TV emotes.")]
         public bool? StvEmotes { get; set; }
 
+        [Option("giphy", Default = true, HelpText = "Enable Giphy GIFs posted in chat, fetched from Giphy when not embedded in the input json. Unresolved GIFs stay as their bracketed alt text.")]
+        public bool? GiphyGifs { get; set; }
+
+        [Option("gif-max-height-percent", Default = 50, HelpText = "Cap on the height of a GIF posted in chat, as a percentage of the chat height. 100 lets one GIF fill the chat.")]
+        public int GifMaxHeightPercent { get; set; }
+
+        [Option("image-cache-mb", Default = 256, HelpText = "Megabytes of off-screen emote and GIF imagery to retain decoded. On-screen images are always kept. Lower it on constrained machines, raise it to re-decode less often.")]
+        public int ImageCacheMb { get; set; }
+
         [Option("allow-unlisted-emotes", Default = true, HelpText = "Allow unlisted 7TV emotes in the render.")]
         public bool? AllowUnlistedEmotes { get; set; }
 
@@ -117,7 +126,7 @@ namespace TwitchDownloaderCLI.Modes.Arguments
         [Option("avatars", Default = false, HelpText = "Renders the avatars of users next to their username and badges.")]
         public bool RenderUserAvatars { get; set; }
 
-        [Option("offline", Default = false, HelpText = "Render completely offline using only embedded emotes, badges, and bits from the input json.")]
+        [Option("offline", Default = false, HelpText = "Render completely offline using only embedded emotes, badges, bits, and Giphy GIFs from the input json.")]
         public bool Offline { get; set; }
 
         [Option("emoji-vendor", Default = "notocolor", HelpText = "The emoji vendor used for rendering emojis. Valid values are: 'twitter' / 'twemoji', 'google' / 'notocolor', and 'system' / 'none'.")]

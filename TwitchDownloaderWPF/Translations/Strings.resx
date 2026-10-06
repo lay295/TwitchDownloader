@@ -466,6 +466,9 @@
   <data name="Streamer" xml:space="preserve">
     <value>Streamer:</value>
   </data>
+  <data name="GiphyGifs" xml:space="preserve">
+    <value>Giphy GIFs:</value>
+  </data>
   <data name="StvEmotes" xml:space="preserve">
     <value>7TV Emotes:</value>
   </data>

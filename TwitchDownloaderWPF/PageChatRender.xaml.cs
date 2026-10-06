@@ -105,6 +105,7 @@ namespace TwitchDownloaderWPF
                 BttvEmotes = checkBTTV.IsChecked.GetValueOrDefault(),
                 FfzEmotes = checkFFZ.IsChecked.GetValueOrDefault(),
                 StvEmotes = checkSTV.IsChecked.GetValueOrDefault(),
+                GiphyGifs = checkGiphy.IsChecked.GetValueOrDefault(),
                 Outline = checkOutline.IsChecked.GetValueOrDefault(),
                 Font = (string)comboFont.SelectedItem,
                 FontSize = numFontSize.Value,
@@ -170,6 +171,7 @@ namespace TwitchDownloaderWPF
                 checkFFZ.IsChecked = Settings.Default.FFZEmotes;
                 checkBTTV.IsChecked = Settings.Default.BTTVEmotes;
                 checkSTV.IsChecked = Settings.Default.STVEmotes;
+                checkGiphy.IsChecked = Settings.Default.GiphyGifs;
                 textHeight.Text = Settings.Default.Height.ToString();
                 textWidth.Text = Settings.Default.Width.ToString();
                 numFontSize.Value = Settings.Default.FontSize;
@@ -290,6 +292,7 @@ namespace TwitchDownloaderWPF
             Settings.Default.FFZEmotes = checkFFZ.IsChecked.GetValueOrDefault();
             Settings.Default.BTTVEmotes = checkBTTV.IsChecked.GetValueOrDefault();
             Settings.Default.STVEmotes = checkSTV.IsChecked.GetValueOrDefault();
+            Settings.Default.GiphyGifs = checkGiphy.IsChecked.GetValueOrDefault();
             Settings.Default.FontColorR = colorFont.SelectedColor.GetValueOrDefault().R;
             Settings.Default.FontColorG = colorFont.SelectedColor.GetValueOrDefault().G;
             Settings.Default.FontColorB = colorFont.SelectedColor.GetValueOrDefault().B;

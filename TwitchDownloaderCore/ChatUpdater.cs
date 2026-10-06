@@ -61,7 +61,8 @@ namespace TwitchDownloaderCore
             int totalSteps = 2;
             if (_updateOptions.TrimBeginning || _updateOptions.TrimEnding) totalSteps++;
             if (_updateOptions.OutputFormat is ChatFormat.Json or ChatFormat.Html
-                && (_updateOptions.EmbedMissing || _updateOptions.ReplaceEmbeds)) totalSteps++;
+                && (_updateOptions.EmbedMissing || _updateOptions.ReplaceEmbeds
+                    || (_updateOptions.GiphyGifs && _updateOptions.OutputFormat is ChatFormat.Json))) totalSteps++;
 
             currentStep++;
             await UpdateVideoInfo(totalSteps, currentStep, cancellationToken);
@@ -75,7 +76,8 @@ namespace TwitchDownloaderCore
 
             // If we are updating/replacing embeds
             if (_updateOptions.OutputFormat is ChatFormat.Json or ChatFormat.Html
-                && (_updateOptions.EmbedMissing || _updateOptions.ReplaceEmbeds))
+                && (_updateOptions.EmbedMissing || _updateOptions.ReplaceEmbeds
+                    || (_updateOptions.GiphyGifs && _updateOptions.OutputFormat is ChatFormat.Json)))
             {
                 currentStep++;
                 await UpdateEmbeds(currentStep, totalSteps, cancellationToken);
@@ -148,7 +150,7 @@ namespace TwitchDownloaderCore
                 }
 
                 chatRoot.video.title = videoInfo.title;
-                chatRoot.video.description = videoInfo.description.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd();
+                chatRoot.video.description = videoInfo.description?.Replace("  \n", "\n").Replace("\n\n", "\n").TrimEnd();
                 chatRoot.video.created_at = videoInfo.createdAt;
                 chatRoot.video.length = videoInfo.lengthSeconds;
                 chatRoot.video.viewCount = videoInfo.viewCount;
@@ -285,13 +287,20 @@ namespace TwitchDownloaderCore
 
             chatRoot.embeddedData ??= new EmbeddedData();
 
-            var embedTasks = new[]
+            var embedTasks = new List<Task>();
+
+            if (_updateOptions.EmbedMissing || _updateOptions.ReplaceEmbeds)
             {
-                Task.Run(() => FirstPartyEmoteTask(cancellationToken), cancellationToken),
-                Task.Run(() => ThirdPartyEmoteTask(cancellationToken), cancellationToken),
-                Task.Run(() => ChatBadgeTask(cancellationToken), cancellationToken),
-                Task.Run(() => BitTask(cancellationToken), cancellationToken),
-            };
+                embedTasks.Add(Task.Run(() => FirstPartyEmoteTask(cancellationToken), cancellationToken));
+                embedTasks.Add(Task.Run(() => ThirdPartyEmoteTask(cancellationToken), cancellationToken));
+                embedTasks.Add(Task.Run(() => ChatBadgeTask(cancellationToken), cancellationToken));
+                embedTasks.Add(Task.Run(() => BitTask(cancellationToken), cancellationToken));
+            }
+
+            if (_updateOptions.GiphyGifs && _updateOptions.OutputFormat is ChatFormat.Json)
+            {
+                embedTasks.Add(Task.Run(() => GifTask(cancellationToken), cancellationToken));
+            }
 
             await Task.WhenAll(embedTasks);
         }
@@ -377,6 +386,61 @@ namespace TwitchDownloaderCore
                 chatRoot.embeddedData.twitchBits.Add(newBit);
             }
             _progress.LogInfo($"Input bit emote count: {inputCount}. Output count: {chatRoot.embeddedData.twitchBits.Count}");
+        }
+
+        private async Task GifTask(CancellationToken cancellationToken = default)
+        {
+            var embeddedData = _updateOptions.ReplaceEmbeds ? null : chatRoot.embeddedData;
+            int inputCount = chatRoot.embeddedData.gifs.Count;
+            var newGifs = new List<EmbedEmoteData>();
+
+            try
+            {
+                if (_updateOptions.EmbedMissing || _updateOptions.ReplaceEmbeds)
+                {
+                    foreach (var gif in await TwitchHelper.GetGiphyGifs(chatRoot.comments, _cacheDir, _progress, embeddedData, cancellationToken: cancellationToken))
+                    {
+                        newGifs.Add(new EmbedEmoteData
+                        {
+                            id = gif.Id,
+                            imageScale = 1,
+                            data = gif.ImageData,
+                            name = gif.Name,
+                            url = gif.Url,
+                            width = gif.Width,
+                            height = gif.Height,
+                        });
+
+                        gif.Dispose();
+                    }
+                }
+                else
+                {
+                    foreach (var (title, gif) in await TwitchHelper.ResolveGiphyGifs(chatRoot.comments, _cacheDir, _progress, embeddedData, cancellationToken: cancellationToken))
+                    {
+                        newGifs.Add(new EmbedEmoteData
+                        {
+                            id = gif.Id,
+                            imageScale = 1,
+                            // Keep images already archived in the input, refreshing urls must not throw them away
+                            data = embeddedData?.gifs.FirstOrDefault(x => title.Equals(x.name, StringComparison.OrdinalIgnoreCase))?.data,
+                            name = title,
+                            url = gif.Url,
+                            width = gif.Width,
+                            height = gif.Height,
+                        });
+                    }
+                }
+
+                chatRoot.embeddedData.gifs = newGifs;
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                // A broken Giphy must not cost the user the chat itself
+                _progress.LogWarning($"Unable to resolve chat GIFs: {ex.Message} Continuing without them.");
+            }
+
+            _progress.LogInfo($"Input GIF count: {inputCount}. Output count: {chatRoot.embeddedData.gifs.Count}");
         }
 
         private bool _trimTaskReportedExpiredVod;

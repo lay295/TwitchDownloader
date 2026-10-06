@@ -2112,6 +2112,15 @@ namespace TwitchDownloaderWPF.Translations {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Giphy GIFs:.
+        /// </summary>
+        public static string GiphyGifs {
+            get {
+                return ResourceManager.GetString("GiphyGifs", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 7TV Emotes:.
         /// </summary>
         public static string StvEmotes {

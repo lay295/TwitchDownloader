@@ -89,5 +89,13 @@ namespace TwitchDownloaderCore.Options
         public bool AdjustUsernameVisibility { get; set; }
         public Func<FileInfo, FileInfo> FileCollisionCallback { get; set; } = info => info;
         public bool RenderUserAvatars { get; set; } = false;
+        /// <summary>How much decoded off screen imagery to retain before releasing the least recently drawn.</summary>
+        /// <remarks>Excludes what is currently on screen, which must be decoded to be drawn and is never released.</remarks>
+        public int ImageCacheMb { get; set; } = 256;
+        /// <summary>Cap on a chat GIF's height, as a percentage of the chat height. 100 lets one fill the chat.</summary>
+        /// <remarks>Oversized messages are clipped at the top of the frame, so this is a readability choice rather than a limit.</remarks>
+        public int GifMaxHeightPercent { get; set; } = 50;
+        /// <summary>Render GIFs posted in chat as a full width image. Unresolvable GIFs stay as their bracketed alt text.</summary>
+        public bool GiphyGifs { get; set; } = true;
     }
 }
