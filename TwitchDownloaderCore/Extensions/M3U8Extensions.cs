@@ -75,7 +75,7 @@ namespace TwitchDownloaderCore.Extensions
 
         public static bool IsSource(this M3U8.Stream stream)
             => stream.Path.Contains("/chunked/", StringComparison.OrdinalIgnoreCase) ||
-                stream.StreamInfo.IvsVariantSource.Contains("source", StringComparison.OrdinalIgnoreCase);
+               stream.StreamInfo.IvsVariantSource.Contains("source", StringComparison.OrdinalIgnoreCase);
 
         public static bool IsAudioOnly(this M3U8.Stream stream)
             => stream.Path.Contains("/audio_only/", StringComparison.OrdinalIgnoreCase) ||
@@ -100,6 +100,17 @@ namespace TwitchDownloaderCore.Extensions
                 : VideoOrientation.None;
         }
 
+        public static UnavailableMedia[] ParseUnavailableMedia(this M3U8 m3u8)
+        {
+            const string UNAVAILABLE_MEDIA_KEY = "com.amazon.ivs.unavailable-media";
+            if (!m3u8.FileMetadata.SessionData.TryGetValue(UNAVAILABLE_MEDIA_KEY, out var unavailableMediaBase64))
+            {
+                return [];
+            }
+            var unavailableMedia = JsonSerializer.Deserialize<UnavailableMedia[]>(Convert.FromBase64String(unavailableMediaBase64));
+            return unavailableMedia;
+        }
+
         public static M3U8 WithUnavailableMedia(this M3U8 m3u8)
         {
             if (m3u8.Streams.Length is 0)
@@ -107,13 +118,7 @@ namespace TwitchDownloaderCore.Extensions
                 return m3u8;
             }
 
-            const string UNAVAILABLE_MEDIA_KEY = "com.amazon.ivs.unavailable-media";
-            if (!m3u8.FileMetadata.SessionData.TryGetValue(UNAVAILABLE_MEDIA_KEY, out var unavailableMediaBase64))
-            {
-                return m3u8;
-            }
-
-            var unavailableMedia = JsonSerializer.Deserialize<UnavailableMedia[]>(Convert.FromBase64String(unavailableMediaBase64));
+            var unavailableMedia = m3u8.ParseUnavailableMedia();
             if (unavailableMedia is not { Length: > 0 })
             {
                 return m3u8;
@@ -123,7 +128,7 @@ namespace TwitchDownloaderCore.Extensions
 
             var unavailableStreams = unavailableMedia.Select(x =>
             {
-                var streamInfo = new M3U8.Stream.ExtStreamInfo(0, x.Bandwidth, x.Codecs.Split(','), M3U8.Stream.ExtStreamInfo.StreamResolution.Parse(x.Resolution), x.FrameRate, x.StableVariantId, x.IvsName, x.IvsGroups, x.VariantSource);
+                var streamInfo = new M3U8.Stream.ExtStreamInfo(0, x.Bandwidth, x.Codecs.Split(','), M3U8.Stream.ExtStreamInfo.StreamResolution.Parse(x.Resolution), x.FrameRate, "", x.StableVariantId, x.IvsName, x.IvsGroups, x.VariantSource);
                 var path = string.Format(pathFormat, x.StableVariantId);
                 return new M3U8.Stream(streamInfo, path);
             });

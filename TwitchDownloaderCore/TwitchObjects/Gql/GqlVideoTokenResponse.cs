@@ -1,17 +1,17 @@
 ﻿namespace TwitchDownloaderCore.TwitchObjects.Gql
 {
-    public class GqlVideoData
+    public class GqlVideoTokenData
     {
-        public VideoPlaybackAccessToken videoPlaybackAccessToken { get; set; }
+        public PlaybackAccessToken videoPlaybackAccessToken { get; set; }
     }
 
     public class GqlVideoTokenResponse
     {
-        public GqlVideoData data { get; set; }
+        public GqlVideoTokenData data { get; set; }
         public Extensions extensions { get; set; }
     }
 
-    public class VideoPlaybackAccessToken
+    public class PlaybackAccessToken
     {
         public string value { get; set; }
         public string signature { get; set; }

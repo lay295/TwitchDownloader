@@ -1,5 +1,4 @@
 using System.Globalization;
-using TwitchDownloaderCore.Models;
 
 namespace TwitchDownloaderCore.Tools
 {
@@ -8,19 +7,18 @@ namespace TwitchDownloaderCore.Tools
     {
         private const string LINE_FEED = "\u000A";
 
-        public static async Task SerializeAsync(string filePath, IEnumerable<M3U8.Stream> playlist, StreamIds streamIds, CancellationToken cancellationToken = default)
+        public static async Task SerializeAsync(Stream fs, IEnumerable<(string filePath, decimal duration, StreamIds streamIds)> playlist, CancellationToken cancellationToken = default)
         {
-            await using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
             await using var sw = new StreamWriter(fs) { NewLine = LINE_FEED };
 
             await sw.WriteLineAsync("ffconcat version 1.0");
 
-            foreach (var stream in playlist)
+            foreach (var (filePath, duration, streamIds) in playlist)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
                 await sw.WriteAsync("file '");
-                await sw.WriteAsync(DownloadTools.RemoveQueryString(stream.Path));
+                await sw.WriteAsync(filePath);
                 await sw.WriteLineAsync('\'');
 
                 foreach (var id in streamIds.Ids)
@@ -30,7 +28,7 @@ namespace TwitchDownloaderCore.Tools
                 }
 
                 await sw.WriteAsync("duration ");
-                await sw.WriteLineAsync(stream.PartInfo.Duration.ToString(CultureInfo.InvariantCulture));
+                await sw.WriteLineAsync(duration.ToString(CultureInfo.InvariantCulture));
             }
         }
 

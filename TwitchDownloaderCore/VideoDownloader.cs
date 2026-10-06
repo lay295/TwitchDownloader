@@ -130,7 +130,8 @@ namespace TwitchDownloaderCore
                     _progress.LogWarning($"The following parts could not be downloaded and will be missing from the finalized video: {string.Join(", ", missingParts.Select(x => x.Path))}");
                 }
 
-                await FfmpegConcatList.SerializeAsync(concatListPath, validParts, streamIds, cancellationToken);
+                await using var fs = new FileStream(concatListPath, FileMode.Create, FileAccess.Write, FileShare.Read);
+                await FfmpegConcatList.SerializeAsync(fs, validParts.Select(x => (DownloadTools.RemoveQueryString(x.Path), x.PartInfo.Duration, streamIds)), cancellationToken);
 
                 outputFs.Close();
 

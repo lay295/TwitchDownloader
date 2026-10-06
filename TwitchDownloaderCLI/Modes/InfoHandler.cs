@@ -353,7 +353,7 @@ namespace TwitchDownloaderCLI.Modes
                     };
 
                     return new M3U8.Stream(
-                        new M3U8.Stream.ExtStreamInfo(0, x.BitRate, x.Item.codecs?.Split(','), x.Resolution, x.Framerate, x.Item.quality, x.Item.quality, ivsGroups, "source"),
+                        new M3U8.Stream.ExtStreamInfo(0, x.BitRate, x.Item.codecs?.Split(','), x.Resolution, x.Framerate, "", x.Item.quality, x.Item.quality, ivsGroups, "source"),
                         $"{x.Item.sourceURL}?sig={clip.playbackAccessToken.signature}&token={HttpUtility.UrlEncode(clip.playbackAccessToken.value)}"
                     );
                 })

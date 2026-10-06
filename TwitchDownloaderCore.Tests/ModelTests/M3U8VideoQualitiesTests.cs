@@ -29,13 +29,13 @@ namespace TwitchDownloaderCore.Tests.ModelTests
         {
             var m3u8 = new M3U8(new M3U8.Metadata(), [
                 new M3U8.Stream(
-                    new M3U8.Stream.ExtStreamInfo(0, 1, ["avc1.4D401F", "mp4a.40.2"], (1920, 1080), 60, "1080p60", "1080p60", ["landscape"], "source"),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, ["avc1.4D401F", "mp4a.40.2"], (1920, 1080), 60, "", "1080p60", "1080p60", ["landscape"], "source"),
                     "1080p60"),
                 new M3U8.Stream(
-                    new M3U8.Stream.ExtStreamInfo(0, 1, ["avc1.4D401F", "mp4a.40.2"], (1280, 720), 60, "720p60", "720p60", ["landscape"], "transcode"),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, ["avc1.4D401F", "mp4a.40.2"], (1280, 720), 60, "", "720p60", "720p60", ["landscape"], "transcode"),
                     "720p60"),
                 new M3U8.Stream(
-                    new M3U8.Stream.ExtStreamInfo(0, 1, ["avc1.4D401F", "mp4a.40.2"], (1280, 720), 30, "720p30", "720p", ["landscape"], "transcode"),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, ["avc1.4D401F", "mp4a.40.2"], (1280, 720), 30, "", "720p30", "720p", ["landscape"], "transcode"),
                     "720p30"),
             ]);
 
@@ -76,31 +76,31 @@ namespace TwitchDownloaderCore.Tests.ModelTests
         {
             var m3u8 = new M3U8(new M3U8.Metadata(), [
                 new M3U8.Stream(
-                    new M3U8.Stream.ExtStreamInfo(0, 1, ["avc1.4D401F", "mp4a.40.2"], (1920, 1080), 58.644M, "1080p60", "1080p60", ["landscape"], "source"),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, ["avc1.4D401F", "mp4a.40.2"], (1920, 1080), 58.644M, "", "1080p60", "1080p60", ["landscape"], "source"),
                     "1080p60"),
                 new M3U8.Stream(
-                    new M3U8.Stream.ExtStreamInfo(0, 1, ["avc1.4D401F", "mp4a.40.2"], (1280, 720), 58.644M, "720p60", "720p60", ["landscape"], "transcode"),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, ["avc1.4D401F", "mp4a.40.2"], (1280, 720), 58.644M, "", "720p60", "720p60", ["landscape"], "transcode"),
                     "720p60"),
                 new M3U8.Stream(
-                    new M3U8.Stream.ExtStreamInfo(0, 1, ["avc1.4D401F", "mp4a.40.2"], (1280, 720), 28.814M, "720p30", "720p", ["landscape"], "transcode"),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, ["avc1.4D401F", "mp4a.40.2"], (1280, 720), 28.814M, "", "720p30", "720p", ["landscape"], "transcode"),
                     "720p30"),
                 new M3U8.Stream(
-                    new M3U8.Stream.ExtStreamInfo(0, 1, ["avc1.42C01E", "mp4a.40.2"], (852, 480), 30.159M, "480p30", "480p", ["landscape"], "transcode"),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, ["avc1.42C01E", "mp4a.40.2"], (852, 480), 30.159M, "", "480p30", "480p", ["landscape"], "transcode"),
                     "480p30"),
                 new M3U8.Stream(
-                    new M3U8.Stream.ExtStreamInfo(0, 1, ["avc1.42C01E", "mp4a.40.2"], (640, 360), 30.159M, "360p30", "360p", ["landscape"], "transcode"),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, ["avc1.42C01E", "mp4a.40.2"], (640, 360), 30.159M, "", "360p30", "360p", ["landscape"], "transcode"),
                     "360p30"),
                 new M3U8.Stream(
-                    new M3U8.Stream.ExtStreamInfo(0, 1, ["avc1.42C00C", "mp4a.40.2"], (256, 144), 30.159M, "144p30", "144p", ["landscape"], "transcode"),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, ["avc1.42C00C", "mp4a.40.2"], (256, 144), 30.159M, "", "144p30", "144p", ["landscape"], "transcode"),
                     "144p30"),
                 new M3U8.Stream(
-                    new M3U8.Stream.ExtStreamInfo(0, 1, ["mp4a.40.2"], (256, 144), 0, "audio_only", "Audio Only", ["landscape", "portrait"], "source"),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, ["mp4a.40.2"], (256, 144), 0, "", "audio_only", "Audio Only", ["landscape", "portrait"], "source"),
                     "audio_only"),
                 new M3U8.Stream(
-                    new M3U8.Stream.ExtStreamInfo(0, 1, ["avc1.4D401F", "mp4a.40.2"], (1080, 1920), 58.644M, "1080p60-portrait", "1080p", ["portrait"], "source"),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, ["avc1.4D401F", "mp4a.40.2"], (1080, 1920), 58.644M, "", "1080p60-portrait", "1080p", ["portrait"], "source"),
                     "1080p60-portrait"),
                 new M3U8.Stream(
-                    new M3U8.Stream.ExtStreamInfo(0, 1, ["avc1.4D401F", "mp4a.40.2"], (720, 1280), 58.644M, "720p60-portrait", "720p60", ["portrait"], "source"),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, ["avc1.4D401F", "mp4a.40.2"], (720, 1280), 58.644M, "", "720p60-portrait", "720p60", ["portrait"], "source"),
                     "720p60-portrait"),
             ]);
 
@@ -128,16 +128,16 @@ namespace TwitchDownloaderCore.Tests.ModelTests
         {
             var m3u8 = new M3U8(new M3U8.Metadata(), [
                 new M3U8.Stream(
-                    new M3U8.Stream.ExtStreamInfo(0, 1, ["avc1.4D401F", "mp4a.40.2"], (1920, 1080), 0, "1080p60", "1080p", ["landscape"], "source"),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, ["avc1.4D401F", "mp4a.40.2"], (1920, 1080), 0, "", "1080p60", "1080p", ["landscape"], "source"),
                     "1080p60"),
                 new M3U8.Stream(
-                    new M3U8.Stream.ExtStreamInfo(0, 1, ["avc1.4D401F", "mp4a.40.2"], (1280, 720), 58.644M, "720p60", "720p60", ["landscape"], "transcode"),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, ["avc1.4D401F", "mp4a.40.2"], (1280, 720), 58.644M, "", "720p60", "720p60", ["landscape"], "transcode"),
                     "720p60"),
                 new M3U8.Stream(
-                    new M3U8.Stream.ExtStreamInfo(0, 1, ["avc1.4D401F", "mp4a.40.2"], (1080, 1920), 0, "1080p60-portrait", "1080p", ["portrait"], "source"),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, ["avc1.4D401F", "mp4a.40.2"], (1080, 1920), 0, "", "1080p60-portrait", "1080p", ["portrait"], "source"),
                     "1080p60-portrait"),
                 new M3U8.Stream(
-                    new M3U8.Stream.ExtStreamInfo(0, 1, ["avc1.4D401F", "mp4a.40.2"], (720, 1280), 58.644M, "720p60-portrait", "720p60", ["portrait"], "source"),
+                    new M3U8.Stream.ExtStreamInfo(0, 1, ["avc1.4D401F", "mp4a.40.2"], (720, 1280), 58.644M, "", "720p60-portrait", "720p60", ["portrait"], "source"),
                     "720p60-portrait"),
             ]);
 

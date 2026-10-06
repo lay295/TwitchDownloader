@@ -21,6 +21,15 @@ namespace TwitchDownloaderCore.Tools
             await SerializeChapters(sw, videoMomentEdges, startOffset, videoLength);
         }
 
+        public static async Task SerializeAsync(string filePath, StreamInfo streamInfo)
+        {
+            await using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
+            await using var sw = new StreamWriter(fs) { NewLine = LINE_FEED };
+
+            var streamer = GetUserName(streamInfo.broadcaster?.displayName, streamInfo.broadcaster?.login);
+            await SerializeGlobalMetadata(sw, streamer, streamInfo.id, streamInfo.title, streamInfo.createdAt, null, null, streamInfo.game?.displayName, null, "Stream");
+        }
+
         public static async Task SerializeAsync(string filePath, string videoId, ShareClipRenderStatusClip clip, IEnumerable<VideoMomentEdge> videoMomentEdges)
         {
             await using var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
@@ -33,8 +42,8 @@ namespace TwitchDownloaderCore.Tools
             await SerializeChapters(sw, videoMomentEdges);
         }
 
-        private static async Task SerializeGlobalMetadata(StreamWriter sw, [AllowNull] string streamer, string id, string title, DateTime createdAt, int viewCount, [AllowNull] string description = null, [AllowNull] string game = null,
-            [AllowNull] string clipper = null)
+        private static async Task SerializeGlobalMetadata(StreamWriter sw, [AllowNull] string streamer, string id, string title, DateTime createdAt, int? viewCount = null, [AllowNull] string description = null, [AllowNull] string game = null,
+            [AllowNull] string clipper = null, string idType = "Video")
         {
             // ReSharper disable once StringLiteralTypo
             await sw.WriteLineAsync(";FFMETADATA1");
@@ -54,8 +63,9 @@ namespace TwitchDownloaderCore.Tools
             if (!string.IsNullOrWhiteSpace(clipper))
                 await sw.WriteLineAsync($@"Clipped by: {EscapeMetadataValue(clipper)}\");
             await sw.WriteLineAsync(@$"Created at: {EscapeMetadataValue(createdAt.ToString("u"))}\");
-            await sw.WriteLineAsync(@$"Video id: {EscapeMetadataValue(id)}\");
-            await sw.WriteLineAsync(@$"Views: {viewCount}");
+            await sw.WriteLineAsync(@$"{idType} id: {EscapeMetadataValue(id)}\");
+            if (viewCount is not null)
+                await sw.WriteLineAsync(@$"Views: {viewCount}");
         }
 
         private static async Task SerializeChapters(StreamWriter sw, IEnumerable<VideoMomentEdge> videoMomentEdges, TimeSpan startOffset = default, TimeSpan videoLength = default)

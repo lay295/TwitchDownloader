@@ -260,17 +260,17 @@ namespace TwitchDownloaderCore.Tests.ModelTests
 
             var streams = new M3U8.Stream[]
             {
-                new(new M3U8.Stream.ExtStreamInfo(0, 5898203, ["avc1.64002A", "mp4a.40.2"], (1920, 1080), 59.995m, "1080p60", "1080p60", ["landscape"], "source"),
+                new(new M3U8.Stream.ExtStreamInfo(0, 5898203, ["avc1.64002A", "mp4a.40.2"], (1920, 1080), 59.995m, "", "1080p60", "1080p60", ["landscape"], "source"),
                     "https://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/chunked/index-dvr.m3u8"),
-                new(new M3U8.Stream.ExtStreamInfo(0, 3443956, ["avc1.4D0020", "mp4a.40.2"], (1280, 720), 59.995m, "720p60", "720p60", ["landscape"], "transcode"),
+                new(new M3U8.Stream.ExtStreamInfo(0, 3443956, ["avc1.4D0020", "mp4a.40.2"], (1280, 720), 59.995m, "", "720p60", "720p60", ["landscape"], "transcode"),
                     "https://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/720p60/index-dvr.m3u8"),
-                new(new M3U8.Stream.ExtStreamInfo(0, 1454397, ["avc1.4D001F", "mp4a.40.2"], (852, 480), 29.998m, "480p30", "480p", ["landscape"], "transcode"),
+                new(new M3U8.Stream.ExtStreamInfo(0, 1454397, ["avc1.4D001F", "mp4a.40.2"], (852, 480), 29.998m, "", "480p30", "480p", ["landscape"], "transcode"),
                     "https://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/480p30/index-dvr.m3u8"),
-                new(new M3U8.Stream.ExtStreamInfo(0, 220328, ["mp4a.40.2"], (0, 0), 0m, "audio_only", "Audio Only", ["landscape", "portrait"], "source"),
+                new(new M3U8.Stream.ExtStreamInfo(0, 220328, ["mp4a.40.2"], (0, 0), 0m, "", "audio_only", "Audio Only", ["landscape", "portrait"], "source"),
                     "https://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/audio_only/index-dvr.m3u8"),
-                new(new M3U8.Stream.ExtStreamInfo(0, 708016, ["avc1.4D001E", "mp4a.40.2"], (640, 360), 29.998m, "360p30", "360p", ["landscape"], "transcode"),
+                new(new M3U8.Stream.ExtStreamInfo(0, 708016, ["avc1.4D001E", "mp4a.40.2"], (640, 360), 29.998m, "", "360p30", "360p", ["landscape"], "transcode"),
                     "https://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/360p30/index-dvr.m3u8"),
-                new(new M3U8.Stream.ExtStreamInfo(0, 288409, ["avc1.4D000C", "mp4a.40.2"], (284, 160), 29.998m, "160p30", "160p", ["landscape"], "transcode"),
+                new(new M3U8.Stream.ExtStreamInfo(0, 288409, ["avc1.4D000C", "mp4a.40.2"], (284, 160), 29.998m, "", "160p30", "160p", ["landscape"], "transcode"),
                     "https://abc123def456gh.cloudfront.net/123abc456def789ghi01_streamer42_12345678901_1234567890/160p30/index-dvr.m3u8")
             };
 

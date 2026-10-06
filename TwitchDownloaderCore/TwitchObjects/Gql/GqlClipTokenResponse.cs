@@ -12,12 +12,6 @@
         public ClipToken clip { get; set; }
     }
 
-    public class PlaybackAccessToken
-    {
-        public string signature { get; set; }
-        public string value { get; set; }
-    }
-
     public class GqlClipTokenResponse
     {
         public ClipTokenData data { get; set; }

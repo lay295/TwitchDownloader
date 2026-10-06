@@ -10,6 +10,9 @@ namespace TwitchDownloaderCore.TwitchObjects.Api
         [JsonPropertyName("IVS_NAME")]
         public string IvsName { get; set; }
 
+        [JsonPropertyName("NAME")]
+        public string Name { get; set; }
+
         [JsonPropertyName("BANDWIDTH")]
         public int Bandwidth { get; set; }
 

@@ -152,11 +152,11 @@ namespace TwitchDownloaderCore.Models
             }
         }
 
-        public partial record Stream(Stream.ExtStreamInfo StreamInfo, Stream.ExtPartInfo PartInfo, DateTimeOffset ProgramDateTime, ByteRange ByteRange, string Path)
+        public partial record Stream(Stream.ExtStreamInfo StreamInfo, Stream.ExtMediaInfo MediaInfo, Stream.ExtPartInfo PartInfo, DateTimeOffset ProgramDateTime, ByteRange ByteRange, string Path)
         {
-            public Stream(ExtStreamInfo streamInfo, string path) : this(streamInfo, null, default, default, path) { }
+            public Stream(ExtStreamInfo streamInfo, string path) : this(streamInfo, null, null, default, default, path) { }
 
-            public Stream(ExtPartInfo partInfo, DateTimeOffset programDateTime, ByteRange byteRange, string path) : this(null, partInfo, programDateTime, byteRange, path) { }
+            public Stream(ExtPartInfo partInfo, DateTimeOffset programDateTime, ByteRange byteRange, string path) : this(null, null, partInfo, programDateTime, byteRange, path) { }
 
             public bool IsPlaylist { get; } = Path.AsSpan().EndsWith(".m3u8") || Path.AsSpan().EndsWith(".m3u");
 
@@ -253,19 +253,22 @@ namespace TwitchDownloaderCore.Models
                     public override string ToString() => $"{Width}x{Height}";
 
                     public static implicit operator StreamResolution((uint width, uint height) tuple) => new(tuple.width, tuple.height);
+
+                    public static readonly StreamResolution None = new(0, 0);
                 }
 
                 internal const string STREAM_INFO_KEY = "#EXT-X-STREAM-INF:";
 
                 private ExtStreamInfo() { }
 
-                public ExtStreamInfo(int programId, int bandwidth, string[] codecs, StreamResolution resolution, decimal framerate, string stableVariantId, string ivsName, string[] ivsGroups, string ivsVariantSource)
+                public ExtStreamInfo(int programId, int bandwidth, string[] codecs, StreamResolution resolution, decimal framerate, string video, string stableVariantId, string ivsName, string[] ivsGroups, string ivsVariantSource)
                 {
                     ProgramId = programId;
                     Bandwidth = bandwidth;
                     Codecs = codecs ?? [];
                     Resolution = resolution;
                     Framerate = framerate;
+                    Video = video ?? "";
                     StableVariantId = stableVariantId ?? "";
                     IvsName = ivsName ?? "";
                     IvsGroups = ivsGroups ?? [];
@@ -277,6 +280,7 @@ namespace TwitchDownloaderCore.Models
                 public IReadOnlyList<string> Codecs { get; internal set; } = [];
                 public StreamResolution Resolution { get; internal set; }
                 public decimal Framerate { get; internal set; }
+                public string Video { get; internal set; } = "";
                 public string StableVariantId { get; internal set; } = "";
                 public string IvsName { get; internal set; } = "";
                 public IReadOnlyList<string> IvsGroups { get; internal set; } = [];
@@ -301,6 +305,9 @@ namespace TwitchDownloaderCore.Models
 
                     if (Framerate != 0)
                         sb.AppendKeyValue("FRAME-RATE=", Framerate, default);
+
+                    if (!string.IsNullOrWhiteSpace(Video))
+                        sb.AppendKeyQuoteValue("VIDEO=", Video, keyValueSeparator);
 
                     if (!string.IsNullOrWhiteSpace(StableVariantId))
                         sb.AppendKeyQuoteValue("STABLE-VARIANT-ID=", StableVariantId, keyValueSeparator);
