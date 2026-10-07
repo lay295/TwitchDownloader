@@ -691,5 +691,27 @@ namespace TwitchDownloaderWPF
             Settings.Default.ChatTextTimestampStyle = (int)TimestampFormat.None;
             Settings.Default.Save();
         }
+
+        private void BtnSyncFromVod_Click(object sender, RoutedEventArgs e)
+        {
+            var vod = MainWindow.pageVodDownload;
+            if (vod.currentVideoId == 0)
+            {
+                MessageBox.Show(Application.Current.MainWindow!, "No VOD is loaded on the VOD Download page.", "Nothing to Sync", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            textUrl.Text = vod.textUrl.Text;
+
+            CheckTrimStart.IsChecked = vod.checkStart.IsChecked;
+            numStartHour.Value = vod.numStartHour.Value;
+            numStartMinute.Value = vod.numStartMinute.Value;
+            numStartSecond.Value = vod.numStartSecond.Value;
+
+            CheckTrimEnd.IsChecked = vod.checkEnd.IsChecked;
+            numEndHour.Value = vod.numEndHour.Value;
+            numEndMinute.Value = vod.numEndMinute.Value;
+            numEndSecond.Value = vod.numEndSecond.Value;
+        }
     }
 }
