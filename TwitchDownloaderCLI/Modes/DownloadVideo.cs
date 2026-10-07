@@ -20,7 +20,7 @@ namespace TwitchDownloaderCLI.Modes
             var downloadOptions = GetDownloadOptions(inputOptions, collisionHandler, progress);
 
             var videoDownloader = new VideoDownloader(downloadOptions, progress);
-            videoDownloader.DownloadAsync(new CancellationToken()).Wait();
+            videoDownloader.DownloadAsync(new CancellationToken()).GetAwaiter().GetResult();
         }
 
         private static VideoDownloadOptions GetDownloadOptions(VideoDownloadArgs inputOptions, FileCollisionHandler collisionHandler, ITaskLogger logger)

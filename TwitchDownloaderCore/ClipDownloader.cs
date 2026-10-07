@@ -112,12 +112,12 @@ namespace TwitchDownloaderCore
 
             if (clip.playbackAccessToken is null)
             {
-                throw new NullReferenceException("Invalid Clip, deleted possibly?");
+                throw new TwitchDownloaderException("Invalid Clip, deleted possibly?");
             }
 
             if (clip.assets is not { Length: > 0 } || clip.assets[0].videoQualities is not { Length: > 0 })
             {
-                throw new NullReferenceException("Clip has no video qualities, deleted possibly?");
+                throw new TwitchDownloaderException("Clip has no video qualities, deleted possibly?");
             }
 
             var qualityUrl = GetDownloadUrlForQuality(clip, downloadOptions.Quality);
@@ -131,7 +131,7 @@ namespace TwitchDownloaderCore
             var qualities = VideoQualities.FromClip(clip);
             var userQuality = qualities.GetQuality(qualityString) ?? qualities.BestQuality();
 
-            return userQuality?.Item.sourceURL ?? throw new NullReferenceException($"Unknown Quality: {qualityString}");
+            return userQuality?.Item.sourceURL ?? throw new TwitchDownloaderException($"Unknown Quality: {qualityString}");
         }
 
         private static async Task DownloadFileTaskAsync(string url, FileStream fs, int throttleKib, IProgress<StreamCopyProgress> progress, CancellationToken cancellationToken)

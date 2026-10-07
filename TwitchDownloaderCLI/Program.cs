@@ -6,6 +6,7 @@ using TwitchDownloaderCLI.Models;
 using TwitchDownloaderCLI.Modes;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
+using TwitchDownloaderCore;
 using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderCLI
@@ -25,20 +26,32 @@ namespace TwitchDownloaderCLI
             var parserResult = parser.ParseArguments<VideoDownloadArgs, ClipDownloadArgs, ChatDownloadArgs, ChatUpdateArgs, ChatRenderArgs, InfoArgs, FfmpegArgs, CacheArgs, UpdateArgs, TsMergeArgs>(preParsedArgs);
             parserResult.WithNotParsed(errors => WriteHelpText(errors, parserResult, parser.Settings));
 
-            CoreLicensor.EnsureFilesExist(null);
-            WriteApplicationBanner((ITwitchDownloaderArgs)parserResult.Value);
+            var downloaderArgs = (ITwitchDownloaderArgs)parserResult.Value;
 
-            parserResult
-                .WithParsed<VideoDownloadArgs>(DownloadVideo.Download)
-                .WithParsed<ClipDownloadArgs>(DownloadClip.Download)
-                .WithParsed<ChatDownloadArgs>(DownloadChat.Download)
-                .WithParsed<ChatUpdateArgs>(UpdateChat.Update)
-                .WithParsed<ChatRenderArgs>(RenderChat.Render)
-                .WithParsed<InfoArgs>(InfoHandler.PrintInfo)
-                .WithParsed<FfmpegArgs>(FfmpegHandler.ParseArgs)
-                .WithParsed<CacheArgs>(CacheHandler.ParseArgs)
-                .WithParsed<UpdateArgs>(UpdateHandler.ParseArgs)
-                .WithParsed<TsMergeArgs>(MergeTs.Merge);
+            CoreLicensor.EnsureFilesExist(null);
+            WriteApplicationBanner(downloaderArgs);
+
+            try
+            {
+                parserResult
+                    .WithParsed<VideoDownloadArgs>(DownloadVideo.Download)
+                    .WithParsed<ClipDownloadArgs>(DownloadClip.Download)
+                    .WithParsed<ChatDownloadArgs>(DownloadChat.Download)
+                    .WithParsed<ChatUpdateArgs>(UpdateChat.Update)
+                    .WithParsed<ChatRenderArgs>(RenderChat.Render)
+                    .WithParsed<InfoArgs>(InfoHandler.PrintInfo)
+                    .WithParsed<FfmpegArgs>(FfmpegHandler.ParseArgs)
+                    .WithParsed<CacheArgs>(CacheHandler.ParseArgs)
+                    .WithParsed<UpdateArgs>(UpdateHandler.ParseArgs)
+                    .WithParsed<TsMergeArgs>(MergeTs.Merge);
+            }
+            catch (TwitchDownloaderException ex)
+            {
+                // Expected failures, such as an expired VOD, are reported without a stack trace.
+                using var progress = new CliTaskProgress(downloaderArgs.LogLevel);
+                progress.LogError(ex.Message);
+                Environment.Exit(1);
+            }
         }
 
         private static void WriteHelpText(IEnumerable<Error> errors, ParserResult<object> parserResult, ParserSettings parserSettings)

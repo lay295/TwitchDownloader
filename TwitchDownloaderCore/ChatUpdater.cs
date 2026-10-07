@@ -399,7 +399,7 @@ namespace TwitchDownloaderCore
                     await AppendCommentSection(downloadOptions, tempFile, cancellationToken);
                 }
             }
-            catch (NullReferenceException)
+            catch (TwitchDownloaderException)
             {
                 if (!_trimTaskReportedExpiredVod)
                 {
@@ -436,7 +436,7 @@ namespace TwitchDownloaderCore
                     await AppendCommentSection(downloadOptions, tempFile, cancellationToken);
                 }
             }
-            catch (NullReferenceException)
+            catch (TwitchDownloaderException)
             {
                 if (!_trimTaskReportedExpiredVod)
                 {

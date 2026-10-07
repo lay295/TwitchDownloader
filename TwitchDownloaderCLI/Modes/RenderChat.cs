@@ -21,8 +21,8 @@ namespace TwitchDownloaderCLI.Modes
             var renderOptions = GetRenderOptions(inputOptions, collisionHandler, progress);
 
             using var chatRenderer = new ChatRenderer(renderOptions, progress);
-            chatRenderer.ParseJsonAsync().Wait();
-            chatRenderer.RenderVideoAsync(new CancellationToken()).Wait();
+            chatRenderer.ParseJsonAsync().GetAwaiter().GetResult();
+            chatRenderer.RenderVideoAsync(new CancellationToken()).GetAwaiter().GetResult();
         }
 
         private static ChatRenderOptions GetRenderOptions(ChatRenderArgs inputOptions, FileCollisionHandler collisionHandler, ITaskLogger logger)

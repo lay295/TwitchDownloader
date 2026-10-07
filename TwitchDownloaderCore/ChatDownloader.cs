@@ -265,7 +265,7 @@ namespace TwitchDownloaderCore
         {
             if (string.IsNullOrWhiteSpace(downloadOptions.Id))
             {
-                throw new NullReferenceException("Null or empty video/clip ID");
+                throw new TwitchDownloaderException("Null or empty video/clip ID");
             }
 
             var outputFileInfo = TwitchHelper.ClaimFile(downloadOptions.Filename, downloadOptions.FileCollisionCallback, _progress);
@@ -372,7 +372,7 @@ namespace TwitchDownloaderCore
                 GqlVideoResponse videoInfoResponse = await TwitchHelper.GetVideoInfo(long.Parse(videoId));
                 if (videoInfoResponse.data.video == null)
                 {
-                    throw new NullReferenceException("Invalid VOD, deleted/expired VOD possibly?");
+                    throw new TwitchDownloaderException("Invalid VOD, deleted/expired VOD possibly?");
                 }
 
                 chatRoot.streamer.name = videoInfoResponse.data.video.owner?.displayName;
@@ -415,7 +415,7 @@ namespace TwitchDownloaderCore
                 var clipInfoResponse = await TwitchHelper.GetShareClipRenderStatus(videoId);
                 if (clipInfoResponse.data.clip.video == null || clipInfoResponse.data.clip.videoOffsetSeconds == null)
                 {
-                    throw new NullReferenceException("Invalid VOD for clip, deleted/expired VOD possibly?");
+                    throw new TwitchDownloaderException("Invalid VOD for clip, deleted/expired VOD possibly?");
                 }
 
                 videoId = clipInfoResponse.data.clip.video.id;

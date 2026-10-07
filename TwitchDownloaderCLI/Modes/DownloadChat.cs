@@ -18,7 +18,7 @@ namespace TwitchDownloaderCLI.Modes
             var downloadOptions = GetDownloadOptions(inputOptions, collisionHandler, progress);
 
             var chatDownloader = new ChatDownloader(downloadOptions, progress);
-            chatDownloader.DownloadAsync(CancellationToken.None).Wait();
+            chatDownloader.DownloadAsync(CancellationToken.None).GetAwaiter().GetResult();
         }
 
         private static ChatDownloadOptions GetDownloadOptions(ChatDownloadArgs inputOptions, FileCollisionHandler collisionHandler, ITaskLogger logger)
