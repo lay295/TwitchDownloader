@@ -70,9 +70,15 @@
         public bool hasPreviousPage { get; set; }
     }
 
+    public class GqlCommentError
+    {
+        public string message { get; set; }
+    }
+
     public class GqlCommentResponse
     {
         public CommentData data { get; set; }
+        public List<GqlCommentError> errors { get; set; }
         public Extensions extensions { get; set; }
     }
 
