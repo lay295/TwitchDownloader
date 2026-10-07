@@ -61,25 +61,56 @@ namespace TwitchDownloaderCore
 
             try
             {
-                GqlVideoResponse videoInfoResponse = await TwitchHelper.GetVideoInfo(downloadOptions.Id);
-                if (videoInfoResponse.data.video == null)
+                M3U8 playlist;
+                Uri baseUrl;
+                DateTimeOffset airDate;
+                string[] allQualityPaths;
+                int? storageCheckBandwidth;
+                VideoInfo videoInfo;
+                IEnumerable<VideoMomentEdge> chapterEdges;
+                bool codecsContainAv1;
+
+                if (downloadOptions.RecoverHiddenVod)
                 {
-                    throw new NullReferenceException("Invalid VOD, deleted/expired VOD possibly?");
+                    var playlistUrl = await ResolveRecoveredPlaylistUrl(cancellationToken);
+                    baseUrl = new Uri(playlistUrl[..(playlistUrl.LastIndexOf('/') + 1)], UriKind.Absolute);
+                    (playlist, airDate) = await GetVideoPlaylist(playlistUrl, cancellationToken);
+
+                    // A recovered DVR playlist is the source-quality media playlist directly - there is no
+                    // master playlist, published metadata, or chapter data to fetch.
+                    allQualityPaths = new[] { "chunked" };
+                    storageCheckBandwidth = null;
+                    videoInfo = null;
+                    chapterEdges = null;
+                    codecsContainAv1 = false;
                 }
+                else
+                {
+                    GqlVideoResponse videoInfoResponse = await TwitchHelper.GetVideoInfo(downloadOptions.Id);
+                    if (videoInfoResponse.data.video == null)
+                    {
+                        throw new NullReferenceException("Invalid VOD, deleted/expired VOD possibly?");
+                    }
 
-                GqlVideoChapterResponse videoChapterResponse = await TwitchHelper.GetOrGenerateVideoChapters(downloadOptions.Id, videoInfoResponse.data.video, _progress);
+                    GqlVideoChapterResponse videoChapterResponse = await TwitchHelper.GetOrGenerateVideoChapters(downloadOptions.Id, videoInfoResponse.data.video, _progress);
 
-                var (allQualityPaths, qualityPlaylist) = await GetQualityPlaylist();
+                    var (qualityPaths, qualityPlaylist) = await GetQualityPlaylist();
 
-                var playlistUrl = qualityPlaylist.Path;
-                var baseUrl = new Uri(playlistUrl[..(playlistUrl.LastIndexOf('/') + 1)], UriKind.Absolute);
+                    var playlistUrl = qualityPlaylist.Path;
+                    baseUrl = new Uri(playlistUrl[..(playlistUrl.LastIndexOf('/') + 1)], UriKind.Absolute);
 
-                var videoInfo = videoInfoResponse.data.video;
-                var (playlist, airDate) = await GetVideoPlaylist(playlistUrl, cancellationToken);
+                    videoInfo = videoInfoResponse.data.video;
+                    chapterEdges = videoChapterResponse.data.video.moments.edges;
+                    (playlist, airDate) = await GetVideoPlaylist(playlistUrl, cancellationToken);
+                    allQualityPaths = qualityPaths;
+                    storageCheckBandwidth = qualityPlaylist.StreamInfo.Bandwidth;
+                    codecsContainAv1 = qualityPlaylist.StreamInfo.Codecs.Any(x => x.StartsWith("av01"));
+                }
 
                 var videoListCrop = GetStreamListTrim(playlist.Streams, out var videoLength, out var startOffset, out var endDuration);
 
-                CheckAvailableStorageSpace(qualityPlaylist.StreamInfo.Bandwidth, videoLength);
+                if (storageCheckBandwidth.HasValue)
+                    CheckAvailableStorageSpace(storageCheckBandwidth.Value, videoLength);
 
                 if (Directory.Exists(_vodCacheDir))
                 {
@@ -88,7 +119,7 @@ namespace TwitchDownloaderCore
 
                 TwitchHelper.CreateDirectory(_vodCacheDir);
 
-                if (qualityPlaylist.StreamInfo.Codecs.Any(x => x.StartsWith("av01")))
+                if (codecsContainAv1)
                 {
                     _progress.LogWarning("AV1 VOD support is still experimental. " +
                                          "If you encounter playback issues, try using an FFmpeg-based application like MPV, Kdenlive, or Blender, or re-encode the video file as H.264/AVC or H.265/HEVC with FFmpeg or Handbrake.");
@@ -108,8 +139,15 @@ namespace TwitchDownloaderCore
                 _progress.SetTemplateStatus("Finalizing Video {0}% [4/4]", 0);
 
                 string metadataPath = Path.Combine(_vodCacheDir, "metadata.txt");
-                await FfmpegMetadata.SerializeAsync(metadataPath, downloadOptions.Id.ToString(), videoInfo, downloadOptions.TrimBeginning ? downloadOptions.TrimBeginningTime : TimeSpan.Zero, videoLength,
-                    videoChapterResponse.data.video.moments.edges);
+                if (downloadOptions.RecoverHiddenVod)
+                {
+                    await FfmpegMetadata.SerializeRecoveredAsync(metadataPath, downloadOptions.StreamId, downloadOptions.ChannelLogin, downloadOptions.StreamStartTime);
+                }
+                else
+                {
+                    await FfmpegMetadata.SerializeAsync(metadataPath, downloadOptions.Id.ToString(), videoInfo, downloadOptions.TrimBeginning ? downloadOptions.TrimBeginningTime : TimeSpan.Zero, videoLength,
+                        chapterEdges);
+                }
 
                 var concatListPath = Path.Combine(_vodCacheDir, "concat.txt");
                 var streamIds = GetStreamIds(playlist);
@@ -670,6 +708,54 @@ namespace TwitchDownloaderCore
             videoLength = TimeSpan.FromSeconds((double)((endTime - endOffset) - (startTime + startOffset)));
 
             return new Range(startIndex, endIndex);
+        }
+
+        /// <summary>
+        /// Resolves the DVR playlist URL for a hidden VOD. If the broadcast's stream id and start time
+        /// were not supplied on the options (e.g. captured earlier while live), they are fetched fresh
+        /// from the channel's current stream. Throws if the channel is offline and no metadata was
+        /// provided, or if no CDN is serving the reconstructed playlist.
+        /// </summary>
+        private async Task<string> ResolveRecoveredPlaylistUrl(CancellationToken cancellationToken)
+        {
+            _progress.SetStatus("Recovering Hidden VOD [1/4]");
+
+            var login = downloadOptions.ChannelLogin;
+            var streamId = downloadOptions.StreamId;
+            var startTime = downloadOptions.StreamStartTime;
+
+            if (string.IsNullOrWhiteSpace(login))
+                throw new InvalidOperationException("A channel login is required to recover a hidden VOD.");
+
+            if (string.IsNullOrWhiteSpace(streamId) || startTime == default)
+            {
+                _progress.LogInfo($"Fetching live broadcast metadata for '{login}'...");
+                var metadata = await TwitchHelper.GetStreamMetadata(login);
+                var stream = metadata?.data?.user?.stream;
+                if (stream is null)
+                {
+                    throw new InvalidOperationException(
+                        $"'{login}' is not currently live and no captured broadcast metadata was provided. " +
+                        "Hidden VOD recovery needs the stream id and start time, which are only available while the channel is live.");
+                }
+
+                login = metadata.data.user.login ?? login;
+                streamId = stream.id;
+                startTime = stream.createdAt;
+                downloadOptions.ChannelLogin = login;
+                downloadOptions.StreamId = streamId;
+                downloadOptions.StreamStartTime = startTime;
+            }
+
+            var playlistUrl = await TwitchHelper.RecoverHiddenVodPlaylistUrl(login, streamId, startTime, downloadOptions.Quality, _progress, cancellationToken);
+            if (string.IsNullOrEmpty(playlistUrl))
+            {
+                throw new InvalidOperationException(
+                    "Could not locate the broadcast's segments on any known Twitch CDN. " +
+                    "The broadcast may have ended too long ago (DVR segments are typically purged within a day or two), or the reconstruction method may no longer be valid.");
+            }
+
+            return playlistUrl;
         }
 
         private async Task<(string[] allQualityPaths, M3U8.Stream qualityPlaylist)> GetQualityPlaylist()
