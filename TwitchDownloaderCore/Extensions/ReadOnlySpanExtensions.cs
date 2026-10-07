@@ -302,6 +302,19 @@ namespace TwitchDownloaderCore.Extensions
             return length;
         }
 
+        public static bool IsWhiteSpace(this ReadOnlySpan<byte> str)
+        {
+            foreach (var b in str)
+            {
+                if (!char.IsWhiteSpace((char)b))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         public static int CopyToExcept<T>(this ReadOnlySpan<T> str, Span<T> destination, SearchValues<T> excludeChars) where T : IEquatable<T>
         {
             var firstIndex = str.IndexOfAny(excludeChars);
