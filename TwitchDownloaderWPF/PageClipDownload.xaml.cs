@@ -247,7 +247,7 @@ namespace TwitchDownloaderWPF
             {
                 Filter = "MP4 Files | *.mp4",
                 FileName = FilenameService.GetFilename(Settings.Default.TemplateClip, textTitle.Text, clipId, currentVideoTime, textStreamer.Text, streamerId, TimeSpan.Zero, clipLength, clipLength, viewCount, game,
-                    clipperName, clipperId) + ".mp4"
+                    clipperName, clipperId, removeEmojis: Settings.Default.RemoveEmojisFromFilenames) + ".mp4"
             };
             if (saveFileDialog.ShowDialog() != true)
             {

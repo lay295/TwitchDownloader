@@ -132,6 +132,33 @@ namespace TwitchDownloaderCore.Tests.ServiceTests
             Assert.Equal(expected, result);
         }
 
+        [Theory]
+        [InlineData("Hello 👋 World", "Hello World")]
+        [InlineData("Game ⭐ Stream", "Game Stream")]
+        [InlineData("Fun 👨‍👩‍👧‍👦 times", "Fun times")]
+        [InlineData("Flag 🇺🇸 raise", "Flag raise")]
+        [InlineData("Trailing 🎮", "Trailing")]
+        [InlineData("No emoji here", "No emoji here")]
+        public void RemovesEmojisFromTitleWhenRequested(string title, string expected)
+        {
+            var (_, id, date, channel, channelId, trimStart, trimEnd, videoLength, viewCount, game, clipper, clipperId) = GetExampleInfo();
+
+            var result = FilenameService.GetFilename("{title}", title, id, date, channel, channelId, trimStart, trimEnd, videoLength, viewCount, game, clipper, clipperId, removeEmojis: true);
+
+            Assert.Equal(expected, result);
+        }
+
+        [Fact]
+        public void KeepsEmojisWhenNotRequested()
+        {
+            const string TITLE = "Keep 🎮 me";
+            var (_, id, date, channel, channelId, trimStart, trimEnd, videoLength, viewCount, game, clipper, clipperId) = GetExampleInfo();
+
+            var result = FilenameService.GetFilename("{title}", TITLE, id, date, channel, channelId, trimStart, trimEnd, videoLength, viewCount, game, clipper, clipperId);
+
+            Assert.Equal(TITLE, result);
+        }
+
         [Fact]
         public void RandomStringIsRandom()
         {
