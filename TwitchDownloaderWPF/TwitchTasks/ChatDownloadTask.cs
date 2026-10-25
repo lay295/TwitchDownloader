@@ -16,6 +16,7 @@ namespace TwitchDownloaderWPF.TwitchTasks
             TokenSource = new CancellationTokenSource();
             Exception = null;
             CanReinitialize = false;
+            DelayCompleted = false;
             ChangeStatus(TwitchTaskStatus.Ready);
         }
 
@@ -28,13 +29,21 @@ namespace TwitchDownloaderWPF.TwitchTasks
         {
             var progress = new WpfTaskProgress(i => Progress = i, s => DisplayStatus = s);
 
-            if (DownloadOptions.DelayDownload && long.TryParse(DownloadOptions.Id, out var videoId))
+            if (!DelayCompleted && DownloadOptions.DelayDownload && long.TryParse(DownloadOptions.Id, out var videoId))
             {
                 var success = await DelayUntilVideoOffline(videoId, progress);
                 if (!success)
                 {
                     ChangeStatus(TwitchTaskStatus.Failed);
                     CanReinitialize = true;
+                    return;
+                }
+
+                if (!TokenSource.IsCancellationRequested)
+                {
+                    // Waiting for the video to go offline must not use up a slot, so queue up again and let the task manager apply the parallel limit
+                    DelayCompleted = true;
+                    ChangeStatus(TwitchTaskStatus.Ready);
                     return;
                 }
             }
