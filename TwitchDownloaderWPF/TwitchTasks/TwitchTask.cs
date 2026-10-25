@@ -50,6 +50,12 @@ namespace TwitchDownloaderWPF.TwitchTasks
 
         public abstract string OutputFile { get; }
 
+        /// <summary>
+        /// Whether the wait for a live video to end is over. A task that finished waiting goes back to
+        /// <see cref="TwitchTaskStatus.Ready"/> so it has to wait for a free slot like any other task.
+        /// </summary>
+        protected bool DelayCompleted { get; set; }
+
         public bool CanCancel
         {
             get;
