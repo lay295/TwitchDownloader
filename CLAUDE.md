@@ -61,7 +61,7 @@ python3 .github/scripts/test_report.py --results results --changed changed.txt -
 - Block-scoped namespaces, `Assert.Equal(expected, actual)`, one assertion topic per test, no `Thread.Sleep` to "wait for" work.
 
 ## CI (.github/workflows)
-- `test.yml` – on push to master and every PR: ubuntu/windows/macos matrix, installs ffmpeg, runs Core + CLI (+ WPF on Windows) with coverage, then the E2E namespace uninstrumented, uploads JUnit/cobertura, and the `report` job posts/updates one sticky PR comment via `.github/scripts/test_report.py` + `post_pr_comment.sh`.
+- `test.yml` – on push to master and every PR: ubuntu/windows/macos matrix, installs ffmpeg, runs Core + CLI (+ WPF on Windows) with coverage, then the E2E namespace uninstrumented, uploads JUnit/cobertura, and the `report` job posts/updates one sticky PR comment (built by `.github/scripts/test_report.py`).
 - `test-report-comment.yml` – posts that comment for fork PRs (runs with the base repo's token after `Tests` completes).
 - `render-preview.yml` – a `/render-preview` PR comment (owner/member/collaborator) renders the sample chats, the alpha mask and a real highlight chat with the base and PR builds, and posts the frames side by side with a difference image (images live on the `render-previews` branch). Renders are lossless and deterministic, so "✅ identical" means pixel-identical. Run it locally against two CLI builds with `python3 .github/scripts/render_preview.py --base <base CLI> --head <PR CLI> --fixtures TwitchDownloaderCore.Tests/TestData --out preview`.
 - `build.yml` / `build-pr.yml` – release/PR publish builds with the profiles above.

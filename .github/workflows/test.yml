@@ -100,13 +100,13 @@ jobs:
           echo "$PR_NUMBER" > pr-comment/pr-number.txt
           cat pr-comment/comment.md >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Post or update the sticky comment
+      - name: Post or update the PR comment
         # PRs from forks get a read-only token here; test-report-comment.yml posts for those from the pr-comment artifact.
         if: github.event.pull_request.head.repo.full_name == github.repository
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REPO: ${{ github.repository }}
-        run: bash .github/scripts/post_pr_comment.sh pr-comment
+        uses: marocchino/sticky-pull-request-comment@v3
+        with:
+          header: test-report
+          path: pr-comment/comment.md
 
       - uses: actions/upload-artifact@v7
         with:

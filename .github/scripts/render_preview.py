@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Render the committed sample chats with the base-branch CLI and the PR CLI, and lay the results side by side for review.
 
-Writes <out>/images/*.png, <out>/logs/*.txt and <out>/comment.md. Image links in comment.md use the {BASE_URL} placeholder,
-which publish_render_preview.sh replaces once the images are hosted.
+Writes <out>/images/*.png, <out>/logs/*.txt and <out>/comment.md, whose image links point at --image-url (where CI hosts the
+images; the default "images" makes the comment viewable next to the local output).
 """
 import argparse
 import os
@@ -55,7 +55,7 @@ def diff_image(base_png, head_png, png):
     return run(["ffmpeg", "-v", "error", "-y", "-i", base_png, "-i", head_png, "-filter_complex", graph, png]).returncode == 0
 
 
-def compare(key, base, head, labels, images):
+def compare(key, base, head, labels, images, url):
     """Compares two successfully rendered videos frame by frame. Returns (status, markdown rows)."""
     (base_video, base_hashes), (head_video, head_hashes) = base, head
     count = min(len(base_hashes), len(head_hashes))
@@ -77,8 +77,8 @@ def compare(key, base, head, labels, images):
     caption = " and ".join(f"{n / FPS:.1f}s" for n in frames)
     header = f"| {labels[0]} | {labels[1]} |" + (" difference (×4) |" if have_diff else "")
     rows = [f"Frames at {caption}.", "", header, "|---|---|" + ("---|" if have_diff else ""),
-            f'| <img src="{{BASE_URL}}/{key}-base.png" width="300"> | <img src="{{BASE_URL}}/{key}-head.png" width="300"> |'
-            + (f' <img src="{{BASE_URL}}/{key}-diff.png" width="300"> |' if have_diff else "")]
+            f'| <img src="{url}/{key}-base.png" width="300"> | <img src="{url}/{key}-head.png" width="300"> |'
+            + (f' <img src="{url}/{key}-diff.png" width="300"> |' if have_diff else "")]
     return status, rows
 
 
@@ -95,6 +95,7 @@ def main():
     parser.add_argument("--out", required=True)
     parser.add_argument("--base-label", default="base")
     parser.add_argument("--head-label", default="PR")
+    parser.add_argument("--image-url", default="images", help="URL (or relative path) the images will be served from")
     args = parser.parse_args()
 
     images, logs = os.path.join(args.out, "images"), os.path.join(args.out, "logs")
@@ -118,7 +119,7 @@ def main():
         rows = []
         if base_ok and head_ok:
             labels = (args.base_label, args.head_label)
-            status, rows = compare(name, (base_video, base_hashes), (head_video, head_hashes), labels, images)
+            status, rows = compare(name, (base_video, base_hashes), (head_video, head_hashes), labels, images, args.image_url)
             if "--generate-mask" in extra:
                 masks = []
                 for video in (base_video, head_video):
@@ -126,7 +127,7 @@ def main():
                     mask = f"{root}_mask{ext}"
                     masks.append((mask, frame_hashes(mask) if os.path.exists(mask) else []))
                 if all(hashes for _, hashes in masks):
-                    mask_status, mask_rows = compare(f"{name}-mask", masks[0], masks[1], labels, images)
+                    mask_status, mask_rows = compare(f"{name}-mask", masks[0], masks[1], labels, images, args.image_url)
                     status = f"colour: {status}; alpha mask: {mask_status}"
                     rows += ["", "**Alpha mask**", "", *mask_rows]
                 else:
@@ -140,7 +141,7 @@ def main():
                 if ok:
                     count = len(results[side][3])
                     if extract_frames(video, [count - 1], os.path.join(images, f"{name}-{side}.png")):
-                        rows += [f"**{label}** final frame:", "", f'<img src="{{BASE_URL}}/{name}-{side}.png" width="300">', ""]
+                        rows += [f"**{label}** final frame:", "", f'<img src="{args.image_url}/{name}-{side}.png" width="300">', ""]
 
         summary.append(f"| `{name}` | {description} | {status} |")
         command = " ".join(["chatrender", "-i", fixture, *COMMON_ARGS, *extra])

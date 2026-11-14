@@ -28,6 +28,9 @@ jobs:
     permissions:
       contents: read
       pull-requests: read
+    outputs:
+      number: ${{ steps.pr.outputs.number }}
+      image_dir: ${{ steps.pr.outputs.image_dir }}
     steps:
       - name: Resolve PR
         id: pr
@@ -36,7 +39,7 @@ jobs:
           PR: ${{ github.event.pull_request.number || github.event.issue.number }}
         run: |
           gh pr view "$PR" -R "$GITHUB_REPOSITORY" --json number,headRefOid,baseRefOid,baseRefName \
-            --jq '"number=\(.number)\nhead_sha=\(.headRefOid)\nbase_sha=\(.baseRefOid)\nbase_ref=\(.baseRefName)"' >> "$GITHUB_OUTPUT"
+            --jq '"number=\(.number)\nhead_sha=\(.headRefOid)\nbase_sha=\(.baseRefOid)\nbase_ref=\(.baseRefName)\nimage_dir=pr-\(.number)/\(.headRefOid[0:12])"' >> "$GITHUB_OUTPUT"
 
       # PR code runs in this job, so it gets no write token (and checkout doesn't persist one)
       - uses: actions/checkout@v7
@@ -64,14 +67,12 @@ jobs:
       - name: Render and compare
         env:
           BASE_REF: ${{ steps.pr.outputs.base_ref }}
-          PR_NUMBER: ${{ steps.pr.outputs.number }}
-          HEAD_SHA: ${{ steps.pr.outputs.head_sha }}
+          IMAGE_URL: https://raw.githubusercontent.com/${{ github.repository }}/render-previews/${{ steps.pr.outputs.image_dir }}
         run: |
           python3 head/.github/scripts/render_preview.py --base cli/base/TwitchDownloaderCLI --head cli/head/TwitchDownloaderCLI \
-            --fixtures head/TwitchDownloaderCore.Tests/TestData --out preview --base-label "$BASE_REF" --head-label "this PR"
-          echo "$PR_NUMBER" > preview/pr-number.txt
-          echo "$HEAD_SHA" > preview/head-sha.txt
-          sed 's|{BASE_URL}/[^"]*|#|g' preview/comment.md >> "$GITHUB_STEP_SUMMARY"
+            --fixtures head/TwitchDownloaderCore.Tests/TestData --out preview --base-label "$BASE_REF" --head-label "this PR" \
+            --image-url "$IMAGE_URL"
+          cat preview/comment.md >> "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/upload-artifact@v7
         with:
@@ -87,16 +88,24 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      # The default branch, so only trusted scripts get the write token (the PR's images are validated before hosting)
-      - uses: actions/checkout@v7
-        with:
-          sparse-checkout: .github/scripts
       - uses: actions/download-artifact@v8
         with:
           name: render-preview
           path: preview
-      - name: Publish images and comment
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REPO: ${{ github.repository }}
-        run: bash .github/scripts/publish_render_preview.sh preview
+      # The artifact was produced by PR code: host only the PNGs
+      - run: find preview/images -type f ! -name '*.png' -delete
+
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ github.token }}
+          publish_branch: render-previews
+          publish_dir: preview/images
+          destination_dir: ${{ needs.render.outputs.image_dir }}
+          keep_files: true
+          commit_message: "Render preview for #${{ needs.render.outputs.number }}"
+
+      - uses: marocchino/sticky-pull-request-comment@v3
+        with:
+          header: render-preview
+          number: ${{ needs.render.outputs.number }}
+          path: preview/comment.md
