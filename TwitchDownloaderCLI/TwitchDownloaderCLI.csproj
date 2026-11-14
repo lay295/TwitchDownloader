@@ -13,6 +13,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="TwitchDownloaderCLI.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
     <PackageReference Include="JetBrains.Annotations" Version="2026.2.0" />
     <PackageReference Include="Spectre.Console" Version="0.57.2" />

@@ -14,7 +14,8 @@ namespace TwitchDownloaderCLI.Modes
 {
     internal static class UpdateHandler
     {
-        private static readonly HttpClient HttpClient = new();
+        // Not readonly so tests can substitute a fake HttpMessageHandler
+        internal static HttpClient HttpClient = new();
 
         public static void ParseArgs(UpdateArgs args)
         {

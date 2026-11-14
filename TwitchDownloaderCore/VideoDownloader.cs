@@ -15,7 +15,8 @@ namespace TwitchDownloaderCore
     public sealed partial class VideoDownloader
     {
         private readonly VideoDownloadOptions downloadOptions;
-        private readonly HttpClient _httpClient = new() { Timeout = TimeSpan.FromSeconds(30) };
+        // Not readonly so tests can substitute a fake HttpMessageHandler
+        internal HttpClient _httpClient = new() { Timeout = TimeSpan.FromSeconds(30) };
         private readonly ITaskProgress _progress;
         private readonly string _cacheDir;
         private readonly string _vodCacheDir;

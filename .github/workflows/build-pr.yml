@@ -7,19 +7,6 @@ on:
     types: [ opened, reopened ]
 
 jobs:
-  run-tests:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v7
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v6
-        with:
-          dotnet-version: 10.0.x
-      - name: Run TwitchDownloaderCLI Tests
-        run: dotnet test TwitchDownloaderCLI.Tests
-      - name: Run TwitchDownloaderCore Tests
-        run: dotnet test TwitchDownloaderCore.Tests
-
   build-gui:
     runs-on: windows-latest
     env:

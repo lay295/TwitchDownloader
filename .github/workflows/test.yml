@@ -1,0 +1,96 @@
+name: Tests
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      # Rendering/merging tests shell out to ffmpeg; they skip themselves when it is missing, so make sure it is present here.
+      - name: Install FFmpeg (Linux)
+        if: runner.os == 'Linux'
+        run: command -v ffmpeg || (sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg)
+      - name: Install FFmpeg (macOS)
+        if: runner.os == 'macOS'
+        run: command -v ffmpeg || brew install ffmpeg
+      - name: Install FFmpeg (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: command -v ffmpeg || choco install ffmpeg -y --no-progress
+
+      - name: Run tests
+        shell: bash
+        run: |
+          projects="TwitchDownloaderCore.Tests TwitchDownloaderCLI.Tests"
+          if [ "$RUNNER_OS" = "Windows" ] && [ -d TwitchDownloaderWPF.Tests ]; then projects="$projects TwitchDownloaderWPF.Tests"; fi
+          status=0
+          for project in $projects; do
+            dotnet test --project "$project" \
+              --results-directory "$GITHUB_WORKSPACE/TestResults/$project" \
+              --report-junit --report-junit-filename "$project.junit.xml" \
+              --coverlet --coverlet-output-format cobertura --coverlet-include "[TwitchDownloader*]*" --coverlet-exclude "[*.Tests]*" \
+              || status=1
+          done
+          exit $status
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-results-${{ matrix.os }}
+          path: TestResults
+          if-no-files-found: ignore
+
+  report:
+    name: report
+    needs: test
+    if: always() && github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: test-results-*
+          path: results
+
+      - name: Build report
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          mkdir -p pr-comment
+          git diff --name-only "$BASE_SHA...$HEAD_SHA" > changed-files.txt || true
+          python3 .github/scripts/test_report.py --results results --changed changed-files.txt --repo-root . --output pr-comment/comment.md
+          echo "$PR_NUMBER" > pr-comment/pr-number.txt
+          cat pr-comment/comment.md >> "$GITHUB_STEP_SUMMARY"
+
+      # The comment itself is posted by test-report-comment.yml, which runs with write permissions even for PRs from forks.
+      - uses: actions/upload-artifact@v7
+        with:
+          name: pr-comment
+          path: pr-comment

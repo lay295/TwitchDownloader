@@ -27,6 +27,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="TwitchDownloaderCore.Tests" />
+    <InternalsVisibleTo Include="TwitchDownloaderCLI.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="HarfBuzzSharp" Version="14.2.1.1" />
     <PackageReference Include="HarfBuzzSharp.NativeAssets.Linux" Version="14.2.1.1" />
     <PackageReference Include="SkiaSharp" Version="2.88.9" />
