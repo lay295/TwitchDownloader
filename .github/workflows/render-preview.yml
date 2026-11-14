@@ -1,13 +1,9 @@
 name: Render Preview
 
-# Opt-in visual review: the sample chats are rendered by the base branch and by the PR, and the frames are posted side by side
-# as a PR comment. Two ways to trigger it:
-# - Comment "/render-preview" on the PR (owner/members/collaborators only) to render once. Comment-triggered workflows always
-#   run this file from the default branch, so this only works once the workflow is merged.
-# - Add the "render-preview" label (needs triage access) to re-render on every push while the label is on the PR.
+# Opt-in visual review: comment "/render-preview" on a PR (owner/members/collaborators only). The sample chats are rendered by the
+# base branch and by the PR, and the frames are posted side by side as a PR comment. Comment-triggered workflows always run this
+# file from the default branch.
 on:
-  pull_request:
-    types: [ labeled, synchronize, reopened ]
   issue_comment:
     types: [ created ]
 
@@ -17,14 +13,12 @@ permissions:
 jobs:
   render:
     if: >-
-      (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'render-preview') &&
-       (github.event.action != 'labeled' || github.event.label.name == 'render-preview')) ||
-      (github.event_name == 'issue_comment' && github.event.issue.pull_request && startsWith(github.event.comment.body, '/render-preview') &&
-       contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association))
+      github.event.issue.pull_request && startsWith(github.event.comment.body, '/render-preview') &&
+      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
     runs-on: ubuntu-latest
     # Job-level so unrelated PR comments (whose runs skip this job) don't cancel a render in progress
     concurrency:
-      group: render-preview-${{ github.event.pull_request.number || github.event.issue.number }}
+      group: render-preview-${{ github.event.issue.number }}
       cancel-in-progress: true
     permissions:
       contents: read
@@ -34,7 +28,7 @@ jobs:
         id: pr
         env:
           GH_TOKEN: ${{ github.token }}
-          PR: ${{ github.event.pull_request.number || github.event.issue.number }}
+          PR: ${{ github.event.issue.number }}
         run: |
           gh pr view "$PR" -R "$GITHUB_REPOSITORY" --json number,headRefOid,baseRefOid,baseRefName \
             --jq '"number=\(.number)\nhead_sha=\(.headRefOid)\nbase_sha=\(.baseRefOid)\nbase_ref=\(.baseRefName)"' >> "$GITHUB_OUTPUT"
@@ -81,15 +75,12 @@ jobs:
 
   publish:
     needs: render
-    # Fork PRs triggered by a label only get a read-only token; render-preview-comment.yml publishes those from the artifact.
-    # Comment-triggered runs always have a write token, for forks too.
-    if: github.event_name == 'issue_comment' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
     steps:
-      # Comment-triggered runs check out the default branch here, so only trusted scripts get the write token
+      # The default branch, so only trusted scripts get the write token (the PR's images are validated before hosting)
       - uses: actions/checkout@v7
         with:
           sparse-checkout: .github/scripts
