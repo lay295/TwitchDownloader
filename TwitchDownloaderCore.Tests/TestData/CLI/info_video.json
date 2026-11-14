@@ -1,0 +1,15 @@
+{
+  "data": {
+    "video": {
+      "title": "[Hype] Speedrun",
+      "thumbnailURLs": [],
+      "createdAt": "2024-01-02T03:04:05Z",
+      "lengthSeconds": 3723,
+      "owner": { "id": "11", "displayName": "StreamerName", "login": "streamername" },
+      "viewCount": 12345,
+      "game": { "id": "509658", "displayName": "Just Chatting", "boxArtURL": "" },
+      "description": "Line one  \nLine two\n\n",
+      "status": "RECORDED"
+    }
+  }
+}

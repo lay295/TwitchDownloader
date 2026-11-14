@@ -4,11 +4,15 @@ using static System.TimeSpan;
 
 namespace TwitchDownloaderCLI.Tests.ModelTests
 {
+    // Tests TimeDuration, the type behind every trim option (-b/--beginning, -e/--ending). It accepts "90s", "1:30", "1.5m" and friends,
+    // so a parsing mistake silently trims a download or render at the wrong time.
     public class TimeDurationTests
     {
         private const string EN_US = "en-US";
         private const string DE_DE = "de-DE";
 
+        // Every supported notation (unit suffixes, decimal seconds in the given culture, m:ss, h:mm:ss, d:hh:mm:ss) parses to the right duration.
+        // Guards the custom regexes that stop TimeSpan.Parse from reading "10:30" as 10 hours or "36:01:02" as 36 days.
         [Theory]
         [InlineData(EN_US, "200ms", 200 * TicksPerMillisecond)]
         [InlineData(EN_US, "55", 55 * TicksPerSecond)]
@@ -45,15 +49,49 @@ namespace TwitchDownloaderCLI.Tests.ModelTests
             Assert.Equal(expected, actual);
         }
 
+        // Malformed input must throw (CommandLineParser turns the exception into a parse error) instead of yielding a bogus duration.
         [Theory]
         [InlineData("")]
         [InlineData("   ")]
         [InlineData("100 s")]
         [InlineData("123d")]
         [InlineData("0:12345")]
+        [InlineData("x5")]
+        [InlineData("1.2.3s")]
         public void ThrowsOnBadFormat(string input)
         {
-            Assert.ThrowsAny<Exception>(() => TimeDuration.Parse(input));
+            Assert.ThrowsAny<Exception>(() => TimeDuration.Parse(input, CultureInfo.InvariantCulture));
+        }
+
+        // CommandLineParser builds option values through the string constructor, so it must behave exactly like Parse.
+        [Fact]
+        public void StringConstructor_MatchesParse()
+        {
+            var culture = CultureInfo.CurrentCulture;
+            try
+            {
+                CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+
+                Assert.Equal(TimeDuration.Parse("1:30"), new TimeDuration("1:30"));
+                Assert.Equal(new TimeDuration(15 * TicksPerSecond / 10), new TimeDuration("1.5"));
+                Assert.Throws<FormatException>(() => new TimeDuration("nope"));
+            }
+            finally
+            {
+                CultureInfo.CurrentCulture = culture;
+            }
+        }
+
+        // The implicit TimeSpan conversion and ToString are what the CLI modes use to hand trims to Core; MinusOneSeconds is the
+        // "not set" sentinel used by chatupdate/chatrender, so its value must stay exactly -1 second.
+        [Fact]
+        public void ConvertsToTimeSpan()
+        {
+            TimeSpan timeSpan = new TimeDuration(FromSeconds(90));
+
+            Assert.Equal(FromSeconds(90), timeSpan);
+            Assert.Equal("00:01:30", new TimeDuration(FromSeconds(90)).ToString());
+            Assert.Equal(FromSeconds(-1), (TimeSpan)TimeDuration.MinusOneSeconds);
         }
     }
 }
