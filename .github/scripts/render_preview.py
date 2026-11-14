@@ -9,13 +9,10 @@ import os
 import subprocess
 import tempfile
 
-# Real chat, downloaded at run time rather than committed (it's large and contains real viewers' messages). Twitch highlights
-# don't expire, and the embedded images (-E) let both builds render the same file offline.
-REAL_CHAT = ["chatdownload", "--id", "1822879862", "-b", "0", "-e", "120", "-E"]
-
-# (name, fixture relative to TestData or a chatdownload command, description, extra chatrender args)
+# (name, fixture relative to TestData, description, extra chatrender args)
 CASES = [
-    ("real-chat", REAL_CHAT, "real highlight chat: 1,000+ messages, real emotes and badges",
+    # 60 s of a real Twitch highlight chat with embedded emotes/badges; commenter names and ids are anonymized
+    ("real-chat", "Render/real_chat_60s.json.gz", "real highlight chat: 559 messages, real emotes and badges",
      []),
     ("default", "Chat/sample_chat_small.json", "default options",
      []),
@@ -105,16 +102,8 @@ def main():
     os.makedirs(logs, exist_ok=True)
 
     summary, details = [], []
-    for name, source, description, extra in CASES:
-        if isinstance(source, list):
-            chat = os.path.join(tempfile.mkdtemp(), f"{name}.json")
-            download = [os.path.abspath(args.head), *source, "-o", chat, "--temp-path", tempfile.mkdtemp()]
-            if run(download, os.path.join(logs, f"{name}-download.txt")).returncode != 0 or not os.path.exists(chat):
-                summary.append(f"| `{name}` | {description} | ⏭️ skipped: chat download failed (Twitch unavailable?) |")
-                continue
-            fixture = " ".join(source)
-        else:
-            chat, fixture = os.path.join(args.fixtures, source), source
+    for name, fixture, description, extra in CASES:
+        chat = os.path.join(args.fixtures, fixture)
 
         results = {}
         for side, cli in (("base", args.base), ("head", args.head)):
@@ -154,7 +143,7 @@ def main():
                         rows += [f"**{label}** final frame:", "", f'<img src="{{BASE_URL}}/{name}-{side}.png" width="300">', ""]
 
         summary.append(f"| `{name}` | {description} | {status} |")
-        command = " ".join(["chatrender", "-i", f"<{fixture}>" if isinstance(source, list) else fixture, *COMMON_ARGS, *extra])
+        command = " ".join(["chatrender", "-i", fixture, *COMMON_ARGS, *extra])
         icon = next((i for i in ("❌", "⚠️") if i in status), "✅")
         details += ["", f"<details><summary>{icon} <b>{name}</b>: {description}</summary>", "",
                     *rows, "", f"`{command}`", "", "</details>"]
