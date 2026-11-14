@@ -8,7 +8,7 @@ C# / .NET 10 tool for downloading Twitch VODs, clips and chat, and rendering cha
 | `TwitchDownloaderCore` | Library used by both front ends | `TwitchHelper.cs` (GQL/CDN calls, image cache), `VideoDownloader`/`ClipDownloader`/`ChatDownloader`/`ChatUpdater`/`TsMerger`, `ChatRenderer.cs` (SkiaSharp + ffmpeg pipe), `Models/M3U8*.cs`, `Options/`, `Tools/`, `Chat/` (JSON/HTML/TXT writers) |
 | `TwitchDownloaderCLI` | Command line front end (CommandLineParser verbs) | `Program.cs`, one verb per file in `Modes/`, option classes in `Modes/Arguments/`, `Tools/` (`CliTaskProgress`, `PreParseArgs` legacy-syntax rewrite, `FileCollisionHandler`) |
 | `TwitchDownloaderWPF` | Windows-only GUI (`net10.0-windows`) | `Page*.xaml(.cs)`, `Services/`, `TwitchTasks/` (queue items), `Translations/*.resx`, `Themes/*.xaml` |
-| `*.Tests` | xunit v3 on Microsoft.Testing.Platform, one test class per production class | `TwitchDownloaderCore.Tests/TestHelpers` (shared by all three), fixtures in `TwitchDownloaderCore.Tests/TestData/` (linked into the CLI tests), `TwitchDownloaderCLI.Tests/EndToEndTests` (runs the built CLI), `LiveTests` (real Twitch), `WpfResourceTests` (resx/theme checks that run on every OS) |
+| `*.Tests` | xunit v3 on Microsoft.Testing.Platform, one test class per production class | `TwitchDownloaderCore.Tests/TestHelpers` (shared by all three), fixtures in `TwitchDownloaderCore.Tests/TestData/` (linked into the CLI tests), `TwitchDownloaderCLI.Tests/EndToEndTests` (runs the built CLI, network blocked), `WpfResourceTests` (resx/theme checks that run on every OS) |
 
 ## Prerequisites
 - .NET 10 SDK (`global.json` selects the Microsoft.Testing.Platform runner). If `dotnet --version` reports no SDK, point `DOTNET_ROOT`/`PATH` at an install (e.g. `export DOTNET_ROOT=~/.dotnet PATH=~/.dotnet:$PATH`).
@@ -32,7 +32,6 @@ dotnet test --project TwitchDownloaderCore.Tests --filter-class "TwitchDownloade
 dotnet test --project TwitchDownloaderCore.Tests --filter-method "TwitchDownloaderCore.Tests.ModelTests.M3U8Tests.Parse_IgnoresBlankLines"
 dotnet test --project TwitchDownloaderCLI.Tests --filter-namespace "TwitchDownloaderCLI.Tests.EndToEndTests"       # E2E only (~8 s)
 dotnet test --project TwitchDownloaderCLI.Tests --filter-not-namespace "TwitchDownloaderCLI.Tests.EndToEndTests"   # CLI unit tests only
-TD_LIVE_TESTS=1 dotnet test --project TwitchDownloaderCLI.Tests --filter-trait "Category=Live"                     # real Twitch; nightly in CI, never on PRs
 dotnet test --project TwitchDownloaderWPF.Tests                                    # Windows only
 dotnet build TwitchDownloaderWPF.Tests -p:EnableWindowsTargeting=true              # what Linux/macOS can do for WPF
 ```
@@ -64,6 +63,5 @@ python3 .github/scripts/test_report.py --results results --changed changed.txt -
 ## CI (.github/workflows)
 - `test.yml` – on push to master and every PR: ubuntu/windows/macos matrix, installs ffmpeg, runs Core + CLI (+ WPF on Windows) with coverage, then the E2E namespace uninstrumented, uploads JUnit/cobertura, and the `report` job posts/updates one sticky PR comment via `.github/scripts/test_report.py` + `post_pr_comment.sh`.
 - `test-report-comment.yml` – posts that comment for fork PRs (runs with the base repo's token after `Tests` completes).
-- `e2e-live.yml` – nightly (06:17 UTC) and manual: `LiveTests` against real Twitch on all three OSes. A failure there means Twitch changed something, not that the PR is broken.
 - `render-preview.yml` – a `/render-preview` PR comment (owner/member/collaborator) renders the sample chats, the alpha mask and a real highlight chat with the base and PR builds, and posts the frames side by side with a difference image (images live on the `render-previews` branch). Renders are lossless and deterministic, so "✅ identical" means pixel-identical. Run it locally against two CLI builds with `python3 .github/scripts/render_preview.py --base <base CLI> --head <PR CLI> --fixtures TwitchDownloaderCore.Tests/TestData --out preview`.
 - `build.yml` / `build-pr.yml` – release/PR publish builds with the profiles above.

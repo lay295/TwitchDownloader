@@ -22,7 +22,7 @@ namespace TwitchDownloaderCLI.Tests.EndToEndTests
     /// </remarks>
     public static class Cli
     {
-        /// <summary>A proxy nobody listens on: any HTTP request from an "offline" run fails immediately instead of reaching the internet.</summary>
+        /// <summary>A proxy nobody listens on: any HTTP request from the CLI fails immediately instead of reaching the internet.</summary>
         private const string DEAD_PROXY = "http://127.0.0.1:9";
 
         private static readonly string AppHost = Path.Combine(AppContext.BaseDirectory, OperatingSystem.IsWindows() ? "TwitchDownloaderCLI.exe" : "TwitchDownloaderCLI");
@@ -33,9 +33,8 @@ namespace TwitchDownloaderCLI.Tests.EndToEndTests
         /// <param name="workDir">Working directory of the CLI. Its "systemp" sub folder becomes the CLI's system temp folder, so the default cache never touches the real one.</param>
         /// <param name="args">The exact argument array, as a shell would pass it.</param>
         /// <param name="stdin">Text typed at prompts. Stdin is always closed afterwards, so an unexpected prompt can never hang the test.</param>
-        /// <param name="offline">Route all HTTP through <see cref="DEAD_PROXY"/> so the test cannot depend on (or be slowed down by) the network.</param>
         /// <param name="env">Extra environment changes (null value removes the variable).</param>
-        public static CliResult Run(string workDir, IEnumerable<string> args, string? stdin = null, bool offline = true, IReadOnlyDictionary<string, string?>? env = null, TimeSpan? timeout = null)
+        public static CliResult Run(string workDir, IEnumerable<string> args, string? stdin = null, IReadOnlyDictionary<string, string?>? env = null, TimeSpan? timeout = null)
         {
             var psi = File.Exists(AppHost)
                 ? new ProcessStartInfo(AppHost)
@@ -58,13 +57,11 @@ namespace TwitchDownloaderCLI.Tests.EndToEndTests
             psi.Environment["TMP"] = sysTemp;
             psi.Environment["TEMP"] = sysTemp;
 
-            if (offline)
-            {
-                foreach (var name in new[] { "http_proxy", "https_proxy", "all_proxy", "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY" })
-                    psi.Environment[name] = DEAD_PROXY;
-                psi.Environment.Remove("no_proxy");
-                psi.Environment.Remove("NO_PROXY");
-            }
+            // Route all HTTP through DEAD_PROXY so no test can depend on (or be slowed down by) the network
+            foreach (var name in new[] { "http_proxy", "https_proxy", "all_proxy", "HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY" })
+                psi.Environment[name] = DEAD_PROXY;
+            psi.Environment.Remove("no_proxy");
+            psi.Environment.Remove("NO_PROXY");
 
             foreach (var (key, value) in env ?? new Dictionary<string, string?>())
             {
