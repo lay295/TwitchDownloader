@@ -23,6 +23,8 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             Assert.Equal(seconds, result.Seconds);
         }
 
+        // Malformed time codes (repeated/unknown units, negative or fractional numbers) must parse to zero rather than a
+        // partial value, so a bad ?t= parameter never trims a download at a wrong offset.
         [Theory]
         [InlineData("123abc")]
         [InlineData("12s12s")]
@@ -30,6 +32,8 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         [InlineData("123ddd")]
         [InlineData("h")]
         [InlineData("hh")]
+        [InlineData("-5s")] // Negative numbers are rejected by the unsigned parse
+        [InlineData("1.5m")]
         public void ReturnsZeroForInvalidTimeCode(string timeCode)
         {
             var expected = TimeSpan.Zero;

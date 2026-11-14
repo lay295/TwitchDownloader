@@ -81,6 +81,19 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
             });
         }
 
+        // An empty input has nothing to split, so any index returns the (empty) input rather than throwing.
+        // Guards the early-out that M3U8 path handling relies on for blank stream paths.
+        [Theory]
+        [InlineData(0)]
+        [InlineData(5)]
+        [InlineData(-1)]
+        public void ReturnsEmpty_WhenInputEmpty(int index)
+        {
+            var actual = ReadOnlySpanExtensions.GetNthOccurrence("", '/', index.ToIndex());
+
+            Assert.True(actual.IsEmpty);
+        }
+
         [Fact]
         public void Throws_WhenIndexFromEndZero()
         {

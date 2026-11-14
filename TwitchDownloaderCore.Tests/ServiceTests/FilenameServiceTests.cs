@@ -235,5 +235,19 @@ namespace TwitchDownloaderCore.Tests.ServiceTests
                 File.Delete(path);
             }
         }
+
+        // GuessVodFileExtension picks the container for a VOD download from the requested quality: audio-only qualities become
+        // .m4a so players open them as audio, everything else (including no quality = best) is .mp4.
+        [Theory]
+        [InlineData(null, ".mp4")]
+        [InlineData("", ".mp4")]
+        [InlineData("  ", ".mp4")]
+        [InlineData("1080p60", ".mp4")]
+        [InlineData("Audio Only", ".m4a")]
+        [InlineData("audio", ".m4a")]
+        public void GuessVodFileExtension_UsesM4aOnlyForAudio(string? qualityString, string expected)
+        {
+            Assert.Equal(expected, FilenameService.GuessVodFileExtension(qualityString));
+        }
     }
 }

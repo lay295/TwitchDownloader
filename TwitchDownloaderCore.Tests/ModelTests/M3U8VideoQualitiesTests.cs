@@ -204,5 +204,74 @@ namespace TwitchDownloaderCore.Tests.ModelTests
 
             Assert.Null(selectedQuality);
         }
+
+        // Builds a stream that has no resolution/framerate at all, so neither the generated name ("0p") nor the regex lookup can match it.
+        private static M3U8.Stream BareStream(string stableVariantId, string ivsName, string pathSegment) =>
+            new(new M3U8.Stream.ExtStreamInfo(0, 1, [], default, 0, stableVariantId, ivsName, ["landscape"], "transcode"),
+                $"https://abc123.cloudfront.net/abc_streamer42_123/{pathSegment}/index-dvr.m3u8");
+
+        /// <summary>
+        /// When the name/keyword/regex lookups fail (e.g. Twitch omitted RESOLUTION and FRAME-RATE), the user's string is matched against the
+        /// raw STABLE-VARIANT-ID, IVS-NAME and URL quality segment, so users can still pick qualities by Twitch's own labels.
+        /// </summary>
+        [Theory]
+        [InlineData("hd", "hd")]
+        [InlineData("HIGH DEFINITION", "hd")]
+        [InlineData("hd_path", "hd")]
+        [InlineData("sd", "sd")]
+        [InlineData("nope", null)]
+        public static void FallsBackToVariantIdIvsNameOrPathSegment(string qualityString, string? expectedVariant)
+        {
+            var m3u8 = new M3U8(new M3U8.Metadata(), [BareStream("hd", "High Definition", "hd_path"), BareStream("sd", "Standard", "sd_path")]);
+
+            var qualities = VideoQualities.FromM3U8(m3u8);
+
+            Assert.Equal(expectedVariant, qualities.GetQuality(qualityString)?.Item.StreamInfo.StableVariantId);
+        }
+
+        /// <summary>
+        /// Streamers can broadcast several source renditions with the same resolution and framerate (e.g. H.264 + HEVC). Their names get
+        /// "-1"/"-2" suffixes, and a plain "1080p60" request must still resolve (to the first) instead of returning nothing.
+        /// </summary>
+        [Fact]
+        public static void PicksFirst_WhenSeveralStreamsShareResolutionAndFramerate()
+        {
+            var m3u8 = new M3U8(new M3U8.Metadata(), [
+                new M3U8.Stream(new M3U8.Stream.ExtStreamInfo(0, 2, ["hev1"], (1920, 1080), 60, "", "", ["landscape"], "source"), "https://x.net/a/hevc/index.m3u8"),
+                new M3U8.Stream(new M3U8.Stream.ExtStreamInfo(0, 1, ["avc1"], (1920, 1080), 60, "", "", ["landscape"], "source"), "https://x.net/a/avc/index.m3u8"),
+            ]);
+
+            var qualities = VideoQualities.FromM3U8(m3u8);
+
+            Assert.Equal(["1080p60-1", "1080p60-2"], qualities.Select(x => x.ToString()));
+            Assert.Equal("https://x.net/a/hevc/index.m3u8", qualities.GetQuality("1080p60")?.Path);
+        }
+
+        /// <summary>The non-generic enumerator must yield the same qualities as the generic one (used by WPF data binding).</summary>
+        [Fact]
+        public static void NonGenericEnumeratorYieldsAllQualities()
+        {
+            var m3u8 = new M3U8(new M3U8.Metadata(), [BareStream("hd", "", "hd"), BareStream("sd", "", "sd")]);
+
+            var qualities = VideoQualities.FromM3U8(m3u8);
+            var items = new List<object>();
+            var enumerator = ((System.Collections.IEnumerable)qualities).GetEnumerator(); // LINQ's Cast would take the generic path
+            while (enumerator.MoveNext())
+            {
+                items.Add(enumerator.Current);
+            }
+
+            Assert.Equal(qualities.Qualities, items);
+        }
+
+        /// <summary>A collection without a quality list returns null for best/worst instead of throwing.</summary>
+        [Fact]
+        public static void BestAndWorst_ReturnNull_WhenQualitiesNull()
+        {
+            var qualities = new M3U8VideoQualities(null!);
+
+            Assert.Null(qualities.BestQuality());
+            Assert.Null(qualities.WorstQuality());
+        }
     }
 }
