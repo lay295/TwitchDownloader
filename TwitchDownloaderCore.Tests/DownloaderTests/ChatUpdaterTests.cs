@@ -240,7 +240,31 @@ namespace TwitchDownloaderCore.Tests.DownloaderTests
             var chat = await ChatJson.DeserializeAsync(options.OutputFile, cancellationToken: TestContext.Current.CancellationToken);
             Assert.Equal(3, chat.comments.Count);
             Assert.Equal((0d, 60d), (chat.video.start, chat.video.end));
-            Assert.Contains(progress.Info, x => x == "Unable to fetch possible missing comments: source VOD is expired or embedded ID is corrupt");
+            // Both the beginning and the ending trim fail to fetch, but the user is told only once
+            Assert.Single(progress.Info, x => x == "Unable to fetch possible missing comments: source VOD is expired or embedded ID is corrupt");
+        }
+
+        /// <summary>
+        /// A Twitch API failure (here a 500 on the video query) while refreshing the metadata is swallowed like a deleted
+        /// VOD: the existing title/game stay, the user is informed and the file is still written. An update must never
+        /// fail just because Twitch is having a bad day.
+        /// </summary>
+        [Fact]
+        public async Task TwitchApiError_KeepsExistingInfo()
+        {
+            using var temp = new TempDirectory();
+            using var fakes = new Fakes();
+            fakes.Twitch.Intercept = (_, body) => body?.Contains("query{video(id:") == true ? new HttpResponseMessage(System.Net.HttpStatusCode.InternalServerError) : null;
+            var options = Options(temp);
+            var progress = new RecordingTaskProgress();
+
+            await Update(options, progress);
+
+            var chat = await ChatJson.DeserializeAsync(options.OutputFile, cancellationToken: TestContext.Current.CancellationToken);
+            Assert.Equal(("Old title", "Old game"), (chat.video.title, chat.video.game));
+            Assert.Equal(3, chat.comments.Count);
+            Assert.Contains(progress.Info, x => x == "Unable to fetch video info, deleted/expired VOD possibly?");
+            Assert.Empty(progress.Errors);
         }
 
         private static void ServeAllEmbeds(FakeTwitch twitch)

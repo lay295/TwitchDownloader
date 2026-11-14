@@ -2,8 +2,11 @@ using TwitchDownloaderCore.Models;
 
 namespace TwitchDownloaderCore.Tests.ModelTests
 {
+    // Tests M3U8VideoQualities, the quality picker behind --quality / the GUI quality box for VODs and live streams: naming renditions
+    // (1080p60, 720p, Audio Only...), resolving user strings and keywords, and best/worst selection.
     public static class M3U8VideoQualitiesTests
     {
+        // User strings (exact names, 'best'/'source'/'worst' keywords, null for best) resolve to the right rendition of a current master playlist.
         [Theory]
         [InlineData("720", "720p30")]
         [InlineData("720p", "720p30")]
@@ -44,6 +47,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
 
             Assert.Equal(expectedPath, selectedQuality?.Item.Path);
         }
+        // Many spellings of one quality (height only, with 'p', with framerate, WIDTHxHEIGHT, with or without framerate) resolve to the same rendition, and the 30fps default applies when no framerate is given.
 
         [Theory]
         [InlineData("1080", "1080p60")]
@@ -109,6 +113,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
 
             Assert.Equal(expectedPath, selectedQuality?.Item.Path);
         }
+        // When FRAME-RATE is missing, names fall back to resolution only and lookups by '1080p' still work (null when nothing matches).
 
         [Theory]
         [InlineData("1080", "1080p60")]
@@ -147,6 +152,8 @@ namespace TwitchDownloaderCore.Tests.ModelTests
             Assert.Equal(expectedPath, selectedQuality?.Item.Path);
         }
 
+        // Rendition names are built from whatever attributes exist (resolution, framerate, source flag, portrait orientation, audio only),
+        // matching the labels the Twitch player shows.
         [Theory]
         // Landscape
         [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=288409,CODECS=\"avc1.4D000C,mp4a.40.2\",RESOLUTION=1920x1080,FRAME-RATE=60.000,STABLE-VARIANT-ID=\"1080p60\",IVS-NAME=\"1080p60\",IVS-GROUPS=\"landscape\",IVS-VARIANT-SOURCE=\"source\"",
@@ -194,6 +201,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
 
             Assert.Equal(expectedName, qualities.First().Name);
         }
+        // A master playlist without renditions yields null instead of throwing, so callers can report 'no qualities'.
 
         [Fact]
         public static void ReturnsNull_WhenNoStreamsPresent()

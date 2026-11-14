@@ -75,6 +75,35 @@ namespace TwitchDownloaderCore.Tests.ServiceTests
             Assert.True(File.Exists(temp.Combine("keep.txt")));
         }
 
+        /// <summary>
+        /// When the cache cannot be deleted (here: its parent is read-only, so the directory entry cannot be removed), the
+        /// failure is returned with the exception for the caller to show instead of propagating. Unix only: Windows ACLs
+        /// cannot be set up portably here, and root ignores the read-only bit.
+        /// </summary>
+        [Fact]
+        public void ClearCacheDirectory_ReturnsFailureWithException()
+        {
+            Assert.SkipWhen(OperatingSystem.IsWindows() || Environment.UserName == "root", "Needs a non-root user on a Unix file system");
+#pragma warning disable CA1416 // The SkipWhen above guards the platform, which the analyzer cannot see
+            using var temp = new TempDirectory();
+            var cacheDir = Directory.CreateDirectory(temp.Combine(SUFFIX)).FullName;
+            File.SetUnixFileMode(temp.Path, UnixFileMode.UserRead | UnixFileMode.UserExecute);
+
+            try
+            {
+                var success = CacheDirectoryService.ClearCacheDirectory(temp.Path, out var exception);
+
+                Assert.False(success);
+                Assert.True(exception is UnauthorizedAccessException or IOException, exception?.ToString());
+                Assert.True(Directory.Exists(cacheDir));
+            }
+            finally
+            {
+                File.SetUnixFileMode(temp.Path, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+            }
+#pragma warning restore CA1416
+        }
+
         /// <summary>A missing cache folder counts as already cleared (success, no exception) rather than an error.</summary>
         [Fact]
         public void ClearCacheDirectory_SucceedsWhenMissing()

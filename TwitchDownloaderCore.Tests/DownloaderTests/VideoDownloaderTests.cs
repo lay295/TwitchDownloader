@@ -24,6 +24,12 @@ namespace TwitchDownloaderCore.Tests.DownloaderTests
         [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "VerifyDownloadedParts")]
         private static extern Task VerifyDownloadedParts(VideoDownloader downloader, VideoDownloadState downloadState, CancellationToken cancellationToken);
 
+        [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "HandleFfmpegOutput")]
+        private static extern void HandleFfmpegOutput(VideoDownloader downloader, string output, TimeSpan videoLength);
+
+        [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "WaitForDownloadThreads")]
+        private static extern Task<IReadOnlyCollection<Exception>> WaitForDownloadThreads(VideoDownloader downloader, VideoDownloadThread[] downloadThreads, VideoDownloadState downloadState, bool limitThreadRestarts, CancellationToken cancellationToken);
+
         private static VideoDownloader Create(FakeTwitch twitch, TempDirectory temp, RecordingTaskProgress progress, Action<VideoDownloadOptions>? configure = null)
         {
             var options = new VideoDownloadOptions
@@ -226,6 +232,133 @@ namespace TwitchDownloaderCore.Tests.DownloaderTests
             var (_, report) = MediaProbe.Probe(temp.Combine("out", "vod.mp4"));
             Assert.InRange(MediaProbe.DurationSeconds(report), 1.8, 2.5);
             Assert.Contains("Video: h264", report);
+        }
+
+        /// <summary>
+        /// fMP4 stubs: when a part of an init-segment VOD can never be downloaded, its stub is a copy of the init segment
+        /// (not the MPEG-TS stub, which would corrupt an mp4 concat), so ffmpeg still finalizes the remaining parts.
+        /// </summary>
+        [Fact]
+        public async Task Fmp4Vod_PermanentlyFailingPart_IsStubbedWithInitSegment()
+        {
+            TestData.RequireFfmpeg();
+            using var temp = new TempDirectory();
+            var twitch = new FakeTwitch();
+            twitch.Files[$"{FakeTwitch.VOD_BASE}chunked/index-dvr.m3u8"] = Encoding.UTF8.GetBytes(FakeTwitch.MediaPlaylist(["0.mp4", "1.mp4"], mapUri: "init-0.mp4"));
+            foreach (var name in new[] { "init-0.mp4", "0.mp4", "1.mp4" })
+            {
+                twitch.Files[$"{FakeTwitch.VOD_BASE}chunked/{name}"] = await File.ReadAllBytesAsync(TestData.Path("Downloaders", "vod_fmp4", name), TestContext.Current.CancellationToken);
+            }
+
+            twitch.Intercept = (req, _) => req.RequestUri!.AbsolutePath.EndsWith("/1.mp4") ? throw new IOException("Connection reset by peer") : null;
+            var progress = new RecordingTaskProgress();
+            using var _ = FakeGql(twitch);
+
+            await Create(twitch, temp, progress).DownloadAsync(CancellationToken.None);
+
+            Assert.Contains(progress.Warnings, x => x == "Failed to redownload 1 parts, using stubs instead");
+            Assert.DoesNotContain(progress.Errors, x => x.StartsWith("Failed to finalize video")); // The init-only stub must not break the mp4 concat
+            var (_, report) = MediaProbe.Probe(temp.Combine("out", "vod.mp4"));
+            Assert.Contains("Video: h264", report);
+            Assert.InRange(MediaProbe.DurationSeconds(report), 0.8, 2.5); // Part 0 carries the samples; the concat demuxer may still count the stub's declared duration
+        }
+
+        /// <summary>
+        /// When every part fails with a hard (non-HTTP) error, each failure faults a worker; once the restart budget
+        /// (max(threads, 95% of the parts)) is spent the download aborts with the collected exceptions instead of silently
+        /// producing a video made of stubs. The empty output and the download cache are removed.
+        /// Currently WaitForDownloadThreads keeps the pre-restart Task in its "all exited" check, so right after restarting
+        /// a worker it can leave the wait loop while that worker is still downloading: its later fault is never counted
+        /// (the limit is not reached here, only "2 errors were encountered" is logged although all 3 parts failed) and
+        /// verification/stub emission can race the still-running worker.
+        /// </summary>
+        [Fact(Skip = "Bug: VideoDownloader.WaitForDownloadThreads tests IsCompleted on the task captured before thread.StartDownload(), so it can return while a restarted worker is still running; restarted workers' faults are not counted towards the restart limit and verification can start while parts are still downloading")]
+        public async Task AllPartsFailHard_AbortsAtRestartLimit_AndCleansUp()
+        {
+            using var temp = new TempDirectory();
+            var twitch = new FakeTwitch();
+            twitch.AddTsVod();
+            twitch.Intercept = (req, _) => req.RequestUri!.AbsolutePath.EndsWith(".ts") ? throw new IOException("Connection reset by peer") : null;
+            var progress = new RecordingTaskProgress();
+            using var _ = FakeGql(twitch);
+
+            var ex = await Assert.ThrowsAsync<AggregateException>(() => Create(twitch, temp, progress).DownloadAsync(CancellationToken.None));
+
+            Assert.StartsWith("The download thread restart limit was reached.", ex.Message);
+            Assert.Equal(3, ex.InnerExceptions.Count); // One faulted worker per part
+            Assert.All(ex.InnerExceptions, inner => Assert.Contains("Connection reset by peer", inner.ToString()));
+            Assert.False(File.Exists(temp.Combine("out", "vod.mp4")));
+            Assert.Empty(VodCacheDirs(temp));
+        }
+
+        /// <summary>
+        /// The deterministic root cause of the test above: a single worker whose first part fails hard and whose second part
+        /// blocks. After the worker is restarted, WaitForDownloadThreads must keep waiting until the restarted worker has
+        /// finished; today it returns immediately (the old, faulted task is "completed") while the worker is still busy.
+        /// </summary>
+        [Fact(Skip = "Bug: VideoDownloader.WaitForDownloadThreads tests IsCompleted on the task captured before thread.StartDownload(), so it can return while a restarted worker is still running; restarted workers' faults are not counted towards the restart limit and verification can start while parts are still downloading")]
+        public async Task WaitForDownloadThreads_WaitsForRestartedWorker()
+        {
+            using var temp = new TempDirectory();
+            using var release = new SemaphoreSlim(0);
+            var handler = new FakeHttpMessageHandler((req, _) =>
+            {
+                if (req.RequestUri!.AbsolutePath.EndsWith("/0.ts")) throw new IOException("Connection reset by peer");
+                release.Wait(TimeSpan.FromSeconds(10));
+                return FakeHttpMessageHandler.Bytes(FakeTwitch.TsSegment(1));
+            });
+            using var client = new HttpClient(handler);
+            var state = new VideoDownloadState(["chunked"], Parts(1, 1), Range.All, new Uri($"{FakeTwitch.VOD_BASE}chunked/"), null, DateTimeOffset.UtcNow.AddDays(-30));
+            var worker = new VideoDownloadThread(state, client, temp.Path, -1, new RecordingTaskProgress(), CancellationToken.None);
+            var downloader = Create(new FakeTwitch(), temp, new RecordingTaskProgress());
+
+            var waiter = WaitForDownloadThreads(downloader, [worker], state, false, CancellationToken.None);
+            var finishedEarly = await Task.WhenAny(waiter, Task.Delay(2_000, TestContext.Current.CancellationToken)) == waiter;
+            release.Release();
+            var exceptions = await waiter;
+
+            Assert.False(finishedEarly, "WaitForDownloadThreads returned while the restarted worker was still downloading 1.ts");
+            Assert.True(worker.ThreadTask.IsCompleted);
+            Assert.Single(exceptions);
+            Assert.True(File.Exists(temp.Combine("1.ts")));
+        }
+
+        /// <summary>
+        /// ffmpeg's stderr "time=HH:MM:SS.cc" progress lines drive the finalization percentage: whole seconds map to the
+        /// fraction of the video length, hours above 24 are accepted (TimeSpan.Parse would reject them), overshoot is
+        /// clamped to 100 and lines without a time are ignored.
+        /// </summary>
+        [Theory]
+        [InlineData("frame=  100 fps=0.0 q=-1.0 size=1024KiB time=00:00:01.00 bitrate=8000.0kbits/s speed=10x", 4, 25)]
+        [InlineData("size=1024KiB time=25:00:00.00 bitrate=8000.0kbits/s", 50 * 3600, 50)]
+        [InlineData("size=1024KiB time=00:00:10.00 bitrate=8000.0kbits/s", 4, 100)]
+        public void HandleFfmpegOutput_ReportsEncodingProgress(string line, int videoLengthSeconds, int expectedPercent)
+        {
+            using var temp = new TempDirectory();
+            var progress = new RecordingTaskProgress();
+            var downloader = Create(new FakeTwitch(), temp, progress);
+
+            HandleFfmpegOutput(downloader, line, TimeSpan.FromSeconds(videoLengthSeconds));
+            HandleFfmpegOutput(downloader, "Input #0, concat, from 'concat.txt':", TimeSpan.FromSeconds(videoLengthSeconds));
+
+            Assert.Equal([expectedPercent], progress.Percentages);
+        }
+
+        /// <summary>
+        /// ffmpeg prints the fractional part of "time=" in centiseconds, but HandleFfmpegOutput feeds it to the TimeSpan
+        /// constructor as milliseconds, so 00:00:01.50 is read as 1.05s instead of 1.5s and the percentage lags (75% expected here).
+        /// Only visible on short videos, but the progress bar is wrong nonetheless.
+        /// </summary>
+        [Fact(Skip = "Bug: VideoDownloader.HandleFfmpegOutput treats ffmpeg's centisecond fraction (time=HH:MM:SS.cc) as milliseconds, so finalization progress lags behind the real encoding time")]
+        public void HandleFfmpegOutput_ReadsCentiseconds()
+        {
+            using var temp = new TempDirectory();
+            var progress = new RecordingTaskProgress();
+            var downloader = Create(new FakeTwitch(), temp, progress);
+
+            HandleFfmpegOutput(downloader, "size=1024KiB time=00:00:01.50 bitrate=8000.0kbits/s", TimeSpan.FromSeconds(2));
+
+            Assert.Equal([75], progress.Percentages);
         }
 
         /// <summary>

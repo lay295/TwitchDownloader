@@ -10,6 +10,8 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
     // ReSharper disable InvokeAsExtensionMember
     public class StringReplaceNthOccurrenceTests
     {
+        // Each range (counted from the start or, with ^n, from the end) is replaced while the delimiters and the other ranges are kept,
+        // including empty ranges between adjacent delimiters and the real playlist URL case.
         [Theory]
         [InlineData(0, "1/2/3", "A/2/3")]
         [InlineData(1, "1/2/3", "1/A/3")]
@@ -30,6 +32,7 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
 
             Assert.Equal(expected, actual);
         }
+        // A string without the delimiter is a single range, so replacing range 0 (or ^1) replaces the whole string.
 
         [Theory]
         [InlineData(0)]
@@ -43,6 +46,7 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
 
             Assert.Equal(EXPECTED, actual);
         }
+        // Without a delimiter only range 0 exists; other indexes leave the string unchanged rather than throwing, unlike GetNthOccurrence.
 
         [Theory]
         [InlineData(1)]
@@ -60,6 +64,7 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
 
             Assert.Equal(EXPECTED, actual);
         }
+        // An index beyond the available ranges (from either end) returns the input unchanged, so callers need no range check.
 
         [Theory]
         [InlineData(3)]
