@@ -24,6 +24,8 @@ CASES = [
       "--outline", "--timestamp", "--avatars", "--alternate-backgrounds"]),
     ("wide-large-font", "Render/synthetic_chat.json", "wide chat, large font, Twemoji, animated emotes",
      ["--chat-width", "500", "--font-size", "18", "--emoji-vendor", "twemoji"]),
+    ("transparent-mask", "Chat/sample_chat_small.json", "semi-transparent background with the alpha mask (--generate-mask)",
+     ["--background-color", "#80111111", "--generate-mask"]),
 ]
 # Lossless output, so frame hashes and the difference image show only real rendering changes, not codec noise
 COMMON_ARGS = ["--offline", "--framerate", "10", "--chat-height", "500", '--output-args=-c:v ffv1 "{save_path}"']
@@ -54,6 +56,33 @@ def diff_image(base_png, head_png, png):
     """Pixel difference between the two PNGs, brightened 4x so small changes are visible. Fails if the sizes differ."""
     graph = "[0]format=gbrp[a];[1]format=gbrp[b];[a][b]blend=all_mode=difference,lutrgb=r=val*4:g=val*4:b=val*4"
     return run(["ffmpeg", "-v", "error", "-y", "-i", base_png, "-i", head_png, "-filter_complex", graph, png]).returncode == 0
+
+
+def compare(key, base, head, labels, images):
+    """Compares two successfully rendered videos frame by frame. Returns (status, markdown rows)."""
+    (base_video, base_hashes), (head_video, head_hashes) = base, head
+    count = min(len(base_hashes), len(head_hashes))
+    differing = [i for i in range(count) if base_hashes[i] != head_hashes[i]]
+    changed = bool(differing) or len(base_hashes) != len(head_hashes)
+    if not changed:
+        status = "✅ identical"
+    else:
+        status = f"⚠️ {len(differing)}/{count} frames differ"
+        status += f" (first at {differing[0] / FPS:.1f}s)" if differing else ""
+        status += f", frame count {len(base_hashes)} → {len(head_hashes)}" if len(base_hashes) != len(head_hashes) else ""
+    # First differing frame (or the middle one) plus the final frame
+    first = differing[0] if differing else count // 2
+    frames = sorted({first, count - 1})
+    have_base = extract_frames(base_video, frames, os.path.join(images, f"{key}-base.png"))
+    have_head = extract_frames(head_video, frames, os.path.join(images, f"{key}-head.png"))
+    have_diff = changed and have_base and have_head and diff_image(
+        os.path.join(images, f"{key}-base.png"), os.path.join(images, f"{key}-head.png"), os.path.join(images, f"{key}-diff.png"))
+    caption = " and ".join(f"{n / FPS:.1f}s" for n in frames)
+    header = f"| {labels[0]} | {labels[1]} |" + (" difference (×4) |" if have_diff else "")
+    rows = [f"Frames at {caption}.", "", header, "|---|---|" + ("---|" if have_diff else ""),
+            f'| <img src="{{BASE_URL}}/{key}-base.png" width="300"> | <img src="{{BASE_URL}}/{key}-head.png" width="300"> |'
+            + (f' <img src="{{BASE_URL}}/{key}-diff.png" width="300"> |' if have_diff else "")]
+    return status, rows
 
 
 def tail(path, lines=15):
@@ -99,29 +128,21 @@ def main():
         (base_ok, base_video, base_log, base_hashes), (head_ok, head_video, head_log, head_hashes) = results["base"], results["head"]
         rows = []
         if base_ok and head_ok:
-            count = min(len(base_hashes), len(head_hashes))
-            differing = [i for i in range(count) if base_hashes[i] != head_hashes[i]]
-            changed = bool(differing) or len(base_hashes) != len(head_hashes)
-            if not changed:
-                status = "✅ identical"
-            else:
-                status = f"⚠️ {len(differing)}/{count} frames differ"
-                status += f" (first at {differing[0] / FPS:.1f}s)" if differing else ""
-                status += f", frame count {len(base_hashes)} → {len(head_hashes)}" if len(base_hashes) != len(head_hashes) else ""
-            # First differing frame (or the middle one) plus the final frame
-            first = differing[0] if differing else count // 2
-            frames = sorted({first, count - 1})
-            have_base = extract_frames(base_video, frames, os.path.join(images, f"{name}-base.png"))
-            have_head = extract_frames(head_video, frames, os.path.join(images, f"{name}-head.png"))
-            have_diff = changed and have_base and have_head and diff_image(
-                os.path.join(images, f"{name}-base.png"), os.path.join(images, f"{name}-head.png"), os.path.join(images, f"{name}-diff.png"))
-            caption = " and ".join(f"{n / FPS:.1f}s" for n in frames)
-            header = f"| {args.base_label} | {args.head_label} |" + (" difference (×4) |" if have_diff else "")
-            rows += [f"Frames at {caption}.", "", header, "|---|---|" + ("---|" if have_diff else ""),
-                     f'| <img src="{{BASE_URL}}/{name}-base.png" width="300"> | <img src="{{BASE_URL}}/{name}-head.png" width="300"> |'
-                     + (f' <img src="{{BASE_URL}}/{name}-diff.png" width="300"> |' if have_diff else "")]
+            labels = (args.base_label, args.head_label)
+            status, rows = compare(name, (base_video, base_hashes), (head_video, head_hashes), labels, images)
+            if "--generate-mask" in extra:
+                masks = []
+                for video in (base_video, head_video):
+                    root, ext = os.path.splitext(video)
+                    mask = f"{root}_mask{ext}"
+                    masks.append((mask, frame_hashes(mask) if os.path.exists(mask) else []))
+                if all(hashes for _, hashes in masks):
+                    mask_status, mask_rows = compare(f"{name}-mask", masks[0], masks[1], labels, images)
+                    status = f"colour: {status}; alpha mask: {mask_status}"
+                    rows += ["", "**Alpha mask**", "", *mask_rows]
+                else:
+                    status = f"colour: {status}; alpha mask: ❌ missing from {' and '.join(l for l, (_, h) in zip(labels, masks) if not h)}"
         else:
-            changed = True
             status = "❌ " + " and ".join(label for label, ok in ((args.base_label, base_ok), (args.head_label, head_ok)) if not ok) + " failed to render"
             for label, ok, log in ((args.base_label, base_ok, base_log), (args.head_label, head_ok, head_log)):
                 if not ok:
@@ -134,7 +155,8 @@ def main():
 
         summary.append(f"| `{name}` | {description} | {status} |")
         command = " ".join(["chatrender", "-i", f"<{fixture}>" if isinstance(source, list) else fixture, *COMMON_ARGS, *extra])
-        details += ["", f"<details><summary>{status.split(' ')[0]} <b>{name}</b>: {description}</summary>", "",
+        icon = next((i for i in ("❌", "⚠️") if i in status), "✅")
+        details += ["", f"<details><summary>{icon} <b>{name}</b>: {description}</summary>", "",
                     *rows, "", f"`{command}`", "", "</details>"]
 
     comment = ["## Chat render preview", "",
