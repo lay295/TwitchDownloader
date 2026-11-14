@@ -1,3 +1,5 @@
 # Media fixtures must never be line-ending normalized (a CRLF conversion would corrupt them on Windows checkouts)
 *.ts binary
 *.mp4 binary
+*.gif binary
+*.png binary
