@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0-windows</TargetFramework>
+        <UseWPF>true</UseWPF>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <OutputType>Exe</OutputType>
+        <LangVersion>default</LangVersion>
+        <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="coverlet.MTP" Version="10.0.1" />
+        <PackageReference Include="xunit.v3.mtp-v2" Version="3.2.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <!-- Share the Core test helpers (fake HTTP handler, temp directories) instead of duplicating them -->
+        <Compile Include="..\TwitchDownloaderCore.Tests\TestHelpers\*.cs" LinkBase="TestHelpers" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\TwitchDownloaderWPF\TwitchDownloaderWPF.csproj" />
+    </ItemGroup>
+
+</Project>
