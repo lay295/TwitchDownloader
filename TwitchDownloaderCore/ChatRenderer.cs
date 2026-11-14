@@ -940,9 +940,11 @@ namespace TwitchDownloaderCore
                 canvas.DrawRect(renderOptions.SidePadding, 0, renderOptions.AccentStrokeWidth, bitmapInfo.Height, accentPaint);
             }
 
+            var sectionY = 0;
             for (var i = 0; i < sectionImages.Count; i++)
             {
-                canvas.DrawBitmap(sectionImages[i].Bitmap, 0, i * renderOptions.SectionHeight);
+                canvas.DrawBitmap(sectionImages[i].Bitmap, 0, sectionY);
+                sectionY += sectionImages[i].Info.Height;
                 _sectionImageCache.Return(sectionImages[i]);
             }
             sectionImages.Clear();
@@ -1248,15 +1250,14 @@ namespace TwitchDownloaderCore
         {
             var gifInfo = gif.Info;
 
-            // Sections are fixed height, so reserve as many blank ones as the image spans. Like emotes it is
-            // composited in later rather than drawn here, so the animation can play.
-            var sectionsNeeded = Math.Max(1, (int)Math.Ceiling(gifInfo.Height / (double)renderOptions.SectionHeight));
-            for (var i = 0; i < sectionsNeeded; i++)
-            {
-                AddImageSection(sectionImages, ref drawPos, defaultPos);
-            }
+            // One blank section of exactly the image's height. Rounding up to whole sections left up to a
+            // section of empty space beneath it. Like emotes it is composited in later rather than drawn
+            // here, so the animation can play.
+            var gifTop = sectionImages.Sum(x => x.Info.Height);
+            drawPos.X = defaultPos.X;
+            drawPos.Y = defaultPos.Y;
+            sectionImages.Add(_sectionImageCache.Rent(renderOptions.ChatWidth, Math.Max(1, gifInfo.Height)));
 
-            var gifTop = (sectionImages.Count - sectionsNeeded) * renderOptions.SectionHeight;
             emotePositionList.Add(new EmotePosition(new Point { X = renderOptions.SidePadding, Y = gifTop }, gif));
 
             drawPos.X = renderOptions.SidePadding + gifInfo.Width;
