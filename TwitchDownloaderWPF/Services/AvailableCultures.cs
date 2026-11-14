@@ -25,6 +25,7 @@ namespace TwitchDownloaderWPF.Services
         public static readonly Culture Italian;
         public static readonly Culture Japanese;
         public static readonly Culture Polish;
+        public static readonly Culture Brazilian;
         public static readonly Culture Russian;
         public static readonly Culture Turkish;
         public static readonly Culture Ukrainian;
@@ -45,7 +46,7 @@ namespace TwitchDownloaderWPF.Services
                 Italian = new Culture("it-it", "Italiano"),
                 Japanese = new Culture("ja-JP", "日本語"),
                 Polish = new Culture("pl-PL", "Polski"),
-                Polish = new Culture("pt-BR", "Português (Brasil)"),
+                Brazilian = new Culture("pt-BR", "Português (Brasil)"),
                 Russian = new Culture("ru-RU", "Русский"),
                 Turkish = new Culture("tr-TR", "Türkçe"),
                 Ukrainian = new Culture("uk-ua", "Українська"),

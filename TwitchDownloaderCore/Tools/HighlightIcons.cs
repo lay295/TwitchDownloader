@@ -177,7 +177,8 @@ namespace TwitchDownloaderCore.Tools
             }
 
             const string VALORANT_ACCOUNT_ID = "490592527";
-            if (comment.commenter._id is TWITCH_ACCOUNT_ID or VALORANT_ACCOUNT_ID &&
+            const string MINECRAFT_ACCOUNT_ID = "112568845";
+            if (comment.commenter._id is TWITCH_ACCOUNT_ID or VALORANT_ACCOUNT_ID or MINECRAFT_ACCOUNT_ID &&
                 comment.message.body.EndsWith("'s gift! ") &&
                 SubtemberRegex.IsMatch(comment.message.body))
             {
