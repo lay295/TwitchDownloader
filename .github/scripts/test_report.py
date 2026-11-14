@@ -116,7 +116,7 @@ def main():
     touched = sorted(((pct(*coverage[f]), f, *coverage[f]) for f in changed if f in coverage))
     # Files in a project with no coverage at all (as opposed to files with no executable lines, e.g. AssemblyInfo.cs)
     covered_projects = {path.split("/")[0] for path in coverage}
-    untracked = [f for f in changed if f.split("/")[0] not in covered_projects and os.path.exists(os.path.join(args.repo_root, f)) and ".Tests/" not in f]
+    untracked = [f for f in changed if coverage and f.split("/")[0] not in covered_projects and os.path.exists(os.path.join(args.repo_root, f)) and ".Tests/" not in f]
     if touched or untracked:
         out += ["", f"### Least-covered files touched by this PR", "", "| File | Line coverage | Lines |", "|---|---|---|"]
         for percent, path, h, t in touched[:WORST_FILES_SHOWN]:

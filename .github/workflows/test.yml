@@ -73,7 +73,8 @@ jobs:
   report:
     name: report
     needs: test
-    if: always() && github.event_name == 'pull_request'
+    # Not always(): a run cancelled by a newer push must not overwrite the comment with an empty report
+    if: ${{ !cancelled() && github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
