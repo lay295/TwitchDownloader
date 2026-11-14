@@ -95,6 +95,8 @@ namespace TwitchDownloaderCore.Options
         /// <summary>Cap on a chat GIF's height, as a percentage of the chat height. 100 lets one fill the chat.</summary>
         /// <remarks>Oversized messages are clipped at the top of the frame, so this is a readability choice rather than a limit.</remarks>
         public int GifMaxHeightPercent { get; set; } = 50;
+        /// <summary>The height cap in pixels that <see cref="GifMaxHeightPercent"/> works out to, never less than one pixel.</summary>
+        public int GifMaxHeight => Math.Max(1, ChatHeight * Math.Max(1, GifMaxHeightPercent) / 100);
         /// <summary>Render GIFs posted in chat as a full width image. Unresolvable GIFs stay as their bracketed alt text.</summary>
         public bool GiphyGifs { get; set; } = true;
     }

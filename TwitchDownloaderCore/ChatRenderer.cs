@@ -2137,7 +2137,7 @@ namespace TwitchDownloaderCore
             var maxWidth = renderOptions.ChatWidth - renderOptions.SidePadding * 2;
             // Purely a readability choice: an oversized message is clipped at the top of the frame rather than
             // breaking anything, so this only decides how much of the chat one GIF is allowed to take up.
-            var maxHeight = Math.Max(1, renderOptions.ChatHeight * Math.Max(1, renderOptions.GifMaxHeightPercent) / 100);
+            var maxHeight = renderOptions.GifMaxHeight;
             foreach (var gif in gifTask)
             {
                 cancellationToken.ThrowIfCancellationRequested();
