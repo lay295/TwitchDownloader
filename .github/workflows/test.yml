@@ -47,7 +47,8 @@ jobs:
           if [ "$RUNNER_OS" = "Windows" ] && [ -d TwitchDownloaderWPF.Tests ]; then projects="$projects TwitchDownloaderWPF.Tests"; fi
           status=0
           for project in $projects; do
-            dotnet test --project "$project" \
+            # Live tests hit the real Twitch API and run nightly in e2e-live.yml instead.
+            dotnet test --project "$project" --filter-not-trait "Category=Live" \
               --results-directory "$GITHUB_WORKSPACE/TestResults/$project" \
               --report-junit --report-junit-filename "$project.junit.xml" \
               --coverlet --coverlet-output-format cobertura --coverlet-include "[TwitchDownloader*]*" --coverlet-exclude "[*.Tests]*" \
