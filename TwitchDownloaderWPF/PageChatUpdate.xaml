@@ -115,6 +115,7 @@
                         <CheckBox IsEnabled="True" x:Name="checkBttvEmbed" Margin="0,0,10,0" Checked="checkBttvEmbed_Checked" Unchecked="checkBttvEmbed_Unchecked" Content="BTTV" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                         <CheckBox IsEnabled="True" x:Name="checkFfzEmbed" Margin="0,0,10,0" Checked="checkFfzEmbed_Checked" Unchecked="checkFfzEmbed_Unchecked" Content="FFZ" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                         <CheckBox IsEnabled="True" x:Name="checkStvEmbed" Margin="0,0,10,0" Checked="checkStvEmbed_Checked" Unchecked="checkStvEmbed_Unchecked" Content="7TV" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                        <CheckBox IsEnabled="True" x:Name="checkGiphyGifs" Margin="0,0,10,0" Checked="checkGiphyGifs_Checked" Unchecked="checkGiphyGifs_Unchecked" Content="Giphy" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                     </StackPanel>
                 </StackPanel>
             </StackPanel>

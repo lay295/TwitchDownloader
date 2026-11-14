@@ -201,6 +201,7 @@ namespace TwitchDownloaderWPF
                         chatOptions.BttvEmotes = CheckBttvEmbed.IsChecked.GetValueOrDefault();
                         chatOptions.FfzEmotes = CheckFfzEmbed.IsChecked.GetValueOrDefault();
                         chatOptions.StvEmotes = CheckStvEmbed.IsChecked.GetValueOrDefault();
+                        chatOptions.GiphyGifs = CheckGiphyGifs.IsChecked.GetValueOrDefault();
                         chatOptions.DelayDownload = checkDelayChat.IsChecked.GetValueOrDefault();
                         chatOptions.Filename = Path.Combine(folderPath, Path.GetFileNameWithoutExtension(downloadOptions.Filename) + chatOptions.FileExtension);
                         chatOptions.FileCollisionCallback = HandleFileCollisionCallback;
@@ -336,6 +337,7 @@ namespace TwitchDownloaderWPF
                         chatOptions.BttvEmotes = CheckBttvEmbed.IsChecked.GetValueOrDefault();
                         chatOptions.FfzEmotes = CheckFfzEmbed.IsChecked.GetValueOrDefault();
                         chatOptions.StvEmotes = CheckStvEmbed.IsChecked.GetValueOrDefault();
+                        chatOptions.GiphyGifs = CheckGiphyGifs.IsChecked.GetValueOrDefault();
                         chatOptions.DelayDownload = checkDelayChat.IsChecked.GetValueOrDefault();
                         chatOptions.Filename = Path.Combine(folderPath, FilenameService.GetFilename(Settings.Default.TemplateChat, downloadTask.Info.Title, chatOptions.Id,
                             clipDownloadPage.currentVideoTime, clipDownloadPage.textStreamer.Text, clipDownloadPage.streamerId, TimeSpan.Zero, clipDownloadPage.clipLength, clipDownloadPage.clipLength,
@@ -677,6 +679,7 @@ namespace TwitchDownloaderWPF
                         BttvEmotes = CheckBttvEmbed.IsChecked.GetValueOrDefault(),
                         FfzEmotes = CheckFfzEmbed.IsChecked.GetValueOrDefault(),
                         StvEmotes = CheckStvEmbed.IsChecked.GetValueOrDefault(),
+                        GiphyGifs = CheckGiphyGifs.IsChecked.GetValueOrDefault(),
                         TimeFormat = TimestampFormat.Relative,
                         Id = taskData.Id,
                         TrimBeginning = false,
@@ -779,7 +782,7 @@ namespace TwitchDownloaderWPF
             radioTxt.IsEnabled = true;
             radioHTML.IsEnabled = true;
             checkEmbed.IsEnabled = true;
-            CheckBttvEmbed.IsEnabled = CheckFfzEmbed.IsEnabled = CheckStvEmbed.IsEnabled = checkEmbed.IsChecked.GetValueOrDefault();
+            CheckBttvEmbed.IsEnabled = CheckFfzEmbed.IsEnabled = CheckStvEmbed.IsEnabled = CheckGiphyGifs.IsEnabled = checkEmbed.IsChecked.GetValueOrDefault();
             checkDelayChat.IsEnabled = true;
             RadioCompressionNone.IsEnabled = true;
             RadioCompressionGzip.IsEnabled = true;
@@ -800,7 +803,7 @@ namespace TwitchDownloaderWPF
             radioTxt.IsEnabled = false;
             radioHTML.IsEnabled = false;
             checkEmbed.IsEnabled = false;
-            CheckBttvEmbed.IsEnabled = CheckFfzEmbed.IsEnabled = CheckStvEmbed.IsEnabled = false;
+            CheckBttvEmbed.IsEnabled = CheckFfzEmbed.IsEnabled = CheckStvEmbed.IsEnabled = CheckGiphyGifs.IsEnabled = false;
             checkDelayChat.IsEnabled = false;
             RadioCompressionNone.IsEnabled = false;
             RadioCompressionGzip.IsEnabled = false;
@@ -818,7 +821,7 @@ namespace TwitchDownloaderWPF
             if (this.IsInitialized)
             {
                 checkEmbed.IsEnabled = true;
-                CheckBttvEmbed.IsEnabled = CheckFfzEmbed.IsEnabled = CheckStvEmbed.IsEnabled = checkEmbed.IsChecked.GetValueOrDefault();
+                CheckBttvEmbed.IsEnabled = CheckFfzEmbed.IsEnabled = CheckStvEmbed.IsEnabled = CheckGiphyGifs.IsEnabled = checkEmbed.IsChecked.GetValueOrDefault();
                 checkRender.IsEnabled = true;
                 StackChatCompression.Visibility = Visibility.Visible;
             }
@@ -829,7 +832,7 @@ namespace TwitchDownloaderWPF
             if (this.IsInitialized)
             {
                 checkEmbed.IsEnabled = false;
-                CheckBttvEmbed.IsEnabled = CheckFfzEmbed.IsEnabled = CheckStvEmbed.IsEnabled = false;
+                CheckBttvEmbed.IsEnabled = CheckFfzEmbed.IsEnabled = CheckStvEmbed.IsEnabled = CheckGiphyGifs.IsEnabled = false;
                 checkRender.IsEnabled = false;
                 StackChatCompression.Visibility = Visibility.Collapsed;
             }
@@ -840,7 +843,7 @@ namespace TwitchDownloaderWPF
             if (this.IsInitialized)
             {
                 checkEmbed.IsEnabled = true;
-                CheckBttvEmbed.IsEnabled = CheckFfzEmbed.IsEnabled = CheckStvEmbed.IsEnabled = checkEmbed.IsChecked.GetValueOrDefault();
+                CheckBttvEmbed.IsEnabled = CheckFfzEmbed.IsEnabled = CheckStvEmbed.IsEnabled = CheckGiphyGifs.IsEnabled = checkEmbed.IsChecked.GetValueOrDefault();
                 checkRender.IsEnabled = false;
                 StackChatCompression.Visibility = Visibility.Collapsed;
             }
@@ -882,7 +885,7 @@ namespace TwitchDownloaderWPF
             if (!IsInitialized)
                 return;
 
-            CheckBttvEmbed.IsEnabled = CheckFfzEmbed.IsEnabled = CheckStvEmbed.IsEnabled = checkEmbed.IsChecked.GetValueOrDefault();
+            CheckBttvEmbed.IsEnabled = CheckFfzEmbed.IsEnabled = CheckStvEmbed.IsEnabled = CheckGiphyGifs.IsEnabled = checkEmbed.IsChecked.GetValueOrDefault();
         }
     }
 }

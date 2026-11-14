@@ -41,7 +41,23 @@ namespace TwitchDownloaderCore.Chat
             };
 
             await using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-            using var jsonDocument = await GetJsonDocumentAsync(fs, filePath, deserializationOptions, cancellationToken);
+
+            JsonDocument jsonDocument;
+            try
+            {
+                jsonDocument = await GetJsonDocumentAsync(fs, filePath, deserializationOptions, cancellationToken);
+            }
+            // JsonDocument buffers the whole file into one array, so it cannot read past int.MaxValue. Chats that embed
+            // GIFs can exceed that, so they are streamed instead. Streaming gives up reading only the parts that were
+            // asked for, which is why it is not the default. How it fails depends on the path: a plain file overflows
+            // while measuring, a gzipped one grows its buffer until the length wraps negative and the rent is rejected.
+            catch (Exception e) when (e is OverflowException or OutOfMemoryException or ArgumentOutOfRangeException)
+            {
+                return await DeserializeLargeAsync(filePath, getComments, getEmbeds, cancellationToken);
+            }
+
+            using (jsonDocument)
+            {
 
             if (jsonDocument.RootElement.TryGetProperty("FileInfo", out JsonElement fileInfoElement))
             {
@@ -98,9 +114,44 @@ namespace TwitchDownloaderCore.Chat
                 }
             }
 
+            }
+
             await UpgradeChatJson(returnChatRoot);
 
             return returnChatRoot;
+        }
+
+        /// <summary>Streams a chat file that is too large for <see cref="JsonDocument"/> to buffer.</summary>
+        /// <remarks>Opens the file again rather than reusing a stream, since disposing a GZipStream closes the one under it.</remarks>
+        private static async Task<ChatRoot> DeserializeLargeAsync(string filePath, bool getComments, bool getEmbeds, CancellationToken cancellationToken)
+        {
+            await using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+
+            var isGzip = fs.ReadByte() == 0x1F && fs.ReadByte() == 0x8B;
+            fs.Seek(0, SeekOrigin.Begin);
+
+            ChatRoot chatRoot;
+            if (isGzip)
+            {
+                await using var gs = new GZipStream(fs, CompressionMode.Decompress);
+                chatRoot = await JsonSerializer.DeserializeAsync<ChatRoot>(gs, _jsonSerializerOptions, cancellationToken);
+            }
+            else
+            {
+                chatRoot = await JsonSerializer.DeserializeAsync<ChatRoot>(fs, _jsonSerializerOptions, cancellationToken);
+            }
+
+            chatRoot ??= new ChatRoot();
+
+            // Everything was parsed to get here, so honouring these only frees the memory again
+            if (!getComments)
+                chatRoot.comments = null;
+            if (!getEmbeds)
+                chatRoot.embeddedData = null;
+
+            await UpgradeChatJson(chatRoot);
+
+            return chatRoot;
         }
 
         private static async Task<JsonDocument> GetJsonDocumentAsync(Stream stream, string filePath, JsonDocumentOptions deserializationOptions, CancellationToken cancellationToken = default)

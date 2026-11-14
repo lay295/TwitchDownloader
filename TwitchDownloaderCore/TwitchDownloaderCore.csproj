@@ -63,4 +63,8 @@
     </EmbeddedResource>
   </ItemGroup>
 
+    <ItemGroup>
+        <InternalsVisibleTo Include="TwitchDownloaderCore.Tests" />
+    </ItemGroup>
+
 </Project>

@@ -69,6 +69,7 @@
                     <CheckBox IsEnabled="False" x:Name="CheckBttvEmbed" Margin="0,0,10,0" Content="BTTV" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                     <CheckBox IsEnabled="False" x:Name="CheckFfzEmbed" Margin="0,0,10,0" Content="FFZ" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                     <CheckBox IsEnabled="False" x:Name="CheckStvEmbed" Margin="0,0,10,0" Content="7TV" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
+                    <CheckBox IsEnabled="False" IsChecked="True" x:Name="CheckGiphyGifs" Margin="0,0,10,0" Content="Giphy" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" />
                 </StackPanel>
                 <CheckBox x:Name="checkDelayChat" Content="{lex:Loc DelayDownload}" HorizontalAlignment="Left" Margin="5,5,0,0" VerticalAlignment="Top" BorderBrush="{DynamicResource AppElementBorder}" Foreground="{DynamicResource AppText}" IsEnabled="False" />
             </StackPanel>
