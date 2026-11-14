@@ -1,7 +1,7 @@
 name: Test Report Comment
 
-# Runs after "Tests" finishes, in the context of the base repository, so it can comment on PRs from forks.
-# It only reads the comment text produced by the test run; it never checks out or executes PR code.
+# PRs from forks only get a read-only token, so tests.yml can't comment on them. This runs after "Tests" finishes, in the
+# context of the base repository, and posts the comment text that run produced. It never checks out or executes PR code.
 on:
   workflow_run:
     workflows: [ Tests ]
@@ -9,13 +9,19 @@ on:
 
 permissions:
   actions: read
+  contents: read
   pull-requests: write
 
 jobs:
   comment:
-    if: github.event.workflow_run.event == 'pull_request'
+    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.head_repository.full_name != github.repository
     runs-on: ubuntu-latest
     steps:
+      # The default branch, not the PR: only trusted scripts run here.
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: .github/scripts
+
       - uses: actions/download-artifact@v8
         with:
           name: pr-comment
@@ -27,14 +33,4 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
-        run: |
-          pr=$(tr -dc '0-9' < pr-comment/pr-number.txt)
-          [ -n "$pr" ] || { echo "No PR number"; exit 0; }
-          marker='<!-- twitchdownloader-test-report -->'
-          { echo "$marker"; head -c 60000 pr-comment/comment.md; } > body.md
-          existing=$(gh api "repos/$REPO/issues/$pr/comments" --paginate --jq ".[] | select(.body | startswith(\"$marker\")) | .id" | head -n1)
-          if [ -n "$existing" ]; then
-            gh api -X PATCH "repos/$REPO/issues/comments/$existing" -F body=@body.md > /dev/null
-          else
-            gh api -X POST "repos/$REPO/issues/$pr/comments" -F body=@body.md > /dev/null
-          fi
+        run: bash .github/scripts/post_pr_comment.sh pr-comment

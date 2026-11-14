@@ -75,6 +75,9 @@ jobs:
     needs: test
     if: always() && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v7
         with:
@@ -96,7 +99,14 @@ jobs:
           echo "$PR_NUMBER" > pr-comment/pr-number.txt
           cat pr-comment/comment.md >> "$GITHUB_STEP_SUMMARY"
 
-      # The comment itself is posted by test-report-comment.yml, which runs with write permissions even for PRs from forks.
+      - name: Post or update the sticky comment
+        # PRs from forks get a read-only token here; test-report-comment.yml posts for those from the pr-comment artifact.
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: bash .github/scripts/post_pr_comment.sh pr-comment
+
       - uses: actions/upload-artifact@v7
         with:
           name: pr-comment
