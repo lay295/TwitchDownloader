@@ -1,0 +1,248 @@
+{
+  "FileInfo": {
+    "Version": {
+      "Major": 1,
+      "Minor": 4,
+      "Patch": 0
+    },
+    "CreatedAt": "2026-01-01T00:00:00Z",
+    "UpdatedAt": "0001-01-01T00:00:00"
+  },
+  "streamer": {
+    "name": "TestStreamer",
+    "login": "teststreamer",
+    "id": 1000
+  },
+  "video": {
+    "title": "Synthetic chat render fixture",
+    "description": null,
+    "id": "2000",
+    "created_at": "2026-01-01T00:00:00Z",
+    "start": 0,
+    "end": 3,
+    "length": 3,
+    "viewCount": 0,
+    "game": "Testing",
+    "chapters": []
+  },
+  "comments": [
+    {
+      "_id": "00000000-0000-0000-0000-000000000000",
+      "created_at": "2026-01-01T00:00:00.000Z",
+      "channel_id": "1000",
+      "content_type": "video",
+      "content_id": "2000",
+      "content_offset_seconds": 0,
+      "commenter": {
+        "display_name": "Alice",
+        "_id": "1",
+        "name": "alice",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2020-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "hi TestEmote AnimThird StaticThird ZeroWidth",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "hi ",
+            "emoticon": null
+          },
+          {
+            "text": "TestEmote",
+            "emoticon": {
+              "emoticon_id": "1001"
+            }
+          },
+          {
+            "text": " AnimThird StaticThird ZeroWidth",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [
+          {
+            "_id": "subscriber",
+            "version": "0"
+          },
+          {
+            "_id": "moderator",
+            "version": "1"
+          }
+        ],
+        "user_color": "#C0C0C0",
+        "emoticons": []
+      }
+    },
+    {
+      "_id": "00000000-0000-0000-0000-000000000001",
+      "created_at": "2026-01-01T00:00:01.000Z",
+      "channel_id": "1000",
+      "content_type": "video",
+      "content_id": "2000",
+      "content_offset_seconds": 1,
+      "commenter": {
+        "display_name": "Bob",
+        "_id": "2",
+        "name": "bob",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2020-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "Cheer100 Cheer1 thanks",
+        "bits_spent": 101,
+        "fragments": [
+          {
+            "text": "Cheer100 Cheer1 thanks",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [],
+        "user_color": "#C0C0C0",
+        "emoticons": []
+      }
+    },
+    {
+      "_id": "00000000-0000-0000-0000-000000000002",
+      "created_at": "2026-01-01T00:00:02.000Z",
+      "channel_id": "1000",
+      "content_type": "video",
+      "content_id": "2000",
+      "content_offset_seconds": 2,
+      "commenter": {
+        "display_name": "TestStreamer",
+        "_id": "1000",
+        "name": "teststreamer",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2020-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "welcome everyone",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "welcome everyone",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [
+          {
+            "_id": "broadcaster",
+            "version": "1"
+          }
+        ],
+        "user_color": "#C0C0C0",
+        "emoticons": []
+      }
+    }
+  ],
+  "embeddedData": {
+    "thirdParty": [
+      {
+        "id": "tp1",
+        "imageScale": 2,
+        "data": "iVBORw0KGgoAAAANSUhEUgAAADgAAAA4CAYAAACohjseAAAAT0lEQVR42u3PAQ0AMAgDsB3/nncFGCCtg760zWGT4wQFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFNx8KGwNt+4oC4gAAAABJRU5ErkJggg==",
+        "name": "StaticThird",
+        "width": 56,
+        "height": 56
+      },
+      {
+        "id": "tp2",
+        "imageScale": 2,
+        "data": "R0lGODlhOAA4AIEAAP8AAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQECgAAACwAAAAAOAA4AAAIXAABCBxIsKDBgwgTKlzIsKHDhxAjSpxIsaLFixgzatzIsaPHjyBDihxJsqTJkyhTqlzJsqXLlzBjypxJs6bNmzhz6tzJs6fPn0CDCh1KtKjRo0iTKl3KtKnTmwEBACH5BAQUAAAALAAAAAA4ADgAgQD/AAAAAAAAAAAAAAhcAAEIHEiwoMGDCBMqXMiwocOHECNKnEixosWLGDNq3Mixo8ePIEOKHEmypMmTKFOqXMmypcuXMGPKnEmzps2bOHPq3Mmzp8+fQIMKHUq0qNGjSJMqXcq0qdObAQEAIfkEBB4AAAAsAAAAADgAOACBAAD/AAAAAAAAAAAACFwAAQgcSLCgwYMIEypcyLChw4cQI0qcSLGixYsYM2rcyLGjx48gQ4ocSbKkyZMoU6pcybKly5cwY8qcSbOmzZs4c+rcybOnz59AgwodSrSo0aNIkypdyrSp05sBAQA7",
+        "name": "AnimThird",
+        "width": 56,
+        "height": 56
+      },
+      {
+        "id": "tp3",
+        "imageScale": 2,
+        "data": "iVBORw0KGgoAAAANSUhEUgAAADgAAAA4CAYAAACohjseAAAAQklEQVR42u3RgQkAIAhFQWtyN7chEqG4G0D+wwgAAAAApq3ug5VRV4Oyd9P+/YMCBQoUKFCgQIECBQoUCAAAAMArDg1TAyDY2nv4AAAAAElFTkSuQmCC",
+        "name": "ZeroWidth",
+        "width": 56,
+        "height": 56,
+        "isZeroWidth": true
+      }
+    ],
+    "firstParty": [
+      {
+        "id": "1001",
+        "imageScale": 2,
+        "data": "iVBORw0KGgoAAAANSUhEUgAAADgAAAA4CAYAAACohjseAAAAT0lEQVR42u3PAQ0AMAgDsB3/nncFGCCtg76mzWGT4wQFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFNx8LGgNtoCz8IAAAAABJRU5ErkJggg==",
+        "name": "TestEmote",
+        "width": 56,
+        "height": 56
+      }
+    ],
+    "twitchBadges": [
+      {
+        "name": "subscriber",
+        "versions": {
+          "0": {
+            "title": "Subscriber",
+            "description": "Subscriber",
+            "bytes": "iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAAM0lEQVR42u3OMQEAMAwDoKz+PWcOevcABbw2zSGTY4SEhISEhISEhISEhISEhISEhIQ2H94AA0UaEs3oAAAAAElFTkSuQmCC"
+          }
+        }
+      },
+      {
+        "name": "moderator",
+        "versions": {
+          "1": {
+            "title": "Moderator",
+            "description": "Moderator",
+            "bytes": "iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAAM0lEQVR42u3OMQEAMAgDsDLlOAcHuzkSBal0Joe8HCMkJCQkJCQkJCQkJCQkJCQkJCT0s3EDAcdB01quAAAAAElFTkSuQmCC"
+          }
+        }
+      },
+      {
+        "name": "broadcaster",
+        "versions": {
+          "1": {
+            "title": "Broadcaster",
+            "description": "Broadcaster",
+            "bytes": "iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAAM0lEQVR42u3OMQEAMAgDsDLlOAcHuzkSBalOJoe8HCMkJCQkJCQkJCQkJCQkJCQkJCT0s3GDAcdxZd05AAAAAElFTkSuQmCC"
+          }
+        }
+      },
+      {
+        "name": "bits",
+        "versions": {
+          "1000": {
+            "title": "cheer 1000",
+            "description": "cheer 1000",
+            "bytes": "iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAANElEQVR42u3OMQEAMAgDsDLlOAcHuzkSBanuTA55OUZISEhISEhISEhISEhISEhISEjoZwGjGQJHv+2HoAAAAABJRU5ErkJggg=="
+          }
+        }
+      }
+    ],
+    "twitchBits": [
+      {
+        "prefix": "Cheer",
+        "tierList": {
+          "1": {
+            "id": "cheer1",
+            "imageScale": 2,
+            "data": "iVBORw0KGgoAAAANSUhEUgAAADgAAAA4CAYAAACohjseAAAAUUlEQVR42u3PAREAIAgEsMdkRrM5JqAAtzVYvZvOYifLCQoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgpOPubkAi+j/fo0AAAAAElFTkSuQmCC",
+            "name": "Cheer1",
+            "width": 56,
+            "height": 56
+          },
+          "100": {
+            "id": "cheer100",
+            "imageScale": 2,
+            "data": "iVBORw0KGgoAAAANSUhEUgAAADgAAAA4CAYAAACohjseAAAAUUlEQVR42u3PAREAIAgEsMdkRrM5JqAAtzVY5b7OYifLCQoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgpOPuXkAi+ybdkjAAAAAElFTkSuQmCC",
+            "name": "Cheer100",
+            "width": 56,
+            "height": 56
+          }
+        }
+      }
+    ]
+  }
+}
