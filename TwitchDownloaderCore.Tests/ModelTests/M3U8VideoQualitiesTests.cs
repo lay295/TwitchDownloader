@@ -47,8 +47,8 @@ namespace TwitchDownloaderCore.Tests.ModelTests
 
             Assert.Equal(expectedPath, selectedQuality?.Item.Path);
         }
-        // Many spellings of one quality (height only, with 'p', with framerate, WIDTHxHEIGHT, with or without framerate) resolve to the same rendition, and the 30fps default applies when no framerate is given.
 
+        // Many spellings of one quality (height only, with 'p', with framerate, WIDTHxHEIGHT, with or without framerate) resolve to the same rendition, and the 30fps default applies when no framerate is given.
         [Theory]
         [InlineData("1080", "1080p60")]
         [InlineData("1080p", "1080p60")]
@@ -113,8 +113,8 @@ namespace TwitchDownloaderCore.Tests.ModelTests
 
             Assert.Equal(expectedPath, selectedQuality?.Item.Path);
         }
-        // When FRAME-RATE is missing, names fall back to resolution only and lookups by '1080p' still work (null when nothing matches).
 
+        // When FRAME-RATE is missing, names fall back to resolution only and lookups by '1080p' still work (null when nothing matches).
         [Theory]
         [InlineData("1080", "1080p60")]
         [InlineData("1080p", "1080p60")]
@@ -201,8 +201,8 @@ namespace TwitchDownloaderCore.Tests.ModelTests
 
             Assert.Equal(expectedName, qualities.First().Name);
         }
-        // A master playlist without renditions yields null instead of throwing, so callers can report 'no qualities'.
 
+        // A master playlist without renditions yields null instead of throwing, so callers can report 'no qualities'.
         [Fact]
         public static void ReturnsNull_WhenNoStreamsPresent()
         {

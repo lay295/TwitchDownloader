@@ -66,8 +66,8 @@ namespace TwitchDownloaderCore.Tests.ModelTests
                 Assert.Equal($"{i}.ts", stream.Path);
             }
         }
-        // A Twitch fMP4 media playlist (EXT-X-MAP init segment plus .mp4 parts) parses with the map URI and byte ranges intact.
 
+        // A Twitch fMP4 media playlist (EXT-X-MAP init segment plus .mp4 parts) parses with the map URI and byte ranges intact.
         [Theory]
         [InlineData(false, "en-US")]
         [InlineData(true, "en-US")]
@@ -142,8 +142,8 @@ namespace TwitchDownloaderCore.Tests.ModelTests
                 duration -= 10;
             }
         }
-        // A Twitch live media playlist (EXT-X-TWITCH-* headers, EXT-X-DATERANGE sessions, 'live' EXTINF flags, no end list) parses without treating the extra tags as parts.
 
+        // A Twitch live media playlist (EXT-X-TWITCH-* headers, EXT-X-DATERANGE sessions, 'live' EXTINF flags, no end list) parses without treating the extra tags as parts.
         [Theory]
         [InlineData(false, "en-US")]
         [InlineData(true, "en-US")]
@@ -236,8 +236,8 @@ namespace TwitchDownloaderCore.Tests.ModelTests
                 Assert.Equal(expectedStream.path, stream.Path);
             }
         }
-        // A Twitch master playlist: EXT-X-MEDIA and EXT-X-STREAM-INF attributes (bandwidth, codecs, resolution, framerate, variant ids) are parsed per rendition.
 
+        // A Twitch master playlist: EXT-X-MEDIA and EXT-X-STREAM-INF attributes (bandwidth, codecs, resolution, framerate, variant ids) are parsed per rendition.
         [Theory]
         [InlineData(false, "en-US")]
         [InlineData(true, "en-US")]
@@ -306,8 +306,8 @@ namespace TwitchDownloaderCore.Tests.ModelTests
                 Assert.Equivalent(streams[i], m3u8.Streams[i], true);
             }
         }
-        // Individual EXT-X-MEDIA lines parse TYPE, GROUP-ID, NAME and the YES/NO flags.
 
+        // Individual EXT-X-MEDIA lines parse TYPE, GROUP-ID, NAME and the YES/NO flags.
         [Theory]
         [InlineData("#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"chunked\",NAME=\"1080p60\",AUTOSELECT=NO,DEFAULT=NO", M3U8.Stream.ExtMediaInfo.MediaType.Video, "chunked", "1080p60", false, false)]
         [InlineData("#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"720p60\",NAME=\"720p60\",AUTOSELECT=YES,DEFAULT=YES", M3U8.Stream.ExtMediaInfo.MediaType.Video, "720p60", "720p60", true, true)]
@@ -352,8 +352,8 @@ namespace TwitchDownloaderCore.Tests.ModelTests
             Assert.Equal(ivsName, streamInfo.IvsName);
             Assert.Equal(ivsVariantSource, streamInfo.IvsVariantSource);
         }
-        // A Kick media playlist, where several byte-ranged parts share one .ts file, parses byte ranges and program date times into the same model.
 
+        // A Kick media playlist, where several byte-ranged parts share one .ts file, parses byte ranges and program date times into the same model.
         [Theory]
         [InlineData(false, "en-US")]
         [InlineData(true, "en-US")]
@@ -540,8 +540,8 @@ namespace TwitchDownloaderCore.Tests.ModelTests
             Assert.Equal(autoSelect, mediaInfo.AutoSelect);
             Assert.Equal(@default, mediaInfo.Default);
         }
-        // Kick's EXT-X-STREAM-INF lines, which lack Twitch's extra attributes, still parse bandwidth/codecs/resolution.
 
+        // Kick's EXT-X-STREAM-INF lines, which lack Twitch's extra attributes, still parse bandwidth/codecs/resolution.
         [Theory]
         [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=9878400,CODECS=\"avc1.64002A,mp4a.40.2\",RESOLUTION=1920x1080,VIDEO=\"1080p60\"", 9878400, new[] { "avc1.64002A", "mp4a.40.2" }, 1920, 1080)]
         [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=3330599,CODECS=\"avc1.4D401F,mp4a.40.2\",RESOLUTION=1280x720,VIDEO=\"720p60\"", 3330599, new[] { "avc1.4D401F", "mp4a.40.2" }, 1280, 720)]
@@ -556,8 +556,8 @@ namespace TwitchDownloaderCore.Tests.ModelTests
             Assert.Equal(codecs, streamInfo.Codecs);
             Assert.Equal((videoWidth, videoHeight), streamInfo.Resolution);
         }
-        // BYTERANGE values parse as 'length' or 'length@start', with and without the key prefix.
 
+        // BYTERANGE values parse as 'length' or 'length@start', with and without the key prefix.
         [Theory]
         [InlineData(100, 200, "100@200", "")]
         [InlineData(100, 200, "#EXT-X-BYTERANGE:100@200", "#EXT-X-BYTERANGE:")]
@@ -570,8 +570,8 @@ namespace TwitchDownloaderCore.Tests.ModelTests
 
             Assert.Equal(expected, actual);
         }
-        // Malformed byte ranges are a FormatException rather than a zero range that would download the wrong bytes.
 
+        // Malformed byte ranges are a FormatException rather than a zero range that would download the wrong bytes.
         [Theory]
         [InlineData("429496729500@1")]
         [InlineData("1@429496729500")]
@@ -580,8 +580,8 @@ namespace TwitchDownloaderCore.Tests.ModelTests
         {
             Assert.Throws<FormatException>(() => M3U8.ByteRange.Parse(byteRangeString, default));
         }
-        // RESOLUTION values parse as WIDTHxHEIGHT.
 
+        // RESOLUTION values parse as WIDTHxHEIGHT.
         [Theory]
         [InlineData(100, 200, "100x200")]
         [InlineData(100, 200, "RESOLUTION=100x200")]
@@ -593,8 +593,8 @@ namespace TwitchDownloaderCore.Tests.ModelTests
 
             Assert.Equal(expected, actual);
         }
-        // Malformed resolutions throw instead of defaulting to 0x0 and breaking quality selection.
 
+        // Malformed resolutions throw instead of defaulting to 0x0 and breaking quality selection.
         [Theory]
         [InlineData("429496729500x1")]
         [InlineData("1x429496729500")]
@@ -603,8 +603,8 @@ namespace TwitchDownloaderCore.Tests.ModelTests
         {
             Assert.Throws<FormatException>(() => M3U8.Stream.ExtStreamInfo.StreamResolution.Parse(resolutionString));
         }
-        // Serializing a playlist writes decimals with '.' in every culture, since the output is fed back to ffmpeg/players.
 
+        // Serializing a playlist writes decimals with '.' in every culture, since the output is fed back to ffmpeg/players.
         [Theory]
         [InlineData("en-GB")]
         [InlineData("tr-TR")]

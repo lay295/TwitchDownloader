@@ -278,8 +278,8 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             Assert.Equal(customMessage.message.body, customMessageString);
             Assert.True(customMessage.message.fragments.Count > 0, $"0 fragments were found in {nameof(customMessage)}. Expected more than 0.");
         }
-        // A watch streak notice without user text is returned unchanged with no custom message.
 
+        // A watch streak notice without user text is returned unchanged with no custom message.
         [Fact]
         public void DoesNotSplitWatchStreakWithoutCustomMessage()
         {

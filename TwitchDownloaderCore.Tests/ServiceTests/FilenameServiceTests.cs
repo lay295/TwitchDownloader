@@ -8,8 +8,8 @@ namespace TwitchDownloaderCore.Tests.ServiceTests
     {
         private static (string title, string id, DateTime date, string channel, string channelId, TimeSpan trimStart, TimeSpan trimEnd, TimeSpan videoLength, int viewCount, string game, string clipper, string clipperId) GetExampleInfo() =>
             ("A Title", "abc123", new DateTime(1984, 11, 1, 9, 43, 21), "streamer8", "123456789", new TimeSpan(0, 1, 2, 3, 4), new TimeSpan(0, 5, 6, 7, 8), new TimeSpan(0, 9, 10, 11, 12), 123456789, "A Game", "viewer8", "987654321");
-        // Every supported template variable, including the custom date/time formats, expands to the documented text.
 
+        // Every supported template variable, including the custom date/time formats, expands to the documented text.
         [Theory]
         [InlineData("{title}", "A Title")]
         [InlineData("{id}", "abc123")]
@@ -37,8 +37,8 @@ namespace TwitchDownloaderCore.Tests.ServiceTests
 
             Assert.Equal(expected, result);
         }
-        // Realistic templates mixing many variables and literal text expand correctly in one pass.
 
+        // Realistic templates mixing many variables and literal text expand correctly in one pass.
         [Theory]
         [InlineData("[{date_custom=\"M-dd-yy\"}] {channel} - {title}", "[11-01-84] streamer8 - A Title")]
         [InlineData("[{channel}] [{date_custom=\"M-dd-yy\"}] [{game}] {title} ({id}) - {views} views", "[streamer8] [11-01-84] [A Game] A Title (abc123) - 123456789 views")]
@@ -51,8 +51,8 @@ namespace TwitchDownloaderCore.Tests.ServiceTests
 
             Assert.Equal(expected, result);
         }
-        // Several custom-format variables (and repeats of the same one) are each expanded with their own format string.
 
+        // Several custom-format variables (and repeats of the same one) are each expanded with their own format string.
         [Fact]
         public void CorrectlyInterpretsMultipleCustomParameters()
         {
@@ -64,8 +64,8 @@ namespace TwitchDownloaderCore.Tests.ServiceTests
 
             Assert.Equal(EXPECTED, result);
         }
-        // Forward slashes in a template create sub folders (platform separator in the result) rather than being escaped.
 
+        // Forward slashes in a template create sub folders (platform separator in the result) rather than being escaped.
         [Fact]
         public void CorrectlyGeneratesSubFolders_WithForwardSlash()
         {
@@ -77,8 +77,8 @@ namespace TwitchDownloaderCore.Tests.ServiceTests
 
             Assert.Equal(expected, result);
         }
-        // Backslashes in a template create sub folders too, so templates written on Windows work everywhere.
 
+        // Backslashes in a template create sub folders too, so templates written on Windows work everywhere.
         [Fact]
         public void CorrectlyGeneratesSubFolders_WithBackSlash()
         {
@@ -90,9 +90,9 @@ namespace TwitchDownloaderCore.Tests.ServiceTests
 
             Assert.Equal(expected, result);
         }
+
         // Metadata values (title, channel, game...) containing Windows-invalid chars are mapped to their full-width look-alikes so the name
         // stays readable but valid; a slash in a title must not create a folder.
-
         [Theory]
         [InlineData("{title}")]
         [InlineData("{id}")]
@@ -110,8 +110,8 @@ namespace TwitchDownloaderCore.Tests.ServiceTests
 
             Assert.Equal(EXPECTED, result);
         }
-        // Literal text inside custom date/time format strings is sanitised the same way.
 
+        // Literal text inside custom date/time format strings is sanitised the same way.
         [Theory]
         [InlineData("{date_custom=\"'")]
         [InlineData("{trim_start_custom=\"'")]
@@ -127,8 +127,8 @@ namespace TwitchDownloaderCore.Tests.ServiceTests
 
             Assert.Equal(EXPECTED, result);
         }
-        // Invalid chars in a sub folder segment are sanitised while the folder split itself is kept.
 
+        // Invalid chars in a sub folder segment are sanitised while the folder split itself is kept.
         [Fact]
         public void CorrectlyReplacesInvalidCharactersForSubFolders()
         {
@@ -142,8 +142,8 @@ namespace TwitchDownloaderCore.Tests.ServiceTests
 
             Assert.Equal(expected, result);
         }
-        // {random_string} must differ between two expansions, otherwise it could not serve as a collision avoider.
 
+        // {random_string} must differ between two expansions, otherwise it could not serve as a collision avoider.
         [Fact]
         public void RandomStringIsRandom()
         {
@@ -155,8 +155,8 @@ namespace TwitchDownloaderCore.Tests.ServiceTests
 
             Assert.NotEqual(result, result2);
         }
-        // Unknown {placeholders} are left as-is instead of being removed or throwing.
 
+        // Unknown {placeholders} are left as-is instead of being removed or throwing.
         [Fact]
         public void DoesNotInterpretBogusTemplateParameter()
         {
@@ -168,8 +168,8 @@ namespace TwitchDownloaderCore.Tests.ServiceTests
 
             Assert.Equal(EXPECTED, result);
         }
-        // Null strings and default times/dates (e.g. a clip without a game) expand to empty/zero text rather than throwing.
 
+        // Null strings and default times/dates (e.g. a clip without a game) expand to empty/zero text rather than throwing.
         [Fact]
         public void GetFilenameDoesNotThrow_WhenNullOrDefaultInput()
         {
@@ -180,8 +180,8 @@ namespace TwitchDownloaderCore.Tests.ServiceTests
 
             Assert.Equal(EXPECTED, result);
         }
-        // Each Windows-invalid char is mapped to its full-width form, and control chars (no look-alike) become '_'.
 
+        // Each Windows-invalid char is mapped to its full-width form, and control chars (no look-alike) become '_'.
         [Theory]
         [InlineData("\"", "＂")]
         [InlineData("*", "＊")]
@@ -199,8 +199,8 @@ namespace TwitchDownloaderCore.Tests.ServiceTests
 
             Assert.Equal(expected, actual);
         }
-        // A null file name passes through as null (annotated NotNullIfNotNull).
 
+        // A null file name passes through as null (annotated NotNullIfNotNull).
         [Fact]
         public void ReplaceInvalidFilenameCharactersDoesNotThrow_WhenNullInput()
         {
@@ -211,8 +211,8 @@ namespace TwitchDownloaderCore.Tests.ServiceTests
 
             Assert.Equal(EXPECTED, actual);
         }
-        // When the file does not exist its name is returned unchanged.
 
+        // When the file does not exist its name is returned unchanged.
         [Fact]
         public void GetNonCollidingNameWorks_WhenNoCollisionExists()
         {
@@ -231,8 +231,8 @@ namespace TwitchDownloaderCore.Tests.ServiceTests
                 File.Delete(path);
             }
         }
-        // When the file exists the first free 'name (n).ext' is chosen, matching Windows Explorer's convention.
 
+        // When the file exists the first free 'name (n).ext' is chosen, matching Windows Explorer's convention.
         [Fact]
         public void GetNonCollidingNameWorks_WhenCollisionExists()
         {

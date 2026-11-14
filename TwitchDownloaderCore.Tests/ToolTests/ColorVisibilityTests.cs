@@ -11,10 +11,10 @@ namespace TwitchDownloaderCore.Tests.ToolTests
         private static extern SKColor AdjustColorVisibilityAccessor(ChatRenderer? @null, SKColor foreground, SKColor background);
 
         private static SKColor AdjustColorVisibility(SKColor foreground, SKColor background) => AdjustColorVisibilityAccessor(null, foreground, background);
+
         // Sweeps every hue/saturation (and a grey value ramp) against six backgrounds and checks, for the saturated backgrounds, that every
         // colour near the background's own hue was changed and no longer equals the background. Rendered as an image so a regression can be
         // inspected visually by enabling WriteDebugBitmap.
-
         [Fact]
         public void RenderTestPattern()
         {

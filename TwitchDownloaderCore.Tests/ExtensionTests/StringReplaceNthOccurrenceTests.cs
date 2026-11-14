@@ -32,8 +32,8 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
 
             Assert.Equal(expected, actual);
         }
-        // A string without the delimiter is a single range, so replacing range 0 (or ^1) replaces the whole string.
 
+        // A string without the delimiter is a single range, so replacing range 0 (or ^1) replaces the whole string.
         [Theory]
         [InlineData(0)]
         [InlineData(-1)]
@@ -46,8 +46,8 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
 
             Assert.Equal(EXPECTED, actual);
         }
-        // Without a delimiter only range 0 exists; other indexes leave the string unchanged rather than throwing, unlike GetNthOccurrence.
 
+        // Without a delimiter only range 0 exists; other indexes leave the string unchanged rather than throwing, unlike GetNthOccurrence.
         [Theory]
         [InlineData(1)]
         [InlineData(2)]
@@ -64,8 +64,8 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
 
             Assert.Equal(EXPECTED, actual);
         }
-        // An index beyond the available ranges (from either end) returns the input unchanged, so callers need no range check.
 
+        // An index beyond the available ranges (from either end) returns the input unchanged, so callers need no range check.
         [Theory]
         [InlineData(3)]
         [InlineData(4)]

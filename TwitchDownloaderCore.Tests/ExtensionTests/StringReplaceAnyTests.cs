@@ -22,8 +22,8 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
 
             Assert.Equal(replaceResult3, replaceAnyResult);
         }
-        // Every occurrence of every listed char is replaced (case-sensitively) and all other chars are kept, pinned against a literal expected string.
 
+        // Every occurrence of every listed char is replaced (case-sensitively) and all other chars are kept, pinned against a literal expected string.
         [Fact]
         public void CorrectlyReplacesAnyCharacter()
         {
@@ -36,8 +36,8 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
 
             Assert.Equal(EXPECTED, result);
         }
-        // An empty input is returned as the same instance: no allocation, no exception.
 
+        // An empty input is returned as the same instance: no allocation, no exception.
         [Fact]
         public void ReturnsOriginalString_WhenEmpty()
         {
@@ -49,8 +49,8 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
 
             Assert.Same(STRING, result);
         }
-        // When none of the chars occur the original instance is returned (callers rely on this to avoid copying every file name).
 
+        // When none of the chars occur the original instance is returned (callers rely on this to avoid copying every file name).
         [Fact]
         public void ReturnsOriginalString_WhenOldCharsNotPresent()
         {
