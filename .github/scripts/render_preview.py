@@ -141,7 +141,7 @@ def main():
                f"Sample chats rendered by **{args.base_label}** and **{args.head_label}** from the same input. "
                "Expand a case to compare frames side by side.", "",
                "| Case | Options | Result |", "|---|---|---|", *summary, *details, "",
-               "<sub>Re-rendered on every push while the <code>render-preview</code> label is on the PR.</sub>"]
+               "<sub>Comment <code>/render-preview</code> to re-render, or add the <code>render-preview</code> label to re-render on every push.</sub>"]
     with open(os.path.join(args.out, "comment.md"), "w", encoding="utf-8") as f:
         f.write("\n".join(comment) + "\n")
 
