@@ -77,5 +77,17 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
 
             Assert.Equal(EXPECTED, actual);
         }
+
+        // Null and empty strings are returned as-is instead of being replaced by newValue or throwing,
+        // so callers can pass optional paths straight through.
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public void ReturnsInput_WhenNullOrEmpty(string? str)
+        {
+            var actual = StringExtensions.ReplaceNthOccurrence(str!, '/', 0, "A");
+
+            Assert.Equal(str, actual);
+        }
     }
 }
