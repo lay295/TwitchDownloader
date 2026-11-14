@@ -1,0 +1,130 @@
+{
+  "video": {
+    "id": "1000000001",
+    "created_at": "2024-01-01T00:00:00Z",
+    "start": 0,
+    "end": 0,
+    "user_id": "100000001",
+    "user_name": "TestStreamer",
+    "duration": "1h2m3s"
+  },
+  "comments": [
+    {
+      "_id": "00000000-0000-4000-9000-000000000001",
+      "created_at": "2024-01-01T00:00:05.000Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 5.0,
+      "commenter": {
+        "display_name": "TestStreamer",
+        "_id": "100000001",
+        "name": "teststreamer",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": "https://static-cdn.jtvnw.net/jtv_user_pictures/test-profile_image-300x300.png"
+      },
+      "message": {
+        "body": "welcome",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "welcome",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [
+          {
+            "_id": "broadcaster",
+            "version": "1"
+          }
+        ],
+        "user_color": "#1E90FF",
+        "emoticons": []
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-9000-000000000002",
+      "created_at": "2024-01-01T00:00:10.000Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 10.0,
+      "commenter": {
+        "display_name": "viewer_one",
+        "_id": "100000011",
+        "name": "viewer_one",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": "https://static-cdn.jtvnw.net/jtv_user_pictures/test2-profile_image-300x300.png"
+      },
+      "message": {
+        "body": "Cheer100 for you",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "Cheer100 for you",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [],
+        "user_color": "#1E90FF",
+        "emoticons": []
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-9000-000000000003",
+      "created_at": "2024-01-01T00:00:20.000Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 20.0,
+      "commenter": {
+        "display_name": "viewer_two",
+        "_id": "100000012",
+        "name": "viewer_two",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "notCheer50 is not a cheer",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "notCheer50 is not a cheer",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [],
+        "user_color": "#1E90FF",
+        "emoticons": []
+      }
+    }
+  ],
+  "emotes": {
+    "thirdParty": [
+      {
+        "id": "000000000000000000000b01",
+        "imageScale": 2,
+        "data": "iVBORw0KGgoAAAANSUhEUgAAADgAAAA4AQMAAACSSKldAAAABlBMVEVBaeH///+bPHV1AAAAGUlEQVR42mNgoDdg/v///wEGJihvuNH0BgAM0QP3xfmHygAAAABJRU5ErkJggg==",
+        "name": "TestBttv",
+        "width": 28,
+        "height": 28
+      }
+    ],
+    "firstParty": [
+      {
+        "id": "25",
+        "imageScale": 2,
+        "data": "iVBORw0KGgoAAAANSUhEUgAAADgAAAA4AQMAAACSSKldAAAABlBMVEVBaeH///+bPHV1AAAAGUlEQVR42mNgoDdg/v///wEGJihvuNH0BgAM0QP3xfmHygAAAABJRU5ErkJggg==",
+        "name": null,
+        "width": 28,
+        "height": 28
+      }
+    ]
+  }
+}

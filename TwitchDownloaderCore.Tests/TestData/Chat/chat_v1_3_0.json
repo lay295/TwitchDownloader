@@ -1,0 +1,169 @@
+{
+  "FileInfo": {
+    "Version": {
+      "Major": 1,
+      "Minor": 3,
+      "Patch": 0
+    },
+    "CreatedAt": "2023-07-23T13:11:54.4269559-04:00",
+    "UpdatedAt": "0001-01-01T00:00:00"
+  },
+  "streamer": {
+    "name": "TestStreamer",
+    "id": 100000001
+  },
+  "video": {
+    "title": "Schema 1.3.0 fixture",
+    "id": "1000000001",
+    "created_at": "2024-01-01T00:00:00Z",
+    "start": 0,
+    "end": 60,
+    "length": 60,
+    "chapters": []
+  },
+  "comments": [
+    {
+      "_id": "00000000-0000-4000-9000-000000000001",
+      "created_at": "2024-01-01T00:00:02.000Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 2.0,
+      "commenter": {
+        "display_name": "viewer_one",
+        "_id": "100000011",
+        "name": "viewer_one",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "Kappa hello",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "Kappa",
+            "emoticon": {
+              "emoticon_id": "25"
+            }
+          },
+          {
+            "text": " hello",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [
+          {
+            "_id": "subscriber",
+            "version": "0"
+          }
+        ],
+        "user_color": "#1E90FF",
+        "emoticons": [
+          {
+            "_id": "25",
+            "begin": 0,
+            "end": 6
+          }
+        ]
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-9000-000000000002",
+      "created_at": "2024-01-01T00:00:30.500Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 30.5,
+      "commenter": {
+        "display_name": "viewer_two",
+        "_id": "100000012",
+        "name": "viewer_two",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "TestBttv nice",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "TestBttv nice",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [],
+        "user_color": "#1E90FF",
+        "emoticons": []
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-9000-000000000003",
+      "created_at": "2024-01-01T00:00:59.000Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 59.0,
+      "commenter": {
+        "display_name": "viewer_one",
+        "_id": "100000011",
+        "name": "viewer_one",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "bye",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "bye",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [],
+        "user_color": "#1E90FF",
+        "emoticons": []
+      }
+    }
+  ],
+  "embeddedData": {
+    "thirdParty": [
+      {
+        "id": "000000000000000000000b01",
+        "imageScale": 2,
+        "data": "iVBORw0KGgoAAAANSUhEUgAAADgAAAA4AQMAAACSSKldAAAABlBMVEVBaeH///+bPHV1AAAAGUlEQVR42mNgoDdg/v///wEGJihvuNH0BgAM0QP3xfmHygAAAABJRU5ErkJggg==",
+        "name": "TestBttv",
+        "width": 28,
+        "height": 28,
+        "isZeroWidth": false
+      }
+    ],
+    "firstParty": [
+      {
+        "id": "25",
+        "imageScale": 2,
+        "data": "iVBORw0KGgoAAAANSUhEUgAAADgAAAA4AQMAAACSSKldAAAABlBMVEVBaeH///+bPHV1AAAAGUlEQVR42mNgoDdg/v///wEGJihvuNH0BgAM0QP3xfmHygAAAABJRU5ErkJggg==",
+        "name": null,
+        "width": 28,
+        "height": 28
+      }
+    ],
+    "twitchBadges": [
+      {
+        "name": "subscriber",
+        "versions": {
+          "0": {
+            "title": "Subscriber",
+            "description": "Subscriber",
+            "bytes": "iVBORw0KGgoAAAANSUhEUgAAACQAAAAkAQMAAADbzgrbAAAABlBMVEXcFDz////vuDXSAAAAGUlEQVR42mNgIA/U/3/AwMTAwMBAc5I8AACHQAKByatfsgAAAABJRU5ErkJggg=="
+          }
+        }
+      }
+    ],
+    "twitchBits": []
+  }
+}
