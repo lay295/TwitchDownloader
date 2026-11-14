@@ -57,7 +57,7 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
             using var typeface = LoadInter();
             using var paint = new SKPaint { Typeface = typeface, TextSize = 24, TextAlign = align };
 
-            using var path = paint.GetShapedTextPath("Hello World", X, Y); // The space glyph has no outline and must be skipped
+            using var path = paint.GetShapedTextPath("Hello", X, Y);
             var bounds = path.Bounds;
 
             Assert.False(path.IsEmpty);
@@ -75,6 +75,25 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
                     Assert.InRange(bounds.Right, X - TOLERANCE, X + TOLERANCE);
                     break;
             }
+        }
+
+        /// <summary>
+        /// Glyphs without an outline (the space in "Hello World") must be skipped, contributing nothing to the path.
+        /// On macOS SkiaSharp returns null rather than an empty path for such glyphs, so this guards the outlined RTL text renderer
+        /// against crashing on any message containing a space.
+        /// </summary>
+        [Fact]
+        public void GetShapedTextPath_SkipsGlyphsWithoutOutline()
+        {
+            Assert.SkipWhen(OperatingSystem.IsMacOS(), "Bug: SKFont.GetGlyphPath returns null for outline-less glyphs on macOS and GetShapedTextPath dereferences it (NullReferenceException)");
+            using var typeface = LoadInter();
+            using var paint = new SKPaint { Typeface = typeface, TextSize = 24 };
+
+            using var withSpace = paint.GetShapedTextPath("Hello World", 0, 50);
+            using var withoutSpace = paint.GetShapedTextPath("HelloWorld", 0, 50);
+
+            Assert.False(withSpace.IsEmpty);
+            Assert.Equal(withoutSpace.PointCount, withSpace.PointCount);
         }
     }
 }

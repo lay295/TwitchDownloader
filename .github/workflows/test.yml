@@ -47,13 +47,19 @@ jobs:
           if [ "$RUNNER_OS" = "Windows" ] && [ -d TwitchDownloaderWPF.Tests ]; then projects="$projects TwitchDownloaderWPF.Tests"; fi
           status=0
           for project in $projects; do
-            # Live tests hit the real Twitch API and run nightly in e2e-live.yml instead.
-            dotnet test --project "$project" --filter-not-trait "Category=Live" \
+            # Live tests hit the real Twitch API and run nightly in e2e-live.yml instead. End-to-end tests run separately below.
+            dotnet test --project "$project" --filter-not-trait "Category=Live" --filter-not-namespace "TwitchDownloaderCLI.Tests.EndToEndTests" \
               --results-directory "$GITHUB_WORKSPACE/TestResults/$project" \
               --report-junit --report-junit-filename "$project.junit.xml" \
               --coverlet --coverlet-output-format cobertura --coverlet-include "[TwitchDownloader*]*" --coverlet-exclude "[*.Tests]*" \
               || status=1
           done
+          # The end-to-end tests launch the CLI as child processes. Under coverlet those processes load the instrumented assemblies and
+          # race each other writing the shared coverage hits file on exit (crashing with exit code 134 on macOS), so run them uninstrumented.
+          dotnet test --project TwitchDownloaderCLI.Tests --filter-namespace "TwitchDownloaderCLI.Tests.EndToEndTests" \
+            --results-directory "$GITHUB_WORKSPACE/TestResults/TwitchDownloaderCLI.Tests.EndToEnd" \
+            --report-junit --report-junit-filename "TwitchDownloaderCLI.Tests.EndToEnd.junit.xml" \
+            || status=1
           exit $status
 
       - name: Upload test results
