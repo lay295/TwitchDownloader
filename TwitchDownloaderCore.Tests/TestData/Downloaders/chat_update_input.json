@@ -1,0 +1,165 @@
+{
+  "FileInfo": {
+    "Version": {
+      "Major": 1,
+      "Minor": 4,
+      "Patch": 0
+    },
+    "CreatedAt": "2024-01-02T00:00:00Z",
+    "UpdatedAt": "0001-01-01T00:00:00"
+  },
+  "streamer": {
+    "name": "FakeStreamer",
+    "login": "fakestreamer",
+    "id": 11111
+  },
+  "video": {
+    "title": "Old title",
+    "description": "Old description",
+    "id": "1234567890",
+    "created_at": "2024-01-01T00:00:00Z",
+    "start": 10,
+    "end": 40,
+    "length": 60,
+    "viewCount": 1,
+    "game": "Old game",
+    "chapters": [
+      {
+        "id": "",
+        "startMilliseconds": 0,
+        "lengthMilliseconds": 30000,
+        "type": "GAME_CHANGE",
+        "description": "Old game",
+        "subDescription": "",
+        "thumbnailUrl": "",
+        "gameId": "1",
+        "gameDisplayName": "Old game",
+        "gameBoxArtUrl": ""
+      }
+    ]
+  },
+  "comments": [
+    {
+      "_id": "c2",
+      "created_at": "2024-01-01T00:00:12Z",
+      "channel_id": "11111",
+      "content_type": "video",
+      "content_id": "1234567890",
+      "content_offset_seconds": 12,
+      "commenter": {
+        "display_name": "User1",
+        "_id": "1",
+        "name": "user1",
+        "bio": null,
+        "created_at": "0001-01-01T00:00:00",
+        "updated_at": "0001-01-01T00:00:00",
+        "logo": null
+      },
+      "message": {
+        "body": "hello Kappa",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "hello ",
+            "emoticon": null
+          },
+          {
+            "text": "Kappa",
+            "emoticon": {
+              "emoticon_id": "25"
+            }
+          }
+        ],
+        "user_badges": [
+          {
+            "_id": "subscriber",
+            "version": "1"
+          }
+        ],
+        "user_color": "#00FF00",
+        "emoticons": [
+          {
+            "_id": "25",
+            "begin": 6,
+            "end": 12
+          }
+        ]
+      }
+    },
+    {
+      "_id": "c3",
+      "created_at": "2024-01-01T00:00:20Z",
+      "channel_id": "11111",
+      "content_type": "video",
+      "content_id": "1234567890",
+      "content_offset_seconds": 20,
+      "commenter": {
+        "display_name": "User2",
+        "_id": "2",
+        "name": "user2",
+        "bio": null,
+        "created_at": "0001-01-01T00:00:00",
+        "updated_at": "0001-01-01T00:00:00",
+        "logo": null
+      },
+      "message": {
+        "body": "bttvFake Cheer100",
+        "bits_spent": 100,
+        "fragments": [
+          {
+            "text": "bttvFake Cheer100",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [],
+        "user_color": "#00FF00",
+        "emoticons": []
+      }
+    },
+    {
+      "_id": "c4",
+      "created_at": "2024-01-01T00:00:33Z",
+      "channel_id": "11111",
+      "content_type": "video",
+      "content_id": "1234567890",
+      "content_offset_seconds": 33,
+      "commenter": {
+        "display_name": "User3",
+        "_id": "3",
+        "name": "user3",
+        "bio": null,
+        "created_at": "0001-01-01T00:00:00",
+        "updated_at": "0001-01-01T00:00:00",
+        "logo": null
+      },
+      "message": {
+        "body": "still here",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "still here",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [],
+        "user_color": "#00FF00",
+        "emoticons": []
+      }
+    }
+  ],
+  "embeddedData": {
+    "thirdParty": [],
+    "firstParty": [
+      {
+        "id": "25",
+        "imageScale": 2,
+        "data": "iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAC0lEQVR4nGNgQAYAAA4AAamRc7EAAAAASUVORK5CYII=",
+        "name": "25",
+        "width": 1,
+        "height": 1
+      }
+    ],
+    "twitchBadges": [],
+    "twitchBits": []
+  }
+}
