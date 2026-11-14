@@ -2,8 +2,10 @@ using TwitchDownloaderCore.Tools;
 
 namespace TwitchDownloaderCore.Tests.ToolTests
 {
+    // Tests UrlTimeCode.Parse, which reads the ?t=1h2m3s style timestamp of pasted VOD URLs so the GUI can pre-fill the trim start.
     public class UrlTimeCodeTests
     {
+        // Any subset of d/h/m/s units, in any order, adds up to the right TimeSpan.
         [Theory]
         [InlineData("12s", 0, 0, 0, 12)]
         [InlineData("13m12s", 0, 0, 13, 12)]

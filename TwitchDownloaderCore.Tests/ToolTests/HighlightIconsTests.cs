@@ -43,6 +43,9 @@ namespace TwitchDownloaderCore.Tests.ToolTests
                 message);
         }
 
+        // Each Twitch system notice (sub tiers/Prime, resubs with and without custom text, gifts, raids, bit badge tiers, watch streaks,
+        // charity, combos...) maps to its HighlightType and ordinary chat stays None. The renderer picks icons and layout from this, so a
+        // wrong classification is visible in every render.
         [Theory]
         // SubscribedTier no custom message
         [InlineData(
@@ -162,6 +165,20 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             Assert.Equal(expectedType, actualType);
         }
 
+        // A raid notice is only recognised when the raiding channel named in the message is the commenter. A viewer typing
+        // "5180 raiders from someone_else have joined!" must stay a plain message, otherwise it would be rendered as a raid.
+        [Fact]
+        public void RaidNotice_RequiresCommenterToBeTheRaider()
+        {
+            const string BODY = "5180 raiders from streamer8 have joined! ";
+            var message = new Message { body = BODY, fragments = [new Fragment { text = BODY }], user_badges = [], emoticons = [] };
+
+            Assert.Equal(HighlightType.Raid, HighlightIcons.GetHighlightType(CreateCommentWithMessage("streamer8", "streamer8", message)));
+            Assert.Equal(HighlightType.None, HighlightIcons.GetHighlightType(CreateCommentWithMessage("viewer8", "viewer8", message)));
+        }
+
+        // Twitch's 'We added N Bonus Gift Subs' notices are posted by the Twitch/VALORANT system accounts and must be treated as GiftedMany;
+        // the same text from a normal user must not be (guarded by the account id check).
         [Theory]
         [InlineData("{\"display_name\":\"Twitch\",\"_id\":\"12826\",\"name\":\"twitch\",\"bio\":\"Twitch is where thousands of communities come together for whatever, every day. \",\"created_at\":\"2007-05-22T10:39:54.238271Z\",\"updated_at\":\"2024-09-22T22:28:39.594659Z\",\"logo\":\"https://static-cdn.jtvnw.net/jtv_user_pictures/aa88230d-7af5-4053-a7cd-889e626d3382-profile_image-300x300.png\"}",
             "{\"body\":\"We added 13 Gift Subs AND 10 Bonus Gift Subs to viewer8's gift! \",\"bits_spent\":0,\"fragments\":[{\"text\":\"We added 13 Gift Subs AND 10 Bonus Gift Subs to viewer8's gift! \",\"emoticon\":null}],\"user_badges\":[],\"user_color\":null,\"emoticons\":[]}")]
@@ -184,6 +201,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             Assert.Equal(EXPECTED_TYPE, actualType);
         }
 
+        // Anonymous gift subs are posted by the AnAnonymousGifter or Twitch account; both must classify as GiftedAnonymous.
         [Theory]
         [InlineData("{\"display_name\":\"AnAnonymousGifter\",\"_id\":\"274598607\",\"name\":\"ananonymousgifter\",\"type\":\"user\",\"bio\":\"?????????????????????????????\",\"created_at\":\"2018-11-12T21:57:31.811529Z\",\"updated_at\":\"2022-04-18T21:57:27.392173Z\",\"logo\":\"https://static-cdn.jtvnw.net/jtv_user_pictures/ae7b05c6-c924-44ab-8203-475a2d3e488c-profile_image-300x300.png\"}",
             "{\"body\":\"An anonymous user gifted a Tier 1 sub to viewer8!  \",\"bits_spent\":0,\"fragments\":[{\"text\":\"An anonymous user gifted a Tier 1 sub to viewer8!  \",\"emoticon\":null}],\"user_badges\":[],\"user_color\":null,\"emoticons\":[]}")]
@@ -202,6 +220,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             Assert.Equal(EXPECTED_TYPE, actualType);
         }
 
+        // A resub notice without user text is returned as-is with a null custom message, so the renderer does not draw an empty second line.
         [Theory]
         [InlineData(
             "{\"body\":\"viewer8 subscribed at Tier 1. \",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 subscribed at Tier 1. \",\"emoticon\":null}],\"user_badges\":[{\"_id\":\"subscriber\",\"version\":\"3\"},{\"_id\":\"sub-gifter\",\"version\":\"5\"}],\"user_color\":\"#1E90FF\",\"emoticons\":[]}")]
@@ -226,6 +245,8 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             Assert.Null(shouldBeNull);
         }
 
+        // A resub notice with user text is split into the system part and the user's message, keeping emote fragments intact (one or many
+        // fragments), so the custom message can be rendered as a normal chat line under the highlight.
         [Theory]
         // 1 Fragment
         [InlineData(
@@ -257,6 +278,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             Assert.Equal(customMessage.message.body, customMessageString);
             Assert.True(customMessage.message.fragments.Count > 0, $"0 fragments were found in {nameof(customMessage)}. Expected more than 0.");
         }
+        // A watch streak notice without user text is returned unchanged with no custom message.
 
         [Fact]
         public void DoesNotSplitWatchStreakWithoutCustomMessage()
@@ -273,6 +295,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             Assert.Null(shouldBeNull);
         }
 
+        // A watch streak notice with user text is split into the notice and the user's message (emote fragments preserved).
         [Theory]
         [InlineData(
             "{\"body\":\"viewer8 watched 3 consecutive streams this month and sparked a watch streak! me too!\",\"bits_spent\":0,\"fragments\":[{\"text\":\"viewer8 watched 3 consecutive streams this month and sparked a watch streak! me too!\",\"emoticon\":null}],\"user_badges\":[],\"user_color\":\"#1E90FF\",\"emoticons\":[]}",

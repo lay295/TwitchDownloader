@@ -7,6 +7,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
     // ReSharper disable StringLiteralTypo
     public class M3U8Tests
     {
+        // A Twitch VOD media playlist of .ts parts: every header, EXTINF duration, program date time and path is parsed, regardless of culture.
         [Theory]
         [InlineData(false, "en-US")]
         [InlineData(true, "en-US")]
@@ -65,6 +66,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
                 Assert.Equal($"{i}.ts", stream.Path);
             }
         }
+        // A Twitch fMP4 media playlist (EXT-X-MAP init segment plus .mp4 parts) parses with the map URI and byte ranges intact.
 
         [Theory]
         [InlineData(false, "en-US")]
@@ -140,6 +142,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
                 duration -= 10;
             }
         }
+        // A Twitch live media playlist (EXT-X-TWITCH-* headers, EXT-X-DATERANGE sessions, 'live' EXTINF flags, no end list) parses without treating the extra tags as parts.
 
         [Theory]
         [InlineData(false, "en-US")]
@@ -233,6 +236,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
                 Assert.Equal(expectedStream.path, stream.Path);
             }
         }
+        // A Twitch master playlist: EXT-X-MEDIA and EXT-X-STREAM-INF attributes (bandwidth, codecs, resolution, framerate, variant ids) are parsed per rendition.
 
         [Theory]
         [InlineData(false, "en-US")]
@@ -302,6 +306,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
                 Assert.Equivalent(streams[i], m3u8.Streams[i], true);
             }
         }
+        // Individual EXT-X-MEDIA lines parse TYPE, GROUP-ID, NAME and the YES/NO flags.
 
         [Theory]
         [InlineData("#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"chunked\",NAME=\"1080p60\",AUTOSELECT=NO,DEFAULT=NO", M3U8.Stream.ExtMediaInfo.MediaType.Video, "chunked", "1080p60", false, false)]
@@ -321,6 +326,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
             Assert.Equal(@default, mediaInfo.Default);
         }
 
+        // Individual EXT-X-STREAM-INF lines parse bandwidth, the codec list, resolution, framerate and Twitch's IVS/variant attributes.
         [Theory]
         [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=5898203,CODECS=\"avc1.64002A,mp4a.40.2\",RESOLUTION=1920x1080,FRAME-RATE=59.995,STABLE-VARIANT-ID=\"1080p60\",IVS-NAME=\"1080p60\",IVS-GROUPS=\"landscape\",IVS-VARIANT-SOURCE=\"source\"",
             5898203, new[] { "avc1.64002A", "mp4a.40.2" }, 1920, 1080, 59.995, "1080p60", "1080p60", new[] { "landscape" }, "source")]
@@ -346,6 +352,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
             Assert.Equal(ivsName, streamInfo.IvsName);
             Assert.Equal(ivsVariantSource, streamInfo.IvsVariantSource);
         }
+        // A Kick media playlist, where several byte-ranged parts share one .ts file, parses byte ranges and program date times into the same model.
 
         [Theory]
         [InlineData(false, "en-US")]
@@ -445,6 +452,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
         }
 
         /* Kick M3U8 doesn't look like this anymore, nor does it use the new IVS API like Twitch. Ignore for now.
+        // A Kick master playlist (EXT-X-SESSION-DATA, a VIDEO EXT-X-MEDIA group per rendition, PROGRAM-ID) parses its renditions.
         [Theory]
         [InlineData(false, "en-US")]
         [InlineData(true, "en-US")]
@@ -532,6 +540,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
             Assert.Equal(autoSelect, mediaInfo.AutoSelect);
             Assert.Equal(@default, mediaInfo.Default);
         }
+        // Kick's EXT-X-STREAM-INF lines, which lack Twitch's extra attributes, still parse bandwidth/codecs/resolution.
 
         [Theory]
         [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=9878400,CODECS=\"avc1.64002A,mp4a.40.2\",RESOLUTION=1920x1080,VIDEO=\"1080p60\"", 9878400, new[] { "avc1.64002A", "mp4a.40.2" }, 1920, 1080)]
@@ -547,6 +556,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
             Assert.Equal(codecs, streamInfo.Codecs);
             Assert.Equal((videoWidth, videoHeight), streamInfo.Resolution);
         }
+        // BYTERANGE values parse as 'length' or 'length@start', with and without the key prefix.
 
         [Theory]
         [InlineData(100, 200, "100@200", "")]
@@ -560,6 +570,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
 
             Assert.Equal(expected, actual);
         }
+        // Malformed byte ranges are a FormatException rather than a zero range that would download the wrong bytes.
 
         [Theory]
         [InlineData("429496729500@1")]
@@ -569,6 +580,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
         {
             Assert.Throws<FormatException>(() => M3U8.ByteRange.Parse(byteRangeString, default));
         }
+        // RESOLUTION values parse as WIDTHxHEIGHT.
 
         [Theory]
         [InlineData(100, 200, "100x200")]
@@ -581,6 +593,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
 
             Assert.Equal(expected, actual);
         }
+        // Malformed resolutions throw instead of defaulting to 0x0 and breaking quality selection.
 
         [Theory]
         [InlineData("429496729500x1")]
@@ -590,6 +603,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
         {
             Assert.Throws<FormatException>(() => M3U8.Stream.ExtStreamInfo.StreamResolution.Parse(resolutionString));
         }
+        // Serializing a playlist writes decimals with '.' in every culture, since the output is fed back to ffmpeg/players.
 
         [Theory]
         [InlineData("en-GB")]

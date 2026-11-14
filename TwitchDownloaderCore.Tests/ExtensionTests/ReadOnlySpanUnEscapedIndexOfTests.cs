@@ -5,6 +5,7 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
     // ReSharper disable InvokeAsExtensionMember
     public class ReadOnlySpanUnEscapedIndexOfTests
     {
+        // Without quotes or backslashes the result matches a plain IndexOf.
         [Fact]
         public void FindsNextIndex_WithoutEscapes()
         {
@@ -16,6 +17,7 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
 
             Assert.Equal(CHAR_INDEX, actual);
         }
+        // A char that never occurs yields -1, like IndexOf.
 
         [Fact]
         public void DoesNotFindAnIndex_WhenNotPresent()
@@ -28,6 +30,7 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
 
             Assert.Equal(CHAR_INDEX, actual);
         }
+        // A backslash-escaped occurrence is skipped and the next unescaped one is returned.
 
         [Fact]
         public void FindsNextIndex_WithBackslashEscapes()
@@ -40,6 +43,7 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
 
             Assert.Equal(CHAR_INDEX, actual);
         }
+        // When every occurrence is escaped the result is -1, not the position of an escaped char.
 
         [Fact]
         public void DoesNotFindIndex_WithBackslashEscapes()
@@ -52,6 +56,7 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
 
             Assert.Equal(CHAR_INDEX, actual);
         }
+        // Quoted text that does not contain the char is skipped over without affecting the index of a later match.
 
         [Fact]
         public void FindsNextIndex_WithUnrelatedQuoteEscapes()
@@ -64,6 +69,7 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
 
             Assert.Equal(CHAR_INDEX, actual);
         }
+        // An occurrence inside quotes is ignored; the first occurrence outside the quotes is returned.
 
         [Fact]
         public void FindsNextIndex_WithQuoteEscapes()
@@ -76,6 +82,7 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
 
             Assert.Equal(CHAR_INDEX, actual);
         }
+        // When every occurrence sits inside quoted sections the result is -1.
 
         [Fact]
         public void DoesNotFindAnIndex_WithQuoteEscapes()
@@ -88,6 +95,7 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
 
             Assert.Equal(CHAR_INDEX, actual);
         }
+        // Searching for a quote or backslash is ambiguous with the escaping rules, so it is rejected up front.
 
         [Theory]
         [InlineData('\\')]
@@ -101,6 +109,7 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
                 ReadOnlySpanExtensions.UnEscapedIndexOf(str, charToFind);
             });
         }
+        // An unterminated quote swallows the rest of the input, so nothing after it can be found (-1) instead of guessing.
 
         [Fact]
         public void DoesNotFind_WhenImbalancedQuotes()

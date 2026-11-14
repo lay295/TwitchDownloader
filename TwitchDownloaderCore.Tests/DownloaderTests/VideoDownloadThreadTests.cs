@@ -234,6 +234,34 @@ namespace TwitchDownloaderCore.Tests.DownloaderTests
             await worker.ThreadTask;
         }
 
+        /// <summary>
+        /// An HttpClient.Timeout (surfaced by HttpClient as a TaskCanceledException mentioning the timeout) is a transient
+        /// failure: it is logged as "timed out" and the part is retried after a back-off, instead of being treated as a
+        /// cancellation that kills the worker. The back-off is 5s, so the test cancels the worker once the timeout has been
+        /// classified and asserts on the log/attempt count rather than waiting for the retry itself.
+        /// </summary>
+        [Fact]
+        public async Task HttpClientTimeout_IsLoggedAndRetried_NotFatal()
+        {
+            using var temp = new TempDirectory();
+            using var cts = new CancellationTokenSource();
+            var handler = new FakeHttpMessageHandler((_, _) =>
+            {
+                cts.CancelAfter(200); // Cancel the retry back-off that follows the timeout so the test stays fast
+                throw new TaskCanceledException("The request was canceled due to the configured HttpClient.Timeout of 30 seconds elapsing.");
+            });
+            using var client = new HttpClient(handler);
+            var state = OldVodState("0.ts");
+            var logger = new RecordingTaskProgress();
+
+            var worker = new VideoDownloadThread(state, client, temp.Path, -1, logger, cts.Token);
+
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => worker.ThreadTask);
+            Assert.Single(handler.Requests);
+            Assert.Contains(logger.Verbose, x => x == "0.ts timed out.");
+            Assert.Equal(1, state.PartStates["0.ts"].DownloadAttempts); // The timeout consumed an attempt but did not fault the worker by itself
+        }
+
         /// <summary>A cancelled token stops the worker before it downloads anything.</summary>
         [Fact]
         public async Task CancelledToken_StopsWorker()

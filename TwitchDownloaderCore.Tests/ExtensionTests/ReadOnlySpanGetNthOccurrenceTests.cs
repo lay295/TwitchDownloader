@@ -11,6 +11,9 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
     // ReSharper disable InvokeAsExtensionMember
     public class ReadOnlySpanGetNthOccurrenceTests
     {
+        // Positive indexes count delimited ranges from the start, ^n indexes from the end, and empty ranges between adjacent delimiters are
+        // returned as empty. The real-world cases are what VideoDownloader/UpdateHandler rely on to extract the quality folder of a playlist
+        // URL and the asset name of a release URL.
         [Theory]
         [InlineData(0, "1/2/3", "1")]
         [InlineData(1, "1/2/3", "2")]
@@ -33,6 +36,7 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
 
             Assert.Equal(expected, actual);
         }
+        // A string without the delimiter is one range, so asking for the first (or last) range returns the whole string instead of throwing.
 
         [Theory]
         [InlineData(0)]
@@ -46,6 +50,7 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
 
             Assert.Equal(EXPECTED, actual);
         }
+        // Without any delimiter there is only range 0/^1; any other index is out of range and must throw rather than return garbage.
 
         [Theory]
         [InlineData(1)]
@@ -63,6 +68,8 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
                 ReadOnlySpanExtensions.GetNthOccurrence(STRING, '/', index.ToIndex());
             });
         }
+        // An index past the number of delimited ranges (from either end) must throw, so a malformed URL is reported instead of silently
+        // yielding the wrong segment.
 
         [Theory]
         [InlineData(3)]
@@ -93,6 +100,7 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
 
             Assert.True(actual.IsEmpty);
         }
+        // ^0 is past the end of any sequence, so it is rejected like other out-of-range indexes.
 
         [Fact]
         public void Throws_WhenIndexFromEndZero()

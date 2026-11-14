@@ -46,11 +46,12 @@ namespace TwitchDownloaderCore.Tests.DownloaderTests
 
         /// <summary>
         /// The body is streamed to disk byte-for-byte, the Content-Length is returned (callers use it to verify parts), the
-        /// request advertises gzip/deflate/br (tryUnmute fails without it, see source comment) and the 60s watchdog on the
-        /// caller's CTS is disarmed afterwards so the next part on that thread isn't cancelled.
+        /// request advertises gzip/deflate/br (tryUnmute fails without it, see source comment) and the caller's CTS is
+        /// still usable afterwards. (The 60s watchdog that DownloadFileAsync arms and then disarms on the CTS cannot be
+        /// observed in a fast test; the final assertion only shows the method did not cancel the token itself.)
         /// </summary>
         [Fact]
-        public async Task DownloadsBody_ReturnsLength_AndResetsWatchdog()
+        public async Task DownloadsBody_ReturnsLength_AndLeavesTokenUncancelled()
         {
             using var temp = new TempDirectory();
             using var client = Client(() => FakeHttpMessageHandler.Bytes(Body), out var handler);
@@ -65,7 +66,6 @@ namespace TwitchDownloaderCore.Tests.DownloaderTests
             Assert.Contains("gzip", acceptEncoding);
             Assert.Contains("deflate", acceptEncoding);
             Assert.Contains("br", acceptEncoding);
-            await Task.Delay(50, TestContext.Current.CancellationToken);
             Assert.False(cts.IsCancellationRequested);
         }
 
