@@ -6,6 +6,10 @@ name: Render Preview
 on:
   issue_comment:
     types: [ created ]
+  # TODO(before merge): remove this pull_request trigger (and the pull_request parts of the job conditions below). It only exists
+  # so the workflow can be tried out on the PR that adds it, since comment-triggered runs only use the default branch's file.
+  pull_request:
+    types: [ opened, synchronize, reopened ]
 
 permissions:
   contents: read
@@ -13,12 +17,13 @@ permissions:
 jobs:
   render:
     if: >-
-      github.event.issue.pull_request && startsWith(github.event.comment.body, '/render-preview') &&
-      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
+      github.event_name == 'pull_request' ||
+      (github.event.issue.pull_request && startsWith(github.event.comment.body, '/render-preview') &&
+       contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association))
     runs-on: ubuntu-latest
     # Job-level so unrelated PR comments (whose runs skip this job) don't cancel a render in progress
     concurrency:
-      group: render-preview-${{ github.event.issue.number }}
+      group: render-preview-${{ github.event.pull_request.number || github.event.issue.number }}
       cancel-in-progress: true
     permissions:
       contents: read
@@ -28,7 +33,7 @@ jobs:
         id: pr
         env:
           GH_TOKEN: ${{ github.token }}
-          PR: ${{ github.event.issue.number }}
+          PR: ${{ github.event.pull_request.number || github.event.issue.number }}
         run: |
           gh pr view "$PR" -R "$GITHUB_REPOSITORY" --json number,headRefOid,baseRefOid,baseRefName \
             --jq '"number=\(.number)\nhead_sha=\(.headRefOid)\nbase_sha=\(.baseRefOid)\nbase_ref=\(.baseRefName)"' >> "$GITHUB_OUTPUT"
@@ -75,6 +80,8 @@ jobs:
 
   publish:
     needs: render
+    # TODO(before merge): drop this condition with the pull_request trigger (fork PRs only get a read-only token on pull_request)
+    if: github.event_name == 'issue_comment' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     permissions:
       contents: write
