@@ -1,0 +1,77 @@
+name: Render Preview
+
+# Opt-in visual review: add the "render-preview" label to a PR (needs triage/write access). The sample chats are rendered by the
+# base branch and by the PR, and the frames are posted side by side as a PR comment. Re-renders on every push while labelled.
+on:
+  pull_request:
+    types: [ labeled, synchronize, reopened ]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: render-preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  render:
+    if: >-
+      contains(github.event.pull_request.labels.*.name, 'render-preview') &&
+      (github.event.action != 'labeled' || github.event.label.name == 'render-preview')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          path: head
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: base
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+      - name: Install FFmpeg
+        run: command -v ffmpeg || (sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg)
+
+      - name: Build both CLIs
+        run: |
+          dotnet build base/TwitchDownloaderCLI -c Release -o cli/base
+          dotnet build head/TwitchDownloaderCLI -c Release -o cli/head
+
+      - name: Render and compare
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+        run: |
+          python3 head/.github/scripts/render_preview.py --base cli/base/TwitchDownloaderCLI --head cli/head/TwitchDownloaderCLI \
+            --fixtures head/TwitchDownloaderCore.Tests/TestData --out preview --base-label "$BASE_REF" --head-label "this PR"
+          echo "${{ github.event.pull_request.number }}" > preview/pr-number.txt
+          echo "${{ github.event.pull_request.head.sha }}" > preview/head-sha.txt
+          sed 's|{BASE_URL}/[^"]*|#|g' preview/comment.md >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: render-preview
+          path: preview
+
+  publish:
+    needs: render
+    # PRs from forks get a read-only token here; render-preview-comment.yml publishes for those from the artifact.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: .github/scripts
+      - uses: actions/download-artifact@v8
+        with:
+          name: render-preview
+          path: preview
+      - name: Publish images and comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: bash .github/scripts/publish_render_preview.sh preview

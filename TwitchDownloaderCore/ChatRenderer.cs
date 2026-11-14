@@ -1736,7 +1736,7 @@ namespace TwitchDownloaderCore
         {
             var userColor = colorOverride ?? (comment.message.user_color is not null
                 ? SKColor.Parse(comment.message.user_color)
-                : DefaultUsernameColors[Math.Abs(comment.commenter.display_name.GetHashCode()) % DefaultUsernameColors.Length]);
+                : DefaultUsernameColors[StableIndex(comment.commenter.display_name, DefaultUsernameColors.Length)]);
 
             if (colorOverride is null && renderOptions.AdjustUsernameVisibility)
             {
@@ -1864,7 +1864,7 @@ namespace TwitchDownloaderCore
 
             if (string.IsNullOrWhiteSpace(avatarUrl) || !_avatarCache.TryGetValue(avatarUrl, out var avatarImage))
             {
-                avatarUrl = DefaultAvatarUrls[Math.Abs(comment.commenter.display_name.GetHashCode()) % DefaultAvatarUrls.Length];
+                avatarUrl = DefaultAvatarUrls[StableIndex(comment.commenter.display_name, DefaultAvatarUrls.Length)];
                 if (!_avatarCache.TryGetValue(avatarUrl, out avatarImage))
                 {
                     return;
@@ -2183,6 +2183,18 @@ namespace TwitchDownloaderCore
 
             fallbackPaint = newPaint;
             return newPaint;
+        }
+
+        // string.GetHashCode() is randomized per process, which gave the same user a different default color/avatar on every render
+        private static int StableIndex(string text, int length)
+        {
+            var hash = 2166136261u; // FNV-1a
+            foreach (var c in text)
+            {
+                hash = (hash ^ c) * 16777619u;
+            }
+
+            return (int)(hash % (uint)length);
         }
 
         private static bool IsNotAscii(char input)
