@@ -14,7 +14,8 @@ namespace TwitchDownloaderCore
     {
         private readonly ClipDownloadOptions downloadOptions;
         private readonly ITaskProgress _progress;
-        private static readonly HttpClient HttpClient = new();
+        // Not readonly so tests can substitute a fake HttpMessageHandler
+        internal static HttpClient HttpClient = new();
         private readonly string _cacheDir;
 
         public ClipDownloader(ClipDownloadOptions clipDownloadOptions, ITaskProgress progress)

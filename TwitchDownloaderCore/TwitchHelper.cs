@@ -23,7 +23,8 @@ namespace TwitchDownloaderCore
 {
     public static partial class TwitchHelper
     {
-        private static readonly HttpClient httpClient = new()
+        // Not readonly so tests can substitute a fake HttpMessageHandler
+        internal static HttpClient httpClient = new()
         {
             Timeout = TimeSpan.FromSeconds(60)
         };

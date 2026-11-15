@@ -10,7 +10,7 @@ namespace TwitchDownloaderWPF.Services
 {
     public static class FileCollisionService
     {
-        private static CollisionBehavior? _sessionCollisionBehavior;
+        internal static CollisionBehavior? _sessionCollisionBehavior;
 
         [return: MaybeNull]
         public static FileInfo HandleCollisionCallback(FileInfo fileInfo, Window owner)

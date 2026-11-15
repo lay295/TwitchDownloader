@@ -7,6 +7,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
     // ReSharper disable StringLiteralTypo
     public class TimeSpanHFormatTests
     {
+        // As an IFormatProvider it must hand itself out for ICustomFormatter so string.Format/StringBuilder route through it.
         [Fact]
         public void GetFormatWithICustomFormatterReturnsSelf()
         {
@@ -18,6 +19,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             Assert.Same(formatter, result);
         }
 
+        // Requests for any other format type return null, deferring to the default provider.
         [Fact]
         public void GetFormatWithNotICustomFormatterReturnsNull()
         {
@@ -29,6 +31,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             Assert.Null(result);
         }
 
+        // The convenience Format(format, TimeSpan) overload must give exactly the ICustomFormatter result.
         [Fact]
         public void CustomFormatOverloadMatchesICustomFormatter()
         {
@@ -41,6 +44,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             Assert.Equal(resultICustomFormatter, resultCustom);
         }
 
+        // Non-TimeSpan IFormattable values (e.g. dates) are formatted with their own ToString(format) so mixed templates still work.
         [Fact]
         public void CorrectlyFormatsNonTimeSpanFormattable()
         {
@@ -53,6 +57,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             Assert.Equal(expected, resultCustom);
         }
 
+        // Plain objects fall back to ToString().
         [Fact]
         public void CorrectlyFormatsNonTimeSpanNonFormattable()
         {
@@ -65,6 +70,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             Assert.Equal(EXPECTED, resultCustom);
         }
 
+        // A null argument formats to an empty string instead of throwing.
         [Fact]
         public void CorrectlyFormatsNull()
         {
@@ -77,6 +83,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             Assert.Equal(EXPECTED, resultCustom);
         }
 
+        // An empty format string behaves like TimeSpan.ToString().
         [Fact]
         public void ReturnsTimeSpanToString_WhenFormatIsEmpty()
         {
@@ -89,6 +96,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             Assert.Equal(expected, resultCustom);
         }
 
+        // A null format string behaves like TimeSpan.ToString().
         [Fact]
         public void ReturnsTimeSpanToString_WhenFormatIsNull()
         {
@@ -101,6 +109,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             Assert.Equal(expected, resultCustom);
         }
 
+        // Under 24 hours 'H' must give the same result as TimeSpan's 'h' (the fast path rewrites H to h).
         [Fact]
         public void MatchesTimeSpanToString_WhenBigHInFormat()
         {
@@ -113,6 +122,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             Assert.Equal(EXPECTED, result);
         }
 
+        // Without 'H' the format is passed straight to TimeSpan.ToString, so every standard specifier keeps working.
         [Fact]
         public void MatchesTimeSpanToString_WhenNoBigHInFormat()
         {
@@ -125,6 +135,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             Assert.Equal(EXPECTED, result);
         }
 
+        // A backslash-escaped 'H' is literal text, not an hours specifier, in both the fast and the big-H path.
         [Fact]
         public void CorrectlyEscapesCharsPrependedByBackslash()
         {
@@ -137,6 +148,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             Assert.Equal(EXPECTED, result);
         }
 
+        // A quoted 'H' is literal text (both quote styles).
         [Fact]
         public void CorrectlyEscapesSingleCharsContainedWithinQuotes()
         {
@@ -149,6 +161,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             Assert.Equal(EXPECTED, result);
         }
 
+        // Whole quoted words containing H are literal text.
         [Fact]
         public void CorrectlyEscapesManyCharsContainedWithinQuotes()
         {
@@ -161,6 +174,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             Assert.Equal(EXPECTED, result);
         }
 
+        // A backslash-escaped quote inside a quoted literal does not end the literal.
         [Fact]
         public void CorrectlyEscapesEndQuotesPrependedByBackslashes()
         {
@@ -173,6 +187,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             Assert.Equal(EXPECTED, result);
         }
 
+        // An 'H' run at the very end of the format is flushed (an easy off-by-one in the hand-written parser).
         [Fact]
         public void CorrectlyFormatsTrailingBigH()
         {
@@ -185,6 +200,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             Assert.Equal(EXPECTED, result);
         }
 
+        // 'HHH' and longer runs zero-pad the total hours; TimeSpan.ToString would throw for 'hhh', so this must take the custom path even under 24h.
         [Fact]
         public void CorrectlyFormatsMoreThan2BigH_WhenHoursUnder24()
         {
@@ -197,6 +213,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             Assert.Equal(EXPECTED, result);
         }
 
+        // Very long 'H' runs pad correctly without overflowing the stack buffers.
         [Fact]
         public void CorrectlyFormatsAbsurdlyLongSequentialBigHFormat()
         {
@@ -209,6 +226,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             Assert.Equal(EXPECTED, result);
         }
 
+        // A format string longer than the 256-char stackalloc threshold takes the heap path and still formats identically.
         [Fact]
         public void CorrectlyFormatsAbsurdlyLongFormatString()
         {
@@ -229,6 +247,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             Assert.Equal(EXPECTED, result);
         }
 
+        // An unterminated quote is a FormatException on the fast (<24h) path, matching TimeSpan.ToString.
         [Fact]
         public void ThrowsOnImbalancedQuoteMarkEscaping_WhenHoursUnder24()
         {
@@ -238,6 +257,7 @@ namespace TwitchDownloaderCore.Tests.ToolTests
             Assert.Throws<FormatException>(() => TimeSpanHFormat.ReusableInstance.Format(FORMAT_STRING, timeSpan));
         }
 
+        // An unterminated quote is a FormatException on the big-H (>=24h) path too, instead of silently eating the rest of the format.
         [Fact]
         public void ThrowsOnImbalancedQuoteMarkEscaping_When24HoursOrMore()
         {

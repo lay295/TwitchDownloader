@@ -1,0 +1,1327 @@
+{
+  "FileInfo": {
+    "Version": {
+      "Major": 1,
+      "Minor": 4,
+      "Patch": 0
+    },
+    "CreatedAt": "2024-01-02T00:00:00Z",
+    "UpdatedAt": "0001-01-01T00:00:00"
+  },
+  "streamer": {
+    "name": "TestStreamer",
+    "login": "teststreamer",
+    "id": 100000001
+  },
+  "video": {
+    "title": "Sample synthetic stream",
+    "description": "Synthetic chat used by unit tests",
+    "id": "1000000001",
+    "created_at": "2024-01-01T00:00:00Z",
+    "start": 0,
+    "end": 120,
+    "length": 120,
+    "viewCount": 42,
+    "game": "Software and Game Development",
+    "chapters": [
+      {
+        "id": "",
+        "startMilliseconds": 0,
+        "lengthMilliseconds": 120000,
+        "type": "GAME_CHANGE",
+        "description": "Software and Game Development",
+        "subDescription": "",
+        "thumbnailUrl": null,
+        "gameId": "1469308723",
+        "gameDisplayName": "Software and Game Development",
+        "gameBoxArtUrl": "https://static-cdn.jtvnw.net/ttv-boxart/1469308723_IGDB-40x53.jpg"
+      }
+    ]
+  },
+  "comments": [
+    {
+      "_id": "00000000-0000-4000-8000-000000000001",
+      "created_at": "2024-01-01T00:00:01.000Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 1.0,
+      "commenter": {
+        "display_name": "TestStreamer",
+        "_id": "100000001",
+        "name": "teststreamer",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "Welcome to the stream everyone!",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "Welcome to the stream everyone!",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [
+          {
+            "_id": "broadcaster",
+            "version": "1"
+          },
+          {
+            "_id": "subscriber",
+            "version": "0"
+          }
+        ],
+        "user_color": "#9146FF",
+        "emoticons": []
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-8000-000000000002",
+      "created_at": "2024-01-01T00:00:03.500Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 3.5,
+      "commenter": {
+        "display_name": "viewer_one",
+        "_id": "100000011",
+        "name": "viewer_one",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "hello chat",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "hello chat",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [],
+        "user_color": null,
+        "emoticons": []
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-8000-000000000003",
+      "created_at": "2024-01-01T00:00:05.000Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 5.0,
+      "commenter": {
+        "display_name": "ModUser",
+        "_id": "100000002",
+        "name": "moduser",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "Kappa hi everyone",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "Kappa",
+            "emoticon": {
+              "emoticon_id": "25"
+            }
+          },
+          {
+            "text": " hi everyone",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [
+          {
+            "_id": "moderator",
+            "version": "1"
+          }
+        ],
+        "user_color": "#00FF7F",
+        "emoticons": [
+          {
+            "_id": "25",
+            "begin": 0,
+            "end": 6
+          }
+        ]
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-8000-000000000004",
+      "created_at": "2024-01-01T00:00:08.250Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 8.25,
+      "commenter": {
+        "display_name": "SubUser",
+        "_id": "100000004",
+        "name": "subuser",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "LUL that was funny LUL",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "LUL",
+            "emoticon": {
+              "emoticon_id": "425618"
+            }
+          },
+          {
+            "text": " that was funny ",
+            "emoticon": null
+          },
+          {
+            "text": "LUL",
+            "emoticon": {
+              "emoticon_id": "425618"
+            }
+          }
+        ],
+        "user_badges": [
+          {
+            "_id": "subscriber",
+            "version": "3"
+          }
+        ],
+        "user_color": "#1E90FF",
+        "emoticons": [
+          {
+            "_id": "425618",
+            "begin": 0,
+            "end": 4
+          },
+          {
+            "_id": "425618",
+            "begin": 19,
+            "end": 23
+          }
+        ]
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-8000-000000000005",
+      "created_at": "2024-01-01T00:00:10.000Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 10.0,
+      "commenter": {
+        "display_name": "VipUser",
+        "_id": "100000003",
+        "name": "vipuser",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "TestBttv TestFfz TestStv",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "TestBttv TestFfz TestStv",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [
+          {
+            "_id": "vip",
+            "version": "1"
+          }
+        ],
+        "user_color": "#FF69B4",
+        "emoticons": []
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-8000-000000000006",
+      "created_at": "2024-01-01T00:00:12.000Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 12.0,
+      "commenter": {
+        "display_name": "viewer_two",
+        "_id": "100000012",
+        "name": "viewer_two",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "TestStv TestZeroWidth stacked",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "TestStv TestZeroWidth stacked",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [],
+        "user_color": "#2E8B57",
+        "emoticons": []
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-8000-000000000007",
+      "created_at": "2024-01-01T00:00:15.000Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 15.0,
+      "commenter": {
+        "display_name": "BitsUser",
+        "_id": "100000007",
+        "name": "bitsuser",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "Cheer100 great stream",
+        "bits_spent": 100,
+        "fragments": [
+          {
+            "text": "Cheer100 great stream",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [
+          {
+            "_id": "bits",
+            "version": "100"
+          }
+        ],
+        "user_color": "#FF4500",
+        "emoticons": []
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-8000-000000000008",
+      "created_at": "2024-01-01T00:00:18.000Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 18.0,
+      "commenter": {
+        "display_name": "BitsUser",
+        "_id": "100000007",
+        "name": "bitsuser",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "Cheer1000 Cheer1 take my bits",
+        "bits_spent": 1000,
+        "fragments": [
+          {
+            "text": "Cheer1000 Cheer1 take my bits",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [
+          {
+            "_id": "bits",
+            "version": "100"
+          }
+        ],
+        "user_color": "#FF4500",
+        "emoticons": []
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-8000-000000000009",
+      "created_at": "2024-01-01T00:00:20.000Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 20.0,
+      "commenter": {
+        "display_name": "SubUser",
+        "_id": "100000004",
+        "name": "subuser",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "SubUser subscribed at Tier 1. They've subscribed for 3 months! Hello again",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "SubUser subscribed at Tier 1. They've subscribed for 3 months! Hello again",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [
+          {
+            "_id": "subscriber",
+            "version": "3"
+          }
+        ],
+        "user_color": "#1E90FF",
+        "emoticons": []
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-8000-000000000010",
+      "created_at": "2024-01-01T00:00:23.000Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 23.0,
+      "commenter": {
+        "display_name": "PrimeUser",
+        "_id": "100000005",
+        "name": "primeuser",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "PrimeUser subscribed with Prime. They've subscribed for 2 months! ",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "PrimeUser subscribed with Prime. They've subscribed for 2 months! ",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [
+          {
+            "_id": "premium",
+            "version": "1"
+          },
+          {
+            "_id": "subscriber",
+            "version": "0"
+          }
+        ],
+        "user_color": null,
+        "emoticons": []
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-8000-000000000011",
+      "created_at": "2024-01-01T00:00:26.000Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 26.0,
+      "commenter": {
+        "display_name": "GifterUser",
+        "_id": "100000006",
+        "name": "gifteruser",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "GifterUser gifted a Tier 1 sub to viewer_one! ",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "GifterUser gifted a Tier 1 sub to viewer_one! ",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [
+          {
+            "_id": "sub-gifter",
+            "version": "5"
+          }
+        ],
+        "user_color": "#DAA520",
+        "emoticons": []
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-8000-000000000012",
+      "created_at": "2024-01-01T00:00:27.000Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 27.0,
+      "commenter": {
+        "display_name": "GifterUser",
+        "_id": "100000006",
+        "name": "gifteruser",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "GifterUser is gifting 5 Tier 1 Subs to TestStreamer's community! They've gifted a total of 10 in the channel! ",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "GifterUser is gifting 5 Tier 1 Subs to TestStreamer's community! They've gifted a total of 10 in the channel! ",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [
+          {
+            "_id": "sub-gifter",
+            "version": "5"
+          }
+        ],
+        "user_color": "#DAA520",
+        "emoticons": []
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-8000-000000000013",
+      "created_at": "2024-01-01T00:00:30.000Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 30.0,
+      "commenter": {
+        "display_name": "RaiderUser",
+        "_id": "100000008",
+        "name": "raideruser",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "12 raiders from RaiderUser have joined! ",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "12 raiders from RaiderUser have joined! ",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [],
+        "user_color": "#8A2BE2",
+        "emoticons": []
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-8000-000000000014",
+      "created_at": "2024-01-01T00:00:33.000Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 33.0,
+      "commenter": {
+        "display_name": "viewer_three",
+        "_id": "100000013",
+        "name": "viewer_three",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "this message is highlighted",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "this message is highlighted",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [],
+        "user_color": "#B22222",
+        "user_notice_params": {
+          "msg_id": "highlighted-message"
+        },
+        "emoticons": []
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-8000-000000000015",
+      "created_at": "2024-01-01T00:00:36.000Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 36.0,
+      "commenter": {
+        "display_name": "テスト視聴者",
+        "_id": "100000014",
+        "name": "jp_viewer",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "こんにちは 😀",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "こんにちは 😀",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [],
+        "user_color": "#5F9EA0",
+        "emoticons": []
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-8000-000000000016",
+      "created_at": "2024-01-01T00:00:39.000Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 39.0,
+      "commenter": {
+        "display_name": "viewer_two",
+        "_id": "100000012",
+        "name": "viewer_two",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "🎉🎉 party time",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "🎉🎉 party time",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [],
+        "user_color": "#2E8B57",
+        "emoticons": []
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-8000-000000000017",
+      "created_at": "2024-01-01T00:00:42.000Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 42.0,
+      "commenter": {
+        "display_name": "viewer_one",
+        "_id": "100000011",
+        "name": "viewer_one",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "<b>not bold</b> & \"quoted\"",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "<b>not bold</b> & \"quoted\"",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [],
+        "user_color": null,
+        "emoticons": []
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-8000-000000000018",
+      "created_at": "2024-01-01T00:00:45.000Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 45.0,
+      "commenter": {
+        "display_name": "ModUser",
+        "_id": "100000002",
+        "name": "moduser",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "TestAnimated animated emote test",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "TestAnimated",
+            "emoticon": {
+              "emoticon_id": "emotesv2_0000000000000000000000000000000a"
+            }
+          },
+          {
+            "text": " animated emote test",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [
+          {
+            "_id": "moderator",
+            "version": "1"
+          }
+        ],
+        "user_color": "#00FF7F",
+        "emoticons": [
+          {
+            "_id": "emotesv2_0000000000000000000000000000000a",
+            "begin": 0,
+            "end": 13
+          }
+        ]
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-8000-000000000019",
+      "created_at": "2024-01-01T00:00:48.000Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 48.0,
+      "commenter": {
+        "display_name": "viewer_three",
+        "_id": "100000013",
+        "name": "viewer_three",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "This is a deliberately long chat message that should wrap across several lines when it is rendered so that line wrapping code paths get exercised by the renderer tests too.",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "This is a deliberately long chat message that should wrap across several lines when it is rendered so that line wrapping code paths get exercised by the renderer tests too.",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [],
+        "user_color": "#B22222",
+        "emoticons": []
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-8000-000000000020",
+      "created_at": "2024-01-01T00:00:52.000Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 52.0,
+      "commenter": {
+        "display_name": "TestStreamer",
+        "_id": "100000001",
+        "name": "teststreamer",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "thanks for the raid Kappa",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "thanks for the raid ",
+            "emoticon": null
+          },
+          {
+            "text": "Kappa",
+            "emoticon": {
+              "emoticon_id": "25"
+            }
+          }
+        ],
+        "user_badges": [
+          {
+            "_id": "broadcaster",
+            "version": "1"
+          },
+          {
+            "_id": "subscriber",
+            "version": "0"
+          }
+        ],
+        "user_color": "#9146FF",
+        "emoticons": [
+          {
+            "_id": "25",
+            "begin": 20,
+            "end": 26
+          }
+        ]
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-8000-000000000021",
+      "created_at": "2024-01-01T00:00:55.500Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 55.5,
+      "commenter": {
+        "display_name": "viewer_two",
+        "_id": "100000012",
+        "name": "viewer_two",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "pog",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "pog",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [],
+        "user_color": "#2E8B57",
+        "emoticons": []
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-8000-000000000022",
+      "created_at": "2024-01-01T00:01:00.000Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 60.0,
+      "commenter": {
+        "display_name": "VipUser",
+        "_id": "100000003",
+        "name": "vipuser",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "TestBttv",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "TestBttv",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [
+          {
+            "_id": "vip",
+            "version": "1"
+          }
+        ],
+        "user_color": "#FF69B4",
+        "emoticons": []
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-8000-000000000023",
+      "created_at": "2024-01-01T00:01:04.000Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 64.0,
+      "commenter": {
+        "display_name": "viewer_one",
+        "_id": "100000011",
+        "name": "viewer_one",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "what game is this?",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "what game is this?",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [],
+        "user_color": null,
+        "emoticons": []
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-8000-000000000024",
+      "created_at": "2024-01-01T00:01:08.000Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 68.0,
+      "commenter": {
+        "display_name": "ModUser",
+        "_id": "100000002",
+        "name": "moduser",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "!commands",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "!commands",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [
+          {
+            "_id": "moderator",
+            "version": "1"
+          }
+        ],
+        "user_color": "#00FF7F",
+        "emoticons": []
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-8000-000000000025",
+      "created_at": "2024-01-01T00:01:12.000Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 72.0,
+      "commenter": {
+        "display_name": "SubUser",
+        "_id": "100000004",
+        "name": "subuser",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "GG",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "GG",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [
+          {
+            "_id": "subscriber",
+            "version": "3"
+          }
+        ],
+        "user_color": "#1E90FF",
+        "emoticons": []
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-8000-000000000026",
+      "created_at": "2024-01-01T00:01:18.000Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 78.0,
+      "commenter": {
+        "display_name": "viewer_three",
+        "_id": "100000013",
+        "name": "viewer_three",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "lol",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "lol",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [],
+        "user_color": "#B22222",
+        "emoticons": []
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-8000-000000000027",
+      "created_at": "2024-01-01T00:01:25.000Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 85.0,
+      "commenter": {
+        "display_name": "BitsUser",
+        "_id": "100000007",
+        "name": "bitsuser",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "one more Cheer100",
+        "bits_spent": 100,
+        "fragments": [
+          {
+            "text": "one more Cheer100",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [
+          {
+            "_id": "bits",
+            "version": "100"
+          }
+        ],
+        "user_color": "#FF4500",
+        "emoticons": []
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-8000-000000000028",
+      "created_at": "2024-01-01T00:01:33.000Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 93.0,
+      "commenter": {
+        "display_name": "viewer_two",
+        "_id": "100000012",
+        "name": "viewer_two",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "brb",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "brb",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [],
+        "user_color": "#2E8B57",
+        "emoticons": []
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-8000-000000000029",
+      "created_at": "2024-01-01T00:01:41.000Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 101.0,
+      "commenter": {
+        "display_name": "PrimeUser",
+        "_id": "100000005",
+        "name": "primeuser",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "back",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "back",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [
+          {
+            "_id": "premium",
+            "version": "1"
+          },
+          {
+            "_id": "subscriber",
+            "version": "0"
+          }
+        ],
+        "user_color": null,
+        "emoticons": []
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-8000-000000000030",
+      "created_at": "2024-01-01T00:01:50.000Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 110.0,
+      "commenter": {
+        "display_name": "viewer_one",
+        "_id": "100000011",
+        "name": "viewer_one",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "LUL",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "LUL",
+            "emoticon": {
+              "emoticon_id": "425618"
+            }
+          }
+        ],
+        "user_badges": [],
+        "user_color": null,
+        "emoticons": [
+          {
+            "_id": "425618",
+            "begin": 0,
+            "end": 4
+          }
+        ]
+      }
+    },
+    {
+      "_id": "00000000-0000-4000-8000-000000000031",
+      "created_at": "2024-01-01T00:01:58.750Z",
+      "channel_id": "100000001",
+      "content_type": "video",
+      "content_id": "1000000001",
+      "content_offset_seconds": 118.75,
+      "commenter": {
+        "display_name": "TestStreamer",
+        "_id": "100000001",
+        "name": "teststreamer",
+        "bio": null,
+        "created_at": "2020-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z",
+        "logo": null
+      },
+      "message": {
+        "body": "That is all for today, bye!",
+        "bits_spent": 0,
+        "fragments": [
+          {
+            "text": "That is all for today, bye!",
+            "emoticon": null
+          }
+        ],
+        "user_badges": [
+          {
+            "_id": "broadcaster",
+            "version": "1"
+          },
+          {
+            "_id": "subscriber",
+            "version": "0"
+          }
+        ],
+        "user_color": "#9146FF",
+        "emoticons": []
+      }
+    }
+  ],
+  "embeddedData": {
+    "thirdParty": [
+      {
+        "id": "000000000000000000000b01",
+        "imageScale": 2,
+        "data": "iVBORw0KGgoAAAANSUhEUgAAADgAAAA4AQMAAACSSKldAAAABlBMVEXcFDz////vuDXSAAAAGUlEQVR42mNgoDdg/v///wEGJihvuNH0BgAM0QP3xfmHygAAAABJRU5ErkJggg==",
+        "name": "TestBttv",
+        "width": 28,
+        "height": 28,
+        "isZeroWidth": false
+      },
+      {
+        "id": "100001",
+        "imageScale": 2,
+        "data": "iVBORw0KGgoAAAANSUhEUgAAADgAAAA4AQMAAACSSKldAAAABlBMVEVBaeH///+bPHV1AAAAGUlEQVR42mNgoDdg/v///wEGJihvuNH0BgAM0QP3xfmHygAAAABJRU5ErkJggg==",
+        "name": "TestFfz",
+        "width": 28,
+        "height": 28,
+        "isZeroWidth": false
+      },
+      {
+        "id": "01TESTSTVEMOTE0000000000S1",
+        "imageScale": 2,
+        "data": "iVBORw0KGgoAAAANSUhEUgAAADgAAAA4AQMAAACSSKldAAAABlBMVEUui1f///8Ik00DAAAAGUlEQVR42mNgoDdg/v///wEGJihvuNH0BgAM0QP3xfmHygAAAABJRU5ErkJggg==",
+        "name": "TestStv",
+        "width": 28,
+        "height": 28,
+        "isZeroWidth": false
+      },
+      {
+        "id": "01TESTSTVEMOTE0000000000Z1",
+        "imageScale": 2,
+        "data": "iVBORw0KGgoAAAANSUhEUgAAADgAAAA4AQMAAACSSKldAAAABlBMVEX/jAD///81C2mCAAAAGUlEQVR42mNgoDdg/v///wEGJihvuNH0BgAM0QP3xfmHygAAAABJRU5ErkJggg==",
+        "name": "TestZeroWidth",
+        "width": 28,
+        "height": 28,
+        "isZeroWidth": true
+      }
+    ],
+    "firstParty": [
+      {
+        "id": "25",
+        "imageScale": 2,
+        "data": "iVBORw0KGgoAAAANSUhEUgAAADgAAAA4AQMAAACSSKldAAAABlBMVEVkZGT////uSmNIAAAAGUlEQVR42mNgoDdg/v///wEGJihvuNH0BgAM0QP3xfmHygAAAABJRU5ErkJggg==",
+        "name": null,
+        "width": 28,
+        "height": 28
+      },
+      {
+        "id": "425618",
+        "imageScale": 2,
+        "data": "iVBORw0KGgoAAAANSUhEUgAAADgAAAA4AQMAAACSSKldAAAABlBMVEXIoAD///8oRZySAAAAGUlEQVR42mNgoDdg/v///wEGJihvuNH0BgAM0QP3xfmHygAAAABJRU5ErkJggg==",
+        "name": null,
+        "width": 28,
+        "height": 28
+      },
+      {
+        "id": "emotesv2_0000000000000000000000000000000a",
+        "imageScale": 2,
+        "data": "R0lGODlhOAA4AIEAAP8AAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQECgAAACwAAAAAOAA4AAAIXAABCBxIsKDBgwgTKlzIsKHDhxAjSpxIsaLFixgzatzIsaPHjyBDihxJsqTJkyhTqlzJsqXLlzBjypxJs6bNmzhz6tzJs6fPn0CDCh1KtKjRo0iTKl3KtKnTmwEBACH5BAQKAAAALAAAAAA4ADgAgQD/AAAAAAAAAAAAAAhcAAEIHEiwoMGDCBMqXMiwocOHECNKnEixosWLGDNq3Mixo8ePIEOKHEmypMmTKFOqXMmypcuXMGPKnEmzps2bOHPq3Mmzp8+fQIMKHUq0qNGjSJMqXcq0qdObAQEAIfkEBAoAAAAsAAAAADgAOACBAAD/AAAAAAAAAAAACFwAAQgcSLCgwYMIEypcyLChw4cQI0qcSLGixYsYM2rcyLGjx48gQ4ocSbKkyZMoU6pcybKly5cwY8qcSbOmzZs4c+rcybOnz59AgwodSrSo0aNIkypdyrSp05sBAQA7",
+        "name": null,
+        "width": 28,
+        "height": 28
+      }
+    ],
+    "twitchBadges": [
+      {
+        "name": "broadcaster",
+        "versions": {
+          "1": {
+            "title": "Broadcaster",
+            "description": "Broadcaster",
+            "bytes": "iVBORw0KGgoAAAANSUhEUgAAACQAAAAkAQMAAADbzgrbAAAABlBMVEXcFDz////vuDXSAAAAGUlEQVR42mNgIA/U/3/AwMTAwMBAc5I8AACHQAKByatfsgAAAABJRU5ErkJggg=="
+          }
+        }
+      },
+      {
+        "name": "moderator",
+        "versions": {
+          "1": {
+            "title": "Moderator",
+            "description": "Moderator",
+            "bytes": "iVBORw0KGgoAAAANSUhEUgAAACQAAAAkAQMAAADbzgrbAAAABlBMVEVBaeH///+bPHV1AAAAGUlEQVR42mNgIA/U/3/AwMTAwMBAc5I8AACHQAKByatfsgAAAABJRU5ErkJggg=="
+          }
+        }
+      },
+      {
+        "name": "vip",
+        "versions": {
+          "1": {
+            "title": "VIP",
+            "description": "VIP",
+            "bytes": "iVBORw0KGgoAAAANSUhEUgAAACQAAAAkAQMAAADbzgrbAAAABlBMVEUui1f///8Ik00DAAAAGUlEQVR42mNgIA/U/3/AwMTAwMBAc5I8AACHQAKByatfsgAAAABJRU5ErkJggg=="
+          }
+        }
+      },
+      {
+        "name": "subscriber",
+        "versions": {
+          "0": {
+            "title": "Subscriber",
+            "description": "Subscriber",
+            "bytes": "iVBORw0KGgoAAAANSUhEUgAAACQAAAAkAQMAAADbzgrbAAAABlBMVEX/jAD///81C2mCAAAAGUlEQVR42mNgIA/U/3/AwMTAwMBAc5I8AACHQAKByatfsgAAAABJRU5ErkJggg=="
+          },
+          "3": {
+            "title": "3-Month Subscriber",
+            "description": "3-Month Subscriber",
+            "bytes": "iVBORw0KGgoAAAANSUhEUgAAACQAAAAkAQMAAADbzgrbAAAABlBMVEWAAID///9WMD0+AAAAGUlEQVR42mNgIA/U/3/AwMTAwMBAc5I8AACHQAKByatfsgAAAABJRU5ErkJggg=="
+          }
+        }
+      },
+      {
+        "name": "premium",
+        "versions": {
+          "1": {
+            "title": "Prime Gaming",
+            "description": "Prime Gaming",
+            "bytes": "iVBORw0KGgoAAAANSUhEUgAAACQAAAAkAQMAAADbzgrbAAAABlBMVEWAAID///9WMD0+AAAAGUlEQVR42mNgIA/U/3/AwMTAwMBAc5I8AACHQAKByatfsgAAAABJRU5ErkJggg=="
+          }
+        }
+      },
+      {
+        "name": "bits",
+        "versions": {
+          "100": {
+            "title": "cheer 100",
+            "description": "cheer 100",
+            "bytes": "iVBORw0KGgoAAAANSUhEUgAAACQAAAAkAQMAAADbzgrbAAAABlBMVEUAgID////5Zpl0AAAAGUlEQVR42mNgIA/U/3/AwMTAwMBAc5I8AACHQAKByatfsgAAAABJRU5ErkJggg=="
+          }
+        }
+      },
+      {
+        "name": "sub-gifter",
+        "versions": {
+          "5": {
+            "title": "5 Gift Subs",
+            "description": "5 Gift Subs",
+            "bytes": "iVBORw0KGgoAAAANSUhEUgAAACQAAAAkAQMAAADbzgrbAAAABlBMVEW4hgv///+658z2AAAAGUlEQVR42mNgIA/U/3/AwMTAwMBAc5I8AACHQAKByatfsgAAAABJRU5ErkJggg=="
+          }
+        }
+      }
+    ],
+    "twitchBits": [
+      {
+        "prefix": "Cheer",
+        "tierList": {
+          "1": {
+            "id": "Cheer1",
+            "imageScale": 2,
+            "data": "iVBORw0KGgoAAAANSUhEUgAAADgAAAA4AQMAAACSSKldAAAABlBMVEXcFDz////vuDXSAAAAGUlEQVR42mNgoDdg/v///wEGJihvuNH0BgAM0QP3xfmHygAAAABJRU5ErkJggg==",
+            "name": "Cheer1",
+            "width": 28,
+            "height": 28
+          },
+          "100": {
+            "id": "Cheer100",
+            "imageScale": 2,
+            "data": "iVBORw0KGgoAAAANSUhEUgAAADgAAAA4AQMAAACSSKldAAAABlBMVEVBaeH///+bPHV1AAAAGUlEQVR42mNgoDdg/v///wEGJihvuNH0BgAM0QP3xfmHygAAAABJRU5ErkJggg==",
+            "name": "Cheer100",
+            "width": 28,
+            "height": 28
+          },
+          "1000": {
+            "id": "Cheer1000",
+            "imageScale": 2,
+            "data": "iVBORw0KGgoAAAANSUhEUgAAADgAAAA4AQMAAACSSKldAAAABlBMVEUui1f///8Ik00DAAAAGUlEQVR42mNgoDdg/v///wEGJihvuNH0BgAM0QP3xfmHygAAAABJRU5ErkJggg==",
+            "name": "Cheer1000",
+            "width": 28,
+            "height": 28
+          }
+        }
+      }
+    ]
+  }
+}

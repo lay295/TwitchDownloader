@@ -1,0 +1,34 @@
+name: Test Report Comment
+
+# PRs from forks only get a read-only token, so tests.yml can't comment on them. This runs after "Tests" finishes, in the
+# context of the base repository, and posts the comment text that run produced. It never checks out or executes PR code.
+on:
+  workflow_run:
+    workflows: [ Tests ]
+    types: [ completed ]
+
+permissions:
+  actions: read
+  pull-requests: write
+
+jobs:
+  comment:
+    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.head_repository.full_name != github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: pr-comment
+          path: pr-comment
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Read PR number
+        id: pr
+        run: echo "number=$(tr -dc '0-9' < pr-comment/pr-number.txt)" >> "$GITHUB_OUTPUT"
+
+      - uses: marocchino/sticky-pull-request-comment@v3
+        with:
+          header: test-report
+          number: ${{ steps.pr.outputs.number }}
+          path: pr-comment/comment.md

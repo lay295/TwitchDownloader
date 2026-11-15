@@ -19,7 +19,8 @@ namespace TwitchDownloaderCore
         private readonly ITaskProgress _progress;
         private readonly string _cacheDir;
 
-        private static readonly HttpClient HttpClient = new()
+        // Not readonly so tests can substitute a fake HttpMessageHandler
+        internal static HttpClient HttpClient = new()
         {
             BaseAddress = new Uri("https://gql.twitch.tv/gql"),
             DefaultRequestHeaders = { { "Client-ID", "kd1unb4b3q4t58fwlpcbzcbnm76a8fp" } }

@@ -21,7 +21,7 @@ namespace TwitchDownloaderCLI.Modes
             chatDownloader.DownloadAsync(CancellationToken.None).Wait();
         }
 
-        private static ChatDownloadOptions GetDownloadOptions(ChatDownloadArgs inputOptions, FileCollisionHandler collisionHandler, ITaskLogger logger)
+        internal static ChatDownloadOptions GetDownloadOptions(ChatDownloadArgs inputOptions, FileCollisionHandler collisionHandler, ITaskLogger logger)
         {
             if (inputOptions.Id is null)
             {

@@ -1,0 +1,111 @@
+name: Render Preview
+
+# Opt-in visual review: comment "/render-preview" on a PR (owner/members/collaborators only). The sample chats are rendered by the
+# base branch and by the PR, and the frames are posted side by side as a PR comment. Comment-triggered workflows always run this
+# file from the default branch.
+on:
+  issue_comment:
+    types: [ created ]
+  # TODO(before merge): remove this pull_request trigger (and the pull_request parts of the job conditions below). It only exists
+  # so the workflow can be tried out on the PR that adds it, since comment-triggered runs only use the default branch's file.
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    if: >-
+      github.event_name == 'pull_request' ||
+      (github.event.issue.pull_request && startsWith(github.event.comment.body, '/render-preview') &&
+       contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association))
+    runs-on: ubuntu-latest
+    # Job-level so unrelated PR comments (whose runs skip this job) don't cancel a render in progress
+    concurrency:
+      group: render-preview-${{ github.event.pull_request.number || github.event.issue.number }}
+      cancel-in-progress: true
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      number: ${{ steps.pr.outputs.number }}
+      image_dir: ${{ steps.pr.outputs.image_dir }}
+    steps:
+      - name: Resolve PR
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number || github.event.issue.number }}
+        run: |
+          gh pr view "$PR" -R "$GITHUB_REPOSITORY" --json number,headRefOid,baseRefOid,baseRefName \
+            --jq '"number=\(.number)\nhead_sha=\(.headRefOid)\nbase_sha=\(.baseRefOid)\nbase_ref=\(.baseRefName)\nimage_dir=pr-\(.number)/\(.headRefOid[0:12])"' >> "$GITHUB_OUTPUT"
+
+      # PR code runs in this job, so it gets no write token (and checkout doesn't persist one)
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ steps.pr.outputs.head_sha }}
+          path: head
+          persist-credentials: false
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ steps.pr.outputs.base_sha }}
+          path: base
+          persist-credentials: false
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+      - name: Install FFmpeg
+        run: command -v ffmpeg || (sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg)
+
+      - name: Build both CLIs
+        run: |
+          dotnet build base/TwitchDownloaderCLI -c Release -o cli/base
+          dotnet build head/TwitchDownloaderCLI -c Release -o cli/head
+
+      - name: Render and compare
+        env:
+          BASE_REF: ${{ steps.pr.outputs.base_ref }}
+          IMAGE_URL: https://raw.githubusercontent.com/${{ github.repository }}/render-previews/${{ steps.pr.outputs.image_dir }}
+        run: |
+          python3 head/.github/scripts/render_preview.py --base cli/base/TwitchDownloaderCLI --head cli/head/TwitchDownloaderCLI \
+            --fixtures head/TestData --out preview --base-label "$BASE_REF" --head-label "this PR" \
+            --image-url "$IMAGE_URL"
+          cat preview/comment.md >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: render-preview
+          path: preview
+
+  publish:
+    needs: render
+    # TODO(before merge): drop this condition with the pull_request trigger (fork PRs only get a read-only token on pull_request)
+    if: github.event_name == 'issue_comment' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: render-preview
+          path: preview
+      # The artifact was produced by PR code: host only the PNGs
+      - run: find preview/images -type f ! -name '*.png' -delete
+
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ github.token }}
+          publish_branch: render-previews
+          publish_dir: preview/images
+          destination_dir: ${{ needs.render.outputs.image_dir }}
+          keep_files: true
+          commit_message: "Render preview for #${{ needs.render.outputs.number }}"
+
+      - uses: marocchino/sticky-pull-request-comment@v3
+        with:
+          header: render-preview
+          number: ${{ needs.render.outputs.number }}
+          path: preview/comment.md

@@ -65,7 +65,7 @@ namespace TwitchDownloaderCLI.Modes
             }
         }
 
-        private static async Task<(GqlVideoResponse videoInfo, GqlVideoChapterResponse chapters, string playlistString)> GetVideoInfo(long videoId, string oauth, bool canThrow, ITaskProgress progress)
+        internal static async Task<(GqlVideoResponse videoInfo, GqlVideoChapterResponse chapters, string playlistString)> GetVideoInfo(long videoId, string oauth, bool canThrow, ITaskProgress progress)
         {
             progress.SetStatus("Fetching Video Info [1/1]");
 
@@ -229,7 +229,7 @@ namespace TwitchDownloaderCLI.Modes
             }
         }
 
-        private static async Task<GqlShareClipRenderStatusResponse> GetClipInfo(string clipId, bool canThrow, ITaskProgress progress)
+        internal static async Task<GqlShareClipRenderStatusResponse> GetClipInfo(string clipId, bool canThrow, ITaskProgress progress)
         {
             progress.SetStatus("Fetching Clip Info [1/1]");
 
@@ -403,7 +403,7 @@ namespace TwitchDownloaderCLI.Modes
             return defaultString;
         }
 
-        private static string StringifyTimestamp(TimeSpan timeSpan)
+        internal static string StringifyTimestamp(TimeSpan timeSpan)
         {
             return timeSpan.Ticks switch
             {
@@ -435,7 +435,7 @@ namespace TwitchDownloaderCLI.Modes
         }
 
         // cmd.exe only supports chars from codepage 437, so the default console encoding on Windows is codepage 437 instead of UTF-8
-        private static void SetUtf8Encoding(bool useUtf8, ITaskLogger logger)
+        internal static void SetUtf8Encoding(bool useUtf8, ITaskLogger logger)
         {
             if (!useUtf8 || Console.OutputEncoding.CodePage == Encoding.UTF8.CodePage)
             {

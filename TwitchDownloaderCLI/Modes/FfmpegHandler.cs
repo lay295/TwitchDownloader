@@ -63,7 +63,7 @@ namespace TwitchDownloaderCLI.Modes
             Environment.Exit(1);
         }
 
-        private sealed class XabeProgressHandler : IProgress<ProgressInfo>, IDisposable
+        internal sealed class XabeProgressHandler : IProgress<ProgressInfo>, IDisposable
         {
             private int _lastPercent = -1;
             private readonly ConcurrentQueue<int> _percentQueue = new();

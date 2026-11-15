@@ -9,7 +9,7 @@ namespace TwitchDownloaderWPF.Utils
     // ReSharper disable InconsistentlySynchronizedField
     internal class LiveVideoMonitor
     {
-        private class VideoState
+        internal class VideoState
         {
             public DateTimeOffset NextTimeToCheck { get; private set; }
             public bool LastCheck { get; private set; }
@@ -57,7 +57,7 @@ namespace TwitchDownloaderWPF.Utils
         private static readonly Dictionary<long, VideoState> VideoStateCache = new();
 
         private readonly ITaskLogger _logger;
-        private readonly VideoState _state;
+        internal readonly VideoState _state;
 
         public GqlVideoResponse LatestVideoResponse => _state.LatestVideoResponse;
 

@@ -1,6 +1,10 @@
 ﻿using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows;
+
+// GenerateAssemblyInfo is disabled for this project, so <InternalsVisibleTo> items in the csproj are ignored; declare it here instead.
+[assembly: InternalsVisibleTo("TwitchDownloaderWPF.Tests")]
 
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information

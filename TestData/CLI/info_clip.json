@@ -1,0 +1,31 @@
+{
+  "data": {
+    "clip": {
+      "id": "1",
+      "slug": "FancyClipSlug",
+      "title": "Clip [title]",
+      "viewCount": 4321,
+      "durationSeconds": 30,
+      "createdAt": "2024-05-06T07:08:09Z",
+      "broadcaster": { "id": "11", "login": "streamername", "displayName": "StreamerName" },
+      "curator": { "id": "22", "login": "clipper", "displayName": "クリッパー" },
+      "game": { "id": "27471", "displayName": "Minecraft" },
+      "video": { "id": "123456789" },
+      "videoOffsetSeconds": 125,
+      "playbackAccessToken": { "signature": "SIG", "value": "{\"a\":1}" },
+      "assets": [
+        {
+          "id": "a1",
+          "aspectRatio": 1.7777,
+          "type": "SOURCE",
+          "thumbnailURL": "https://example.invalid/landscape/thumb.jpg",
+          "portraitMetadata": null,
+          "videoQualities": [
+            { "bitrate": 3000000, "codecs": "avc1.4D401F,mp4a.40.2", "width": 1280, "height": 720, "frameRate": 30, "quality": "720", "sourceURL": "https://example.invalid/clip-720.mp4" },
+            { "bitrate": 6000000, "codecs": "avc1.4D402A,mp4a.40.2", "width": 1920, "height": 1080, "frameRate": 60, "quality": "1080", "sourceURL": "https://example.invalid/clip-1080.mp4" }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -23,7 +23,7 @@ namespace TwitchDownloaderCLI.Modes
             videoDownloader.DownloadAsync(new CancellationToken()).Wait();
         }
 
-        private static VideoDownloadOptions GetDownloadOptions(VideoDownloadArgs inputOptions, FileCollisionHandler collisionHandler, ITaskLogger logger)
+        internal static VideoDownloadOptions GetDownloadOptions(VideoDownloadArgs inputOptions, FileCollisionHandler collisionHandler, ITaskLogger logger)
         {
             if (inputOptions.Id is null)
             {

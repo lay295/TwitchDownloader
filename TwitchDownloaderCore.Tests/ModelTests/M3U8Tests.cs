@@ -7,6 +7,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
     // ReSharper disable StringLiteralTypo
     public class M3U8Tests
     {
+        // A Twitch VOD media playlist of .ts parts: every header, EXTINF duration, program date time and path is parsed, regardless of culture.
         [Theory]
         [InlineData(false, "en-US")]
         [InlineData(true, "en-US")]
@@ -66,6 +67,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
             }
         }
 
+        // A Twitch fMP4 media playlist (EXT-X-MAP init segment plus .mp4 parts) parses with the map URI and byte ranges intact.
         [Theory]
         [InlineData(false, "en-US")]
         [InlineData(true, "en-US")]
@@ -141,6 +143,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
             }
         }
 
+        // A Twitch live media playlist (EXT-X-TWITCH-* headers, EXT-X-DATERANGE sessions, 'live' EXTINF flags, no end list) parses without treating the extra tags as parts.
         [Theory]
         [InlineData(false, "en-US")]
         [InlineData(true, "en-US")]
@@ -234,6 +237,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
             }
         }
 
+        // A Twitch master playlist: EXT-X-MEDIA and EXT-X-STREAM-INF attributes (bandwidth, codecs, resolution, framerate, variant ids) are parsed per rendition.
         [Theory]
         [InlineData(false, "en-US")]
         [InlineData(true, "en-US")]
@@ -303,6 +307,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
             }
         }
 
+        // Individual EXT-X-MEDIA lines parse TYPE, GROUP-ID, NAME and the YES/NO flags.
         [Theory]
         [InlineData("#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"chunked\",NAME=\"1080p60\",AUTOSELECT=NO,DEFAULT=NO", M3U8.Stream.ExtMediaInfo.MediaType.Video, "chunked", "1080p60", false, false)]
         [InlineData("#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID=\"720p60\",NAME=\"720p60\",AUTOSELECT=YES,DEFAULT=YES", M3U8.Stream.ExtMediaInfo.MediaType.Video, "720p60", "720p60", true, true)]
@@ -321,6 +326,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
             Assert.Equal(@default, mediaInfo.Default);
         }
 
+        // Individual EXT-X-STREAM-INF lines parse bandwidth, the codec list, resolution, framerate and Twitch's IVS/variant attributes.
         [Theory]
         [InlineData("#EXT-X-STREAM-INF:BANDWIDTH=5898203,CODECS=\"avc1.64002A,mp4a.40.2\",RESOLUTION=1920x1080,FRAME-RATE=59.995,STABLE-VARIANT-ID=\"1080p60\",IVS-NAME=\"1080p60\",IVS-GROUPS=\"landscape\",IVS-VARIANT-SOURCE=\"source\"",
             5898203, new[] { "avc1.64002A", "mp4a.40.2" }, 1920, 1080, 59.995, "1080p60", "1080p60", new[] { "landscape" }, "source")]
@@ -347,6 +353,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
             Assert.Equal(ivsVariantSource, streamInfo.IvsVariantSource);
         }
 
+        // A Kick media playlist, where several byte-ranged parts share one .ts file, parses byte ranges and program date times into the same model.
         [Theory]
         [InlineData(false, "en-US")]
         [InlineData(true, "en-US")]
@@ -445,6 +452,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
         }
 
         /* Kick M3U8 doesn't look like this anymore, nor does it use the new IVS API like Twitch. Ignore for now.
+        // A Kick master playlist (EXT-X-SESSION-DATA, a VIDEO EXT-X-MEDIA group per rendition, PROGRAM-ID) parses its renditions.
         [Theory]
         [InlineData(false, "en-US")]
         [InlineData(true, "en-US")]
@@ -533,6 +541,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
             Assert.Equal(@default, mediaInfo.Default);
         }
 
+        // Kick's EXT-X-STREAM-INF lines, which lack Twitch's extra attributes, still parse bandwidth/codecs/resolution.
         [Theory]
         [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=9878400,CODECS=\"avc1.64002A,mp4a.40.2\",RESOLUTION=1920x1080,VIDEO=\"1080p60\"", 9878400, new[] { "avc1.64002A", "mp4a.40.2" }, 1920, 1080)]
         [InlineData("#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=3330599,CODECS=\"avc1.4D401F,mp4a.40.2\",RESOLUTION=1280x720,VIDEO=\"720p60\"", 3330599, new[] { "avc1.4D401F", "mp4a.40.2" }, 1280, 720)]
@@ -548,6 +557,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
             Assert.Equal((videoWidth, videoHeight), streamInfo.Resolution);
         }
 
+        // BYTERANGE values parse as 'length' or 'length@start', with and without the key prefix.
         [Theory]
         [InlineData(100, 200, "100@200", "")]
         [InlineData(100, 200, "#EXT-X-BYTERANGE:100@200", "#EXT-X-BYTERANGE:")]
@@ -561,6 +571,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
             Assert.Equal(expected, actual);
         }
 
+        // Malformed byte ranges are a FormatException rather than a zero range that would download the wrong bytes.
         [Theory]
         [InlineData("429496729500@1")]
         [InlineData("1@429496729500")]
@@ -570,6 +581,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
             Assert.Throws<FormatException>(() => M3U8.ByteRange.Parse(byteRangeString, default));
         }
 
+        // RESOLUTION values parse as WIDTHxHEIGHT.
         [Theory]
         [InlineData(100, 200, "100x200")]
         [InlineData(100, 200, "RESOLUTION=100x200")]
@@ -582,6 +594,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
             Assert.Equal(expected, actual);
         }
 
+        // Malformed resolutions throw instead of defaulting to 0x0 and breaking quality selection.
         [Theory]
         [InlineData("429496729500x1")]
         [InlineData("1x429496729500")]
@@ -591,6 +604,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
             Assert.Throws<FormatException>(() => M3U8.Stream.ExtStreamInfo.StreamResolution.Parse(resolutionString));
         }
 
+        // Serializing a playlist writes decimals with '.' in every culture, since the output is fed back to ffmpeg/players.
         [Theory]
         [InlineData("en-GB")]
         [InlineData("tr-TR")]
@@ -652,6 +666,247 @@ namespace TwitchDownloaderCore.Tests.ModelTests
             CultureInfo.CurrentCulture = oldCulture;
 
             Assert.Equal(stringExpected, stringActual);
+        }
+
+        /// <summary>
+        /// Metadata.ToString writes every known header (and passes unknown ones through) in M3U8 syntax, and parsing that text
+        /// restores the same values. This is what the VOD downloader writes back to disk for ffmpeg, so a dropped header breaks playback.
+        /// </summary>
+        [Theory]
+        [InlineData(M3U8.Metadata.PlaylistType.Event, "EVENT")]
+        [InlineData(M3U8.Metadata.PlaylistType.Vod, "VOD")]
+        public void Metadata_RoundTripsThroughToStringAndParse(M3U8.Metadata.PlaylistType type, string typeText)
+        {
+            var metadata = new M3U8.Metadata
+            {
+                Version = 3,
+                StreamTargetDuration = 10,
+                Type = type,
+                MediaSequence = 5,
+                TwitchLiveSequence = 6,
+                TwitchElapsedSeconds = 1.5m,
+                TwitchTotalSeconds = 2.25m,
+                Map = new M3U8.Metadata.ExtMap("init-0.mp4", default),
+                SessionData = new Dictionary<string, string> { ["com.example.id"] = "value" },
+                UnparsedValues = [new("#EXT-X-CUSTOM:", "abc"), new("", "#EXT-X-FLAG")],
+            };
+
+            var text = metadata.ToString();
+            var parsed = M3U8.Parse("#EXTM3U\n" + text).FileMetadata;
+
+            Assert.Equal(string.Join(Environment.NewLine,
+                "#EXT-X-VERSION:3", "#EXT-X-TARGETDURATION:10", $"#EXT-X-PLAYLIST-TYPE:{typeText}","#EXT-X-MEDIA-SEQUENCE:5",
+                "#EXT-X-TWITCH-LIVE-SEQUENCE:6", "#EXT-X-TWITCH-ELAPSED-SECS:1.5", "#EXT-X-TWITCH-TOTAL-SECS:2.25",
+                """#EXT-X-MAP:URI="init-0.mp4" """.TrimEnd(), """#EXT-X-SESSION-DATA:DATA-ID="com.example.id",VALUE="value" """.TrimEnd(),
+                "#EXT-X-CUSTOM:abc", "#EXT-X-FLAG"), text);
+            Assert.Equal(metadata.Version, parsed.Version);
+            Assert.Equal(metadata.StreamTargetDuration, parsed.StreamTargetDuration);
+            Assert.Equal(metadata.Type, parsed.Type);
+            Assert.Equal(metadata.MediaSequence, parsed.MediaSequence);
+            Assert.Equal(metadata.TwitchLiveSequence, parsed.TwitchLiveSequence);
+            Assert.Equal(metadata.TwitchElapsedSeconds, parsed.TwitchElapsedSeconds);
+            Assert.Equal(metadata.TwitchTotalSeconds, parsed.TwitchTotalSeconds);
+            Assert.Equal(metadata.Map, parsed.Map);
+            Assert.Equal(metadata.SessionData, parsed.SessionData);
+            Assert.Equal(metadata.UnparsedValues, parsed.UnparsedValues);
+        }
+
+        /// <summary>Empty metadata serializes to nothing, so a bare playlist is just the header and the end tag.</summary>
+        [Fact]
+        public void EmptyMetadata_StringifiesToEmpty()
+        {
+            Assert.Equal("", new M3U8.Metadata().ToString());
+            Assert.Equal("", new M3U8.Metadata.ExtMap("", default).ToString());
+            Assert.Equal($"#EXTM3U{Environment.NewLine}#EXT-X-ENDLIST", new M3U8(new M3U8.Metadata(), []).ToString());
+        }
+
+        /// <summary>
+        /// A segment entry serializes its EXTINF (with Twitch's trailing comma and "live" flag), program date time (ISO 8601)
+        /// and byte range before the path, and parses back to the same values.
+        /// </summary>
+        [Fact]
+        public void SegmentStream_RoundTripsThroughToStringAndParse()
+        {
+            var stream = new M3U8.Stream(new M3U8.Stream.ExtPartInfo(2.002m, true), new DateTimeOffset(2023, 11, 16, 5, 34, 7, 970, TimeSpan.Zero), (100u, 200u), "500.ts");
+
+            var text = stream.ToString();
+            var parsed = M3U8.Parse("#EXTM3U\n" + text).Streams.Single();
+
+            Assert.Equal(string.Join(Environment.NewLine, "#EXTINF:2.002,live", "#EXT-X-PROGRAM-DATE-TIME:2023-11-16T05:34:07.9700000+00:00", "#EXT-X-BYTERANGE:100@200", "500.ts"), text);
+            Assert.Equal(stream.PartInfo, parsed.PartInfo);
+            Assert.Equal(stream.ProgramDateTime, parsed.ProgramDateTime);
+            Assert.Equal(stream.ByteRange, parsed.ByteRange);
+            Assert.Equal(stream.Path, parsed.Path);
+            Assert.Equal("", new M3U8.Stream(null, null, default, default, "").ToString());
+        }
+
+        /// <summary>
+        /// ExtMediaInfo (still used by Kick playlists) serializes TYPE, quoted GROUP-ID/NAME and YES/NO flags, and parses back unchanged,
+        /// including the AUDIO media type.
+        /// </summary>
+        [Theory]
+        [InlineData(M3U8.Stream.ExtMediaInfo.MediaType.Video, "chunked", "1080p60", true, false, """#EXT-X-MEDIA:TYPE=VIDEO,GROUP-ID="chunked",NAME="1080p60",AUTOSELECT=YES,DEFAULT=NO""")]
+        [InlineData(M3U8.Stream.ExtMediaInfo.MediaType.Audio, "audio", "Audio", false, true, """#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="audio",NAME="Audio",AUTOSELECT=NO,DEFAULT=YES""")]
+        [InlineData(M3U8.Stream.ExtMediaInfo.MediaType.Unknown, "", "", false, false, "#EXT-X-MEDIA:AUTOSELECT=NO,DEFAULT=NO")]
+        public void MediaInfo_RoundTripsThroughToStringAndParse(M3U8.Stream.ExtMediaInfo.MediaType type, string groupId, string name, bool autoSelect, bool @default, string expected)
+        {
+            var mediaInfo = new M3U8.Stream.ExtMediaInfo(type, groupId, name, autoSelect, @default);
+
+            var text = mediaInfo.ToString();
+            var parsed = M3U8.Stream.ExtMediaInfo.Parse(text);
+
+            Assert.Equal(expected, text);
+            Assert.Equal(type, parsed.Type);
+            Assert.Equal(autoSelect, parsed.AutoSelect);
+            Assert.Equal(@default, parsed.Default);
+        }
+
+        /// <summary>
+        /// ExtStreamInfo.ToString must produce a valid, comma-separated attribute list that parses back to the same values.
+        /// Today FRAME-RATE is written without a trailing comma, so it fuses with the next attribute ("FRAME-RATE=60STABLE-VARIANT-ID=...")
+        /// and both values are lost when the playlist is read back.
+        /// </summary>
+        [Fact(Skip = "Bug: ExtStreamInfo.ToString omits the comma after FRAME-RATE, so the following attribute (e.g. STABLE-VARIANT-ID) is corrupted")]
+        public void StreamInfo_RoundTripsThroughToStringAndParse()
+        {
+            var streamInfo = new M3U8.Stream.ExtStreamInfo(1, 5898203, ["avc1.64002A", "mp4a.40.2"], (1920, 1080), 60, "1080p60", "1080p60", ["landscape"], "source");
+
+            var text = streamInfo.ToString();
+            var parsed = M3U8.Stream.ExtStreamInfo.Parse(text);
+
+            Assert.Equal("""#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=5898203,CODECS="avc1.64002A,mp4a.40.2",RESOLUTION=1920x1080,FRAME-RATE=60,""" +
+                         """STABLE-VARIANT-ID="1080p60",IVS-NAME="1080p60",IVS-GROUPS="landscape",IVS-VARIANT-SOURCE="source" """.TrimEnd(), text);
+            Assert.Equal(streamInfo.Framerate, parsed.Framerate);
+            Assert.Equal(streamInfo.StableVariantId, parsed.StableVariantId);
+            Assert.Equal(streamInfo.IvsName, parsed.IvsName);
+        }
+
+        /// <summary>
+        /// When FRAME-RATE is missing, the framerate is inferred from a STABLE-VARIANT-ID like "1080p60" so quality names and
+        /// best-quality selection still work.
+        /// </summary>
+        [Fact]
+        public void StreamInfo_InfersFramerateFromStableVariantId()
+        {
+            var streamInfo = M3U8.Stream.ExtStreamInfo.Parse("""#EXT-X-STREAM-INF:BANDWIDTH=1,STABLE-VARIANT-ID="1080p60" """.TrimEnd());
+
+            Assert.Equal(60, streamInfo.Framerate);
+        }
+
+        /// <summary>
+        /// The inference regex explicitly allows a "-suffix" (e.g. "1080p60-portrait"), but the code locates the framerate with
+        /// LastIndexOf('p'), which finds the "p" of "portrait", so portrait streams are left with a framerate of 0.
+        /// </summary>
+        [Fact(Skip = "Existing behavior in v1.56.5: ExtStreamInfo.Parse does not infer the framerate from suffixed STABLE-VARIANT-IDs such as 1080p60-portrait (LastIndexOf('p') finds 'portrait')")]
+        public void StreamInfo_InfersFramerateFromSuffixedStableVariantId()
+        {
+            var streamInfo = M3U8.Stream.ExtStreamInfo.Parse("""#EXT-X-STREAM-INF:BANDWIDTH=1,STABLE-VARIANT-ID="1080p60-portrait" """.TrimEnd());
+
+            Assert.Equal(60, streamInfo.Framerate);
+        }
+
+        /// <summary>
+        /// EXT-X-MAP's BYTERANGE is a quoted string (RFC 8216 4.3.2.5) and ExtMap.ToString writes it quoted, but ExtMap.Parse feeds
+        /// the quote into the integer parser and throws, so a playlist with a ranged init segment can neither be read nor round-tripped.
+        /// </summary>
+        [Fact(Skip = "Existing behavior in v1.56.5: ExtMap.Parse only accepts an unquoted BYTERANGE and throws FormatException on the quoted form (RFC 8216), which ExtMap.ToString itself writes")]
+        public void ExtMap_RoundTripsByteRange()
+        {
+            var map = new M3U8.Metadata.ExtMap("init-0.mp4", (1000u, 0u));
+
+            var text = map.ToString();
+
+            Assert.Equal("""URI="init-0.mp4",BYTERANGE="1000@0" """.TrimEnd(), text);
+            Assert.Equal(map, M3U8.Metadata.ExtMap.Parse(text));
+        }
+
+        /// <summary>
+        /// Blank lines are skipped (they used to be treated as new stream entries) in both the stream and span parsers,
+        /// and a playlist ending with a newline does not create an empty trailing entry.
+        /// </summary>
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void Parse_IgnoresBlankLines(bool useStream)
+        {
+            const string PLAYLIST = "#EXTM3U\n\n#EXTINF:2.000,\n   \n0.ts\n\n#EXTINF:2.000,\n1.ts\n";
+
+            var m3u8 = useStream
+                ? M3U8.Parse(new MemoryStream(Encoding.UTF8.GetBytes(PLAYLIST)), Encoding.UTF8)
+                : M3U8.Parse(PLAYLIST);
+
+            Assert.Equal(["0.ts", "1.ts"], m3u8.Streams.Select(x => x.Path));
+        }
+
+        /// <summary>Input without the #EXTM3U header is rejected with a FormatException instead of being parsed as garbage.</summary>
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void Parse_ThrowsWithoutHeader(bool useStream)
+        {
+            const string PLAYLIST = "<html>Not a playlist</html>";
+
+            Assert.Throws<FormatException>(() => useStream
+                ? M3U8.Parse(new MemoryStream(Encoding.UTF8.GetBytes(PLAYLIST)), Encoding.UTF8)
+                : M3U8.Parse(PLAYLIST));
+        }
+
+        /// <summary>
+        /// Malformed values the parser cannot recover from (bad playlist type, non-numeric headers, unterminated or escaped quotes)
+        /// raise exceptions rather than producing a silently wrong playlist.
+        /// </summary>
+        [Theory]
+        [InlineData("#EXT-X-PLAYLIST-TYPE:LIVE", typeof(FormatException))]
+        [InlineData("#EXT-X-VERSION:three", typeof(FormatException))]
+        [InlineData("""#EXT-X-SESSION-DATA:DATA-ID="unterminated""", typeof(FormatException))]
+        [InlineData("""#EXT-X-SESSION-DATA:DATA-ID="a\"b" """, typeof(NotSupportedException))]
+        [InlineData("#EXT-X-TWITCH-ELAPSED-SECS:soon", typeof(FormatException))]
+        public void Parse_ThrowsOnMalformedValues(string line, Type exceptionType)
+        {
+            Assert.Throws(exceptionType, () => M3U8.Parse("#EXTM3U\n" + line));
+        }
+
+        /// <summary>An unparseable program date time is tolerated (left unset) so one bad timestamp does not abort a media playlist.</summary>
+        [Fact]
+        public void Parse_ToleratesBadProgramDateTime()
+        {
+            var m3u8 = M3U8.Parse("#EXTM3U\n#EXT-X-PROGRAM-DATE-TIME:yesterday\n#EXTINF:2.000,\n0.ts");
+
+            Assert.Equal(default, m3u8.Streams.Single().ProgramDateTime);
+        }
+
+        /// <summary>An unknown EXT-X-MEDIA TYPE is rejected rather than defaulting to video.</summary>
+        [Fact]
+        public void MediaInfo_ThrowsOnUnknownType()
+        {
+            Assert.Throws<FormatException>(() => M3U8.Stream.ExtMediaInfo.Parse("#EXT-X-MEDIA:TYPE=SUBTITLES"));
+        }
+
+        /// <summary>
+        /// Besides HLS's YES/NO, AUTOSELECT/DEFAULT also accept .NET boolean text (true/false); anything else is a FormatException
+        /// rather than a silent "false".
+        /// </summary>
+        [Theory]
+        [InlineData("AUTOSELECT=true,DEFAULT=False", true, false)]
+        [InlineData("AUTOSELECT=YES,DEFAULT=NO", true, false)]
+        public void MediaInfo_ParsesBooleanFlags(string flags, bool autoSelect, bool @default)
+        {
+            var mediaInfo = M3U8.Stream.ExtMediaInfo.Parse("#EXT-X-MEDIA:TYPE=VIDEO," + flags);
+
+            Assert.Equal(autoSelect, mediaInfo.AutoSelect);
+            Assert.Equal(@default, mediaInfo.Default);
+            Assert.Throws<FormatException>(() => M3U8.Stream.ExtMediaInfo.Parse("#EXT-X-MEDIA:AUTOSELECT=maybe"));
+        }
+
+        /// <summary>Unparseable numeric stream attributes are tolerated (default to 0) so one odd value does not break the whole master playlist.</summary>
+        [Fact]
+        public void StreamInfo_ToleratesBadNumbers()
+        {
+            var streamInfo = M3U8.Stream.ExtStreamInfo.Parse("#EXT-X-STREAM-INF:PROGRAM-ID=x,BANDWIDTH=y,FRAME-RATE=z");
+
+            Assert.Equal(0, streamInfo.ProgramId);
+            Assert.Equal(0, streamInfo.Bandwidth);
+            Assert.Equal(0, streamInfo.Framerate);
         }
     }
 }

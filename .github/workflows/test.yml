@@ -1,0 +1,126 @@
+name: Tests
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      # Rendering/merging tests shell out to ffmpeg; they skip themselves when it is missing, so make sure it is present here.
+      - name: Install FFmpeg (Linux)
+        if: runner.os == 'Linux'
+        run: command -v ffmpeg || (sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg)
+      - name: Install FFmpeg (macOS)
+        if: runner.os == 'macOS'
+        run: command -v ffmpeg || brew install ffmpeg
+      - name: Install FFmpeg (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: command -v ffmpeg || choco install ffmpeg -y --no-progress
+
+      - name: Run tests
+        shell: bash
+        run: |
+          projects="TwitchDownloaderCore.Tests TwitchDownloaderCLI.Tests"
+          if [ "$RUNNER_OS" = "Windows" ] && [ -d TwitchDownloaderWPF.Tests ]; then projects="$projects TwitchDownloaderWPF.Tests"; fi
+          status=0
+          for project in $projects; do
+            # End-to-end tests run separately below
+            dotnet test --project "$project" --filter-not-namespace "TwitchDownloaderCLI.Tests.EndToEndTests" \
+              --results-directory "$GITHUB_WORKSPACE/TestResults/$project" \
+              --report-junit --report-junit-filename "$project.junit.xml" \
+              --coverlet --coverlet-output-format cobertura --coverlet-include "[TwitchDownloader*]*" --coverlet-exclude "[*.Tests]*" \
+              || status=1
+          done
+          # The end-to-end tests launch the CLI as child processes. Under coverlet those processes load the instrumented assemblies and
+          # race each other writing the shared coverage hits file on exit (crashing with exit code 134 on macOS), so run them uninstrumented.
+          dotnet test --project TwitchDownloaderCLI.Tests --filter-namespace "TwitchDownloaderCLI.Tests.EndToEndTests" \
+            --results-directory "$GITHUB_WORKSPACE/TestResults/TwitchDownloaderCLI.Tests.EndToEnd" \
+            --report-junit --report-junit-filename "TwitchDownloaderCLI.Tests.EndToEnd.junit.xml" \
+            || status=1
+          exit $status
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-results-${{ matrix.os }}
+          path: TestResults
+          if-no-files-found: ignore
+
+  python:
+    name: python types
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      # The CI scripts and the TestData generators must stay fully typed
+      - name: mypy --strict
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install --quiet mypy pillow
+          "$RUNNER_TEMP/venv/bin/mypy" --strict .github/scripts/*.py TestData/generators/*.py
+
+  report:
+    name: report
+    needs: test
+    # Not always(): a run cancelled by a newer push must not overwrite the comment with an empty report
+    if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: test-results-*
+          path: results
+
+      - name: Build report
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          mkdir -p pr-comment
+          git diff --name-only "$BASE_SHA...$HEAD_SHA" > changed-files.txt || true
+          python3 .github/scripts/test_report.py --results results --changed changed-files.txt --repo-root . --output pr-comment/comment.md
+          echo "$PR_NUMBER" > pr-comment/pr-number.txt
+          cat pr-comment/comment.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Post or update the PR comment
+        # PRs from forks get a read-only token here; test-report-comment.yml posts for those from the pr-comment artifact.
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        uses: marocchino/sticky-pull-request-comment@v3
+        with:
+          header: test-report
+          path: pr-comment/comment.md
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: pr-comment
+          path: pr-comment

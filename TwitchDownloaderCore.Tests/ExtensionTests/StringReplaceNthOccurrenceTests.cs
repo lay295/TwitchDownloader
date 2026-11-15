@@ -10,6 +10,8 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
     // ReSharper disable InvokeAsExtensionMember
     public class StringReplaceNthOccurrenceTests
     {
+        // Each range (counted from the start or, with ^n, from the end) is replaced while the delimiters and the other ranges are kept,
+        // including empty ranges between adjacent delimiters and the real playlist URL case.
         [Theory]
         [InlineData(0, "1/2/3", "A/2/3")]
         [InlineData(1, "1/2/3", "1/A/3")]
@@ -31,6 +33,7 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
             Assert.Equal(expected, actual);
         }
 
+        // A string without the delimiter is a single range, so replacing range 0 (or ^1) replaces the whole string.
         [Theory]
         [InlineData(0)]
         [InlineData(-1)]
@@ -44,6 +47,7 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
             Assert.Equal(EXPECTED, actual);
         }
 
+        // Without a delimiter only range 0 exists; other indexes leave the string unchanged rather than throwing, unlike GetNthOccurrence.
         [Theory]
         [InlineData(1)]
         [InlineData(2)]
@@ -61,6 +65,7 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
             Assert.Equal(EXPECTED, actual);
         }
 
+        // An index beyond the available ranges (from either end) returns the input unchanged, so callers need no range check.
         [Theory]
         [InlineData(3)]
         [InlineData(4)]
@@ -76,6 +81,18 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
             var actual = StringExtensions.ReplaceNthOccurrence(STRING, '/', index.ToIndex(), "A");
 
             Assert.Equal(EXPECTED, actual);
+        }
+
+        // Null and empty strings are returned as-is instead of being replaced by newValue or throwing,
+        // so callers can pass optional paths straight through.
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public void ReturnsInput_WhenNullOrEmpty(string? str)
+        {
+            var actual = StringExtensions.ReplaceNthOccurrence(str!, '/', 0, "A");
+
+            Assert.Equal(str, actual);
         }
     }
 }

@@ -21,7 +21,7 @@ namespace TwitchDownloaderCLI.Modes
             chatUpdater.UpdateAsync(new CancellationToken()).Wait();
         }
 
-        private static ChatUpdateOptions GetUpdateOptions(ChatUpdateArgs inputOptions, FileCollisionHandler collisionHandler, ITaskLogger logger)
+        internal static ChatUpdateOptions GetUpdateOptions(ChatUpdateArgs inputOptions, FileCollisionHandler collisionHandler, ITaskLogger logger)
         {
             if (!File.Exists(inputOptions.InputFile))
             {
