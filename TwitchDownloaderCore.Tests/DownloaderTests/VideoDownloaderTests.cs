@@ -1,6 +1,5 @@
 using System.ComponentModel;
 using System.Net;
-using System.Runtime.CompilerServices;
 using System.Text;
 using TwitchDownloaderCore.Models;
 using TwitchDownloaderCore.Options;
@@ -15,21 +14,6 @@ namespace TwitchDownloaderCore.Tests.DownloaderTests
     [Collection(StaticHttpClientCollection.NAME)]
     public class VideoDownloaderTests
     {
-        [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "GetStreamListTrim")]
-        private static extern Range GetStreamListTrim(VideoDownloader downloader, IList<M3U8.Stream> streamList, out TimeSpan videoLength, out decimal startOffset, out decimal endDuration);
-
-        [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "GetVideoPlaylist")]
-        private static extern Task<(M3U8 playlist, DateTimeOffset airDate)> GetVideoPlaylist(VideoDownloader downloader, string playlistUrl, CancellationToken cancellationToken);
-
-        [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "VerifyDownloadedParts")]
-        private static extern Task VerifyDownloadedParts(VideoDownloader downloader, VideoDownloadState downloadState, CancellationToken cancellationToken);
-
-        [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "HandleFfmpegOutput")]
-        private static extern void HandleFfmpegOutput(VideoDownloader downloader, string output, TimeSpan videoLength);
-
-        [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "WaitForDownloadThreads")]
-        private static extern Task<IReadOnlyCollection<Exception>> WaitForDownloadThreads(VideoDownloader downloader, VideoDownloadThread[] downloadThreads, VideoDownloadState downloadState, bool limitThreadRestarts, CancellationToken cancellationToken);
-
         private static VideoDownloader Create(FakeTwitch twitch, TempDirectory temp, RecordingTaskProgress progress, Action<VideoDownloadOptions>? configure = null)
         {
             var options = new VideoDownloadOptions
@@ -196,7 +180,7 @@ namespace TwitchDownloaderCore.Tests.DownloaderTests
                 TrimEnding = trimEnd, TrimEndingTime = TimeSpan.FromSeconds(end)
             }, new RecordingTaskProgress());
 
-            var range = GetStreamListTrim(downloader, Parts(10, 10, 10, 10), out var length, out var startOffset, out var endDuration);
+            var range = downloader.GetStreamListTrim(Parts(10, 10, 10, 10), out var length, out var startOffset, out var endDuration);
 
             Assert.Equal(new Range(expectedStartIndex, expectedEndIndex), range);
             Assert.Equal(TimeSpan.FromSeconds(expectedLength), length);
@@ -312,7 +296,7 @@ namespace TwitchDownloaderCore.Tests.DownloaderTests
             var worker = new VideoDownloadThread(state, client, temp.Path, -1, new RecordingTaskProgress(), CancellationToken.None);
             var downloader = Create(new FakeTwitch(), temp, new RecordingTaskProgress());
 
-            var waiter = WaitForDownloadThreads(downloader, [worker], state, false, CancellationToken.None);
+            var waiter = downloader.WaitForDownloadThreads([worker], state, false, CancellationToken.None);
             var finishedEarly = await Task.WhenAny(waiter, Task.Delay(2_000, TestContext.Current.CancellationToken)) == waiter;
             release.Release();
             var exceptions = await waiter;
@@ -338,8 +322,8 @@ namespace TwitchDownloaderCore.Tests.DownloaderTests
             var progress = new RecordingTaskProgress();
             var downloader = Create(new FakeTwitch(), temp, progress);
 
-            HandleFfmpegOutput(downloader, line, TimeSpan.FromSeconds(videoLengthSeconds));
-            HandleFfmpegOutput(downloader, "Input #0, concat, from 'concat.txt':", TimeSpan.FromSeconds(videoLengthSeconds));
+            downloader.HandleFfmpegOutput(line, TimeSpan.FromSeconds(videoLengthSeconds));
+            downloader.HandleFfmpegOutput("Input #0, concat, from 'concat.txt':", TimeSpan.FromSeconds(videoLengthSeconds));
 
             Assert.Equal([expectedPercent], progress.Percentages);
         }
@@ -356,7 +340,7 @@ namespace TwitchDownloaderCore.Tests.DownloaderTests
             var progress = new RecordingTaskProgress();
             var downloader = Create(new FakeTwitch(), temp, progress);
 
-            HandleFfmpegOutput(downloader, "size=1024KiB time=00:00:01.50 bitrate=8000.0kbits/s", TimeSpan.FromSeconds(2));
+            downloader.HandleFfmpegOutput("size=1024KiB time=00:00:01.50 bitrate=8000.0kbits/s", TimeSpan.FromSeconds(2));
 
             Assert.Equal([75], progress.Percentages);
         }
@@ -563,7 +547,7 @@ namespace TwitchDownloaderCore.Tests.DownloaderTests
             var progress = new RecordingTaskProgress();
             var downloader = Create(twitch, temp, progress);
 
-            var (playlist, airDate) = await GetVideoPlaylist(downloader, $"{FakeTwitch.VOD_BASE}chunked/highlight-{FakeTwitch.VIDEO_ID}-muted-ABCDEF1234.m3u8", CancellationToken.None);
+            var (playlist, airDate) = await downloader.GetVideoPlaylist($"{FakeTwitch.VOD_BASE}chunked/highlight-{FakeTwitch.VIDEO_ID}-muted-ABCDEF1234.m3u8", CancellationToken.None);
 
             Assert.Equal("0.ts", Assert.Single(playlist.Streams).Path);
             Assert.Equal(new DateTime(2023, 9, 23, 17, 37, 6), airDate.DateTime);
@@ -578,7 +562,7 @@ namespace TwitchDownloaderCore.Tests.DownloaderTests
             var twitch = new FakeTwitch();
             var downloader = Create(twitch, temp, new RecordingTaskProgress());
 
-            var ex = await Assert.ThrowsAsync<HttpRequestException>(() => GetVideoPlaylist(downloader, $"{FakeTwitch.VOD_BASE}chunked/index-dvr.m3u8", CancellationToken.None));
+            var ex = await Assert.ThrowsAsync<HttpRequestException>(() => downloader.GetVideoPlaylist($"{FakeTwitch.VOD_BASE}chunked/index-dvr.m3u8", CancellationToken.None));
 
             Assert.Equal(HttpStatusCode.NotFound, ex.StatusCode);
             Assert.Single(twitch.Handler.Requests);
@@ -596,7 +580,7 @@ namespace TwitchDownloaderCore.Tests.DownloaderTests
             var parts = Enumerable.Range(0, 21).Select(i => new M3U8.Stream(new M3U8.Stream.ExtPartInfo(1, false), default, default, $"{i}.ts")).ToArray();
             var state = new VideoDownloadState(["chunked"], parts, Range.All, new Uri($"{FakeTwitch.VOD_BASE}chunked/"), null, DateTimeOffset.UtcNow.AddDays(-30));
 
-            var ex = await Assert.ThrowsAsync<Exception>(() => VerifyDownloadedParts(downloader, state, CancellationToken.None));
+            var ex = await Assert.ThrowsAsync<Exception>(() => downloader.VerifyDownloadedParts(state, CancellationToken.None));
 
             Assert.Equal("Too many parts are missing or corrupt (21/21), aborting.", ex.Message);
         }

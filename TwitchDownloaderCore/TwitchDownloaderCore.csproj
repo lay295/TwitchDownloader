@@ -29,6 +29,7 @@
   <ItemGroup>
     <InternalsVisibleTo Include="TwitchDownloaderCore.Tests" />
     <InternalsVisibleTo Include="TwitchDownloaderCLI.Tests" />
+    <InternalsVisibleTo Include="TwitchDownloaderWPF.Tests" />
   </ItemGroup>
 
   <ItemGroup>

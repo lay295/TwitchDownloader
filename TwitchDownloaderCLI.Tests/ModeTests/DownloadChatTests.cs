@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using TwitchDownloaderCLI.Modes;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tests.CliTestHelpers;
@@ -18,15 +17,10 @@ namespace TwitchDownloaderCLI.Tests.ModeTests
     [Collection(StaticHttpClientCollection.NAME)]
     public class DownloadChatTests
     {
-        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "GetDownloadOptions")]
-        private static extern ChatDownloadOptions GetDownloadOptions(
-            [UnsafeAccessorType("TwitchDownloaderCLI.Modes.DownloadChat, TwitchDownloaderCLI")] object? @class,
-            ChatDownloadArgs inputOptions, FileCollisionHandler collisionHandler, ITaskLogger logger);
-
         private static ChatDownloadOptions Map(params string[] argv)
         {
             var args = CliArgs.Parse<ChatDownloadArgs>(argv);
-            return GetDownloadOptions(null, args, new FileCollisionHandler(args, new RecordingTaskProgress()), new RecordingTaskProgress());
+            return DownloadChat.GetDownloadOptions(args, new FileCollisionHandler(args, new RecordingTaskProgress()), new RecordingTaskProgress());
         }
 
         // All options must be copied over, a VOD URL reduced to its id, and trims converted to seconds.

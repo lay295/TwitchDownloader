@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using TwitchDownloaderCLI.Modes;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tests.CliTestHelpers;
@@ -15,15 +14,10 @@ namespace TwitchDownloaderCLI.Tests.ModeTests
     // The missing-input and non-JSON-input branches call Environment.Exit, so they are not unit tested; Update() is only tested for a corrupt input.
     public class UpdateChatTests
     {
-        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "GetUpdateOptions")]
-        private static extern ChatUpdateOptions GetUpdateOptions(
-            [UnsafeAccessorType("TwitchDownloaderCLI.Modes.UpdateChat, TwitchDownloaderCLI")] object? @class,
-            ChatUpdateArgs inputOptions, FileCollisionHandler collisionHandler, ITaskLogger logger);
-
         private static ChatUpdateOptions Map(RecordingTaskProgress logger, params string[] argv)
         {
             var args = CliArgs.Parse<ChatUpdateArgs>(argv);
-            return GetUpdateOptions(null, args, new FileCollisionHandler(args, logger), logger);
+            return UpdateChat.GetUpdateOptions(args, new FileCollisionHandler(args, logger), logger);
         }
 
         // All options must be copied over and the output extension must select the output format.

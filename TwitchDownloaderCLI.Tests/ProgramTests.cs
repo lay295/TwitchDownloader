@@ -1,6 +1,6 @@
+using TwitchDownloaderCLI;
 using System.Net;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using CommandLine;
 using TwitchDownloaderCLI.Modes;
@@ -19,17 +19,6 @@ namespace TwitchDownloaderCLI.Tests
     [Collection(StaticHttpClientCollection.NAME)]
     public class ProgramTests
     {
-        private const string PROGRAM = "TwitchDownloaderCLI.Program, TwitchDownloaderCLI";
-
-        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "Main")]
-        private static extern void RunMain([UnsafeAccessorType(PROGRAM)] object? @class, string[] args);
-
-        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "WriteApplicationBanner")]
-        private static extern void WriteApplicationBanner([UnsafeAccessorType(PROGRAM)] object? @class, ITwitchDownloaderArgs args);
-
-        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "get_GitHashRegex")]
-        private static extern Regex GitHashRegex([UnsafeAccessorType(PROGRAM)] object? @class);
-
         private static readonly Type[] VerbTypes = typeof(ITwitchDownloaderArgs).Assembly.GetTypes()
             .Where(t => t.GetCustomAttribute<VerbAttribute>() is not null)
             .ToArray();
@@ -92,7 +81,7 @@ namespace TwitchDownloaderCLI.Tests
             using var httpOverride = new HttpClientOverride(c => TwitchHelper.httpClient = c, () => TwitchHelper.httpClient, http);
             using var console = new ConsoleCapture();
 
-            RunMain(null, ["info", "--id", "123456789", "--format", "m3u8", "--banner", "false", "--log-level", "None", "--use-utf8", "false"]);
+            Program.Main(["info", "--id", "123456789", "--format", "m3u8", "--banner", "false", "--log-level", "None", "--use-utf8", "false"]);
 
             Assert.StartsWith("#EXTM3U", console.Output);
             Assert.Contains("https://example.invalid/vod/chunked/index-dvr.m3u8", console.Output);
@@ -109,7 +98,7 @@ namespace TwitchDownloaderCLI.Tests
             File.WriteAllText(list, part);
             using var console = new ConsoleCapture();
 
-            RunMain(null, ["TSMERGE", "-i", list, "-o", temp.Combine("out.ts"), "--log-level", "None"]);
+            Program.Main(["TSMERGE", "-i", list, "-o", temp.Combine("out.ts"), "--log-level", "None"]);
 
             Assert.Equal(188, new FileInfo(temp.Combine("out.ts")).Length);
             Assert.Equal("", console.Output);
@@ -124,9 +113,9 @@ namespace TwitchDownloaderCLI.Tests
                 new FakeHttpMessageHandler((_, _) => FakeHttpMessageHandler.Text("<item><version>1.0.0</version></item>")));
             using var console = new ConsoleCapture();
 
-            RunMain(null, ["cache"]);
-            RunMain(null, ["ffmpeg", "--banner", "false"]);
-            RunMain(null, ["update", "--banner", "false"]);
+            Program.Main(["cache"]);
+            Program.Main(["ffmpeg", "--banner", "false"]);
+            Program.Main(["update", "--banner", "false"]);
 
             var lines = console.Output.Split('\n', StringSplitOptions.RemoveEmptyEntries);
             Assert.Equal(2, lines.Length);
@@ -144,7 +133,7 @@ namespace TwitchDownloaderCLI.Tests
         {
             using var console = new ConsoleCapture();
 
-            WriteApplicationBanner(null, CliArgs.Parse<CacheArgs>(argv));
+            Program.WriteApplicationBanner(CliArgs.Parse<CacheArgs>(argv));
 
             Assert.Equal(expectBanner, console.Output.Length > 0);
             Assert.DoesNotContain("©", console.Output); // the copyright sign is replaced for consoles without Unicode support
@@ -157,7 +146,7 @@ namespace TwitchDownloaderCLI.Tests
         [InlineData("C++ 1.0", "C++ 1.0")]
         public void GitHashRegex_StripsOnlyTheCommitSuffix(string input, string expected)
         {
-            Assert.Equal(expected, GitHashRegex(null).Replace(input, ""));
+            Assert.Equal(expected, Program.GitHashRegex.Replace(input, ""));
         }
     }
 }

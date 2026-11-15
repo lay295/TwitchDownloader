@@ -1,6 +1,5 @@
 using System.Globalization;
 using System.Net;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
@@ -23,21 +22,6 @@ namespace TwitchDownloaderCLI.Tests.ModeTests
     [Collection(StaticHttpClientCollection.NAME)]
     public class InfoHandlerTests
     {
-        private const string INFO_HANDLER = "TwitchDownloaderCLI.Modes.InfoHandler, TwitchDownloaderCLI";
-
-        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "GetVideoInfo")]
-        private static extern Task<(GqlVideoResponse videoInfo, GqlVideoChapterResponse chapters, string playlistString)> GetVideoInfo(
-            [UnsafeAccessorType(INFO_HANDLER)] object? @class, long videoId, string? oauth, bool canThrow, ITaskProgress progress);
-
-        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "GetClipInfo")]
-        private static extern Task<GqlShareClipRenderStatusResponse> GetClipInfo([UnsafeAccessorType(INFO_HANDLER)] object? @class, string clipId, bool canThrow, ITaskProgress progress);
-
-        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "StringifyTimestamp")]
-        private static extern string StringifyTimestamp([UnsafeAccessorType(INFO_HANDLER)] object? @class, TimeSpan timeSpan);
-
-        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "SetUtf8Encoding")]
-        private static extern void SetUtf8Encoding([UnsafeAccessorType(INFO_HANDLER)] object? @class, bool useUtf8, ITaskLogger logger);
-
         private const string RESTRICTED_PLAYLIST = """[{"url":"https://usher.ttvnw.net/vod/v2/123456789.m3u8","error":"Unauthorized","error_code":"vod_manifest_restricted","type":"error"}]""";
 
         /// <summary>The bodies the fake Twitch API answers with; defaults are the TestData/CLI/info_* fixtures.</summary>
@@ -218,7 +202,7 @@ namespace TwitchDownloaderCLI.Tests.ModeTests
 
             using (new HttpClientOverride(c => TwitchHelper.httpClient = c, () => TwitchHelper.httpClient, FakeTwitch(new Responses { Token = """{"data":{"videoPlaybackAccessToken":null}}""" })))
             {
-                var (videoInfo, chapters, playlist) = await GetVideoInfo(null, 123456789, null, false, progress);
+                var (videoInfo, chapters, playlist) = await InfoHandler.GetVideoInfo(123456789, null, false, progress);
 
                 Assert.Equal("[Hype] Speedrun", videoInfo.data.video.title);
                 Assert.Null(chapters);
@@ -227,7 +211,7 @@ namespace TwitchDownloaderCLI.Tests.ModeTests
 
             using (new HttpClientOverride(c => TwitchHelper.httpClient = c, () => TwitchHelper.httpClient, FakeTwitch(new Responses { Playlist = RESTRICTED_PLAYLIST, PlaylistStatus = HttpStatusCode.Forbidden })))
             {
-                var (_, chapters, playlist) = await GetVideoInfo(null, 123456789, null, false, progress);
+                var (_, chapters, playlist) = await InfoHandler.GetVideoInfo(123456789, null, false, progress);
 
                 Assert.Contains("vod_manifest_restricted", playlist);
                 Assert.Equal(2, chapters.data.video.moments.edges.Count);
@@ -364,7 +348,7 @@ namespace TwitchDownloaderCLI.Tests.ModeTests
             var responses = new Responses { Clip = EditClip(clip => clip["playbackAccessToken"] = null) };
 
             using var _ = new HttpClientOverride(c => TwitchHelper.httpClient = c, () => TwitchHelper.httpClient, FakeTwitch(responses));
-            var clipInfo = await GetClipInfo(null, "FancyClipSlug", false, progress);
+            var clipInfo = await InfoHandler.GetClipInfo("FancyClipSlug", false, progress);
 
             Assert.Null(clipInfo.data.clip.playbackAccessToken);
             Assert.Equal(["Fetching Clip Info [1/1]"], progress.Statuses);
@@ -380,7 +364,7 @@ namespace TwitchDownloaderCLI.Tests.ModeTests
         [InlineData(93_600_000, "26:00:00")]
         public void StringifyTimestamp_UsesCompactFormat(long milliseconds, string expected)
         {
-            Assert.Equal(expected, StringifyTimestamp(null, TimeSpan.FromMilliseconds(milliseconds)));
+            Assert.Equal(expected, InfoHandler.StringifyTimestamp(TimeSpan.FromMilliseconds(milliseconds)));
         }
 
         // --use-utf8 false must leave the console encoding alone; when enabled the console ends up in UTF-8 (or a warning explains why not),
@@ -392,11 +376,11 @@ namespace TwitchDownloaderCLI.Tests.ModeTests
             var logger = new RecordingTaskProgress();
             try
             {
-                SetUtf8Encoding(null, false, logger);
+                InfoHandler.SetUtf8Encoding(false, logger);
                 Assert.Equal(original.CodePage, Console.OutputEncoding.CodePage);
                 Assert.Empty(logger.Verbose);
 
-                SetUtf8Encoding(null, true, logger);
+                InfoHandler.SetUtf8Encoding(true, logger);
                 Assert.True(Console.OutputEncoding.CodePage == Encoding.UTF8.CodePage || !logger.Warnings.IsEmpty);
             }
             finally

@@ -25,7 +25,7 @@ namespace TwitchDownloaderCLI.Modes
             chatRenderer.RenderVideoAsync(new CancellationToken()).Wait();
         }
 
-        private static ChatRenderOptions GetRenderOptions(ChatRenderArgs inputOptions, FileCollisionHandler collisionHandler, ITaskLogger logger)
+        internal static ChatRenderOptions GetRenderOptions(ChatRenderArgs inputOptions, FileCollisionHandler collisionHandler, ITaskLogger logger)
         {
             ChatRenderOptions renderOptions = new()
             {

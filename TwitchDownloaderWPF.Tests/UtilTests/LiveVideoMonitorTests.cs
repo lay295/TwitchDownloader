@@ -65,17 +65,15 @@ namespace TwitchDownloaderWPF.Tests.UtilTests
             Assert.Empty(logger.Errors);
 
             // IsVideoRecording only re-polls every 30-40 seconds, so drive the remaining polls directly on the shared state.
-            var state = typeof(LiveVideoMonitor).GetField("_state", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!.GetValue(monitor)!;
-            var checkIsRecording = state.GetType().GetMethod("CheckIsRecording")!;
             for (var i = 2; i <= 5; i++)
             {
-                await (Task)checkIsRecording.Invoke(state, [logger])!;
+                await monitor._state.CheckIsRecording(logger);
             }
 
             Assert.True(await monitor.IsVideoRecording(TestContext.Current.CancellationToken));
             Assert.Empty(logger.Errors);
 
-            await (Task)checkIsRecording.Invoke(state, [logger])!;
+            await monitor._state.CheckIsRecording(logger);
 
             Assert.False(await monitor.IsVideoRecording(TestContext.Current.CancellationToken));
             Assert.Single(logger.Errors);

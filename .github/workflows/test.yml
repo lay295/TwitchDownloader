@@ -70,6 +70,18 @@ jobs:
           path: TestResults
           if-no-files-found: ignore
 
+  python:
+    name: python types
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      # The CI scripts and the TestData generators must stay fully typed
+      - name: mypy --strict
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install --quiet mypy pillow
+          "$RUNNER_TEMP/venv/bin/mypy" --strict .github/scripts/*.py TestData/generators/*.py
+
   report:
     name: report
     needs: test

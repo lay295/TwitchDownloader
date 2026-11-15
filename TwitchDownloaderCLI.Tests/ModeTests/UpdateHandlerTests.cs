@@ -1,6 +1,5 @@
 using System.IO.Compression;
 using System.Net;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using TwitchDownloaderCLI.Modes;
@@ -19,29 +18,7 @@ namespace TwitchDownloaderCLI.Tests.ModeTests
     [Collection(StaticHttpClientCollection.NAME)]
     public class UpdateHandlerTests
     {
-        private const string UPDATE_HANDLER = "TwitchDownloaderCLI.Modes.UpdateHandler, TwitchDownloaderCLI";
         private const string UPDATE_FEED_URL = "https://downloader-update.twitcharchives.workers.dev/";
-
-        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "CheckForUpdate")]
-        private static extern Task CheckForUpdate([UnsafeAccessorType(UPDATE_HANDLER)] object? @class, UpdateArgs args, ITaskProgress progress);
-
-        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "ConstructPackageName")]
-        private static extern string? ConstructPackageName([UnsafeAccessorType(UPDATE_HANDLER)] object? @class, string origPackageName);
-
-        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "DownloadUpdateArchive")]
-        private static extern Task DownloadUpdateArchive([UnsafeAccessorType(UPDATE_HANDLER)] object? @class, string url, ITaskProgress progress, string archivePath);
-
-        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "ExtractZipFiles")]
-        private static extern Task ExtractZipFiles([UnsafeAccessorType(UPDATE_HANDLER)] object? @class, ITaskProgress progress, string archivePath, string destinationDir);
-
-        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "BackupCurrentExecutable")]
-        private static extern void BackupCurrentExecutable([UnsafeAccessorType(UPDATE_HANDLER)] object? @class, string currentExePath, ITaskProgress progress);
-
-        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "GetUnixFilePermissions")]
-        private static extern UnixFileMode? GetUnixFilePermissions([UnsafeAccessorType(UPDATE_HANDLER)] object? @class, ITaskProgress progress, string currentExePath);
-
-        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "ApplyUnixFilePermissions")]
-        private static extern void ApplyUnixFilePermissions([UnsafeAccessorType(UPDATE_HANDLER)] object? @class, ITaskProgress progress, string currentExePath, UnixFileMode? previousPermissions);
 
         private static string UpdateXml(string version) =>
             $"<item><version>{version}</version><url-cli>https://example.invalid/releases/TwitchDownloaderCLI-{version}-{{0}}.zip</url-cli></item>";
@@ -64,7 +41,7 @@ namespace TwitchDownloaderCLI.Tests.ModeTests
 
             using (OverrideHttp(http))
             {
-                await CheckForUpdate(null, new UpdateArgs(), progress);
+                await UpdateHandler.CheckForUpdate(new UpdateArgs(), progress);
             }
 
             Assert.Equal(["You have the latest version of TwitchDownloaderCLI"], progress.Info);
@@ -79,7 +56,7 @@ namespace TwitchDownloaderCLI.Tests.ModeTests
 
             using (OverrideHttp(FakeFeed("  ")))
             {
-                await CheckForUpdate(null, new UpdateArgs(), progress);
+                await UpdateHandler.CheckForUpdate(new UpdateArgs(), progress);
             }
 
             Assert.Equal(["Could not parse remote update info XML"], progress.Errors);
@@ -91,7 +68,7 @@ namespace TwitchDownloaderCLI.Tests.ModeTests
         [Fact]
         public async Task CheckForUpdate_NewerVersion_DeclinedPromptDownloadsNothing()
         {
-            var packageName = ConstructPackageName(null, "TwitchDownloaderCLI-999.0.0-{0}.zip");
+            var packageName = UpdateHandler.ConstructPackageName("TwitchDownloaderCLI-999.0.0-{0}.zip");
             Assert.SkipWhen(packageName is null, "Self-update is not supported on this OS/architecture");
             var http = FakeFeed(UpdateXml("999.0.0"));
             var progress = new RecordingTaskProgress();
@@ -99,7 +76,7 @@ namespace TwitchDownloaderCLI.Tests.ModeTests
             using (OverrideHttp(http))
             using (var console = new ConsoleCapture("n\n"))
             {
-                await CheckForUpdate(null, new UpdateArgs(), progress);
+                await UpdateHandler.CheckForUpdate(new UpdateArgs(), progress);
 
                 Assert.StartsWith("Would you like to update?", console.Output);
             }
@@ -126,7 +103,7 @@ namespace TwitchDownloaderCLI.Tests.ModeTests
                 _ => null
             };
 
-            var actual = ConstructPackageName(null, "TwitchDownloaderCLI-1.0.0-{0}.zip");
+            var actual = UpdateHandler.ConstructPackageName("TwitchDownloaderCLI-1.0.0-{0}.zip");
 
             Assert.Equal(expected is null ? null : $"TwitchDownloaderCLI-1.0.0-{expected}.zip", actual);
         }
@@ -142,7 +119,7 @@ namespace TwitchDownloaderCLI.Tests.ModeTests
 
             using (OverrideHttp(new FakeHttpMessageHandler((_, _) => FakeHttpMessageHandler.Bytes(payload))))
             {
-                await DownloadUpdateArchive(null, "https://example.invalid/update.zip", progress, archivePath);
+                await UpdateHandler.DownloadUpdateArchive("https://example.invalid/update.zip", progress, archivePath);
             }
 
             Assert.Equal(payload, await File.ReadAllBytesAsync(archivePath, TestContext.Current.CancellationToken));
@@ -159,7 +136,7 @@ namespace TwitchDownloaderCLI.Tests.ModeTests
 
             using (OverrideHttp(FakeHttpMessageHandler.NotFound()))
             {
-                await Assert.ThrowsAsync<HttpRequestException>(() => DownloadUpdateArchive(null, "https://example.invalid/update.zip", new RecordingTaskProgress(), archivePath));
+                await Assert.ThrowsAsync<HttpRequestException>(() => UpdateHandler.DownloadUpdateArchive("https://example.invalid/update.zip", new RecordingTaskProgress(), archivePath));
             }
 
             Assert.False(File.Exists(archivePath));
@@ -181,7 +158,7 @@ namespace TwitchDownloaderCLI.Tests.ModeTests
             await File.WriteAllTextAsync(Path.Combine(installDir, "TwitchDownloaderCLI"), "old binary", TestContext.Current.CancellationToken);
             var progress = new RecordingTaskProgress();
 
-            await ExtractZipFiles(null, progress, archivePath, installDir);
+            await UpdateHandler.ExtractZipFiles(progress, archivePath, installDir);
 
             Assert.Equal("new binary", await File.ReadAllTextAsync(Path.Combine(installDir, "TwitchDownloaderCLI"), TestContext.Current.CancellationToken));
             Assert.Equal("license", await File.ReadAllTextAsync(Path.Combine(installDir, "COPYRIGHT.txt"), TestContext.Current.CancellationToken));
@@ -198,7 +175,7 @@ namespace TwitchDownloaderCLI.Tests.ModeTests
             File.WriteAllText(exe + ".bak", "older");
             var progress = new RecordingTaskProgress();
 
-            BackupCurrentExecutable(null, exe, progress);
+            UpdateHandler.BackupCurrentExecutable(exe, progress);
 
             Assert.False(File.Exists(exe));
             Assert.Equal("current", File.ReadAllText(exe + ".bak"));
@@ -212,7 +189,7 @@ namespace TwitchDownloaderCLI.Tests.ModeTests
             using var temp = new TempDirectory();
             var progress = new RecordingTaskProgress();
 
-            BackupCurrentExecutable(null, temp.Combine("missing"), progress);
+            UpdateHandler.BackupCurrentExecutable(temp.Combine("missing"), progress);
 
             Assert.Contains("Failed to create backup", Assert.Single(progress.Warnings));
         }
@@ -230,9 +207,9 @@ namespace TwitchDownloaderCLI.Tests.ModeTests
             File.SetUnixFileMode(exe, MODE);
             var progress = new RecordingTaskProgress();
 
-            var captured = GetUnixFilePermissions(null, progress, exe);
+            var captured = UpdateHandler.GetUnixFilePermissions(progress, exe);
             File.SetUnixFileMode(exe, UnixFileMode.UserRead | UnixFileMode.UserWrite); // extraction resets the mode
-            ApplyUnixFilePermissions(null, progress, exe, captured);
+            UpdateHandler.ApplyUnixFilePermissions(progress, exe, captured);
 
             Assert.Equal(MODE, captured);
             Assert.Equal(MODE, File.GetUnixFileMode(exe));
@@ -250,10 +227,10 @@ namespace TwitchDownloaderCLI.Tests.ModeTests
             var missing = temp.Combine("missing");
             var progress = new RecordingTaskProgress();
 
-            ApplyUnixFilePermissions(null, progress, missing, null);
+            UpdateHandler.ApplyUnixFilePermissions(progress, missing, null);
             Assert.Empty(progress.Errors);
 
-            ApplyUnixFilePermissions(null, progress, missing, UnixFileMode.UserRead);
+            UpdateHandler.ApplyUnixFilePermissions(progress, missing, UnixFileMode.UserRead);
             var chmod = OperatingSystem.IsMacOS() ? "chmod +x" : "sudo chmod +x";
             Assert.Contains($"Please run '{chmod} missing'", Assert.Single(progress.Errors));
         }
@@ -268,8 +245,8 @@ namespace TwitchDownloaderCLI.Tests.ModeTests
             File.WriteAllText(exe, "");
             var progress = new RecordingTaskProgress();
 
-            Assert.Null(GetUnixFilePermissions(null, progress, exe));
-            ApplyUnixFilePermissions(null, progress, exe, UnixFileMode.UserRead);
+            Assert.Null(UpdateHandler.GetUnixFilePermissions(progress, exe));
+            UpdateHandler.ApplyUnixFilePermissions(progress, exe, UnixFileMode.UserRead);
             Assert.Empty(progress.Errors);
         }
 

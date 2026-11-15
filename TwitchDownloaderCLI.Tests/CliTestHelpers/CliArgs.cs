@@ -1,27 +1,16 @@
 using CommandLine;
-using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tools;
 
 namespace TwitchDownloaderCLI.Tests.CliTestHelpers
 {
     /// <summary>
-    /// Parses a command line exactly the way <c>Program.Main</c> does (legacy-syntax rewrite, then CommandLineParser with
-    /// case-insensitive enums and every verb registered), so tests exercise the real option attributes instead of hand-built args objects.
+    /// Parses a command line exactly the way <c>Program.Main</c> does (legacy-syntax rewrite, then <see cref="Program.ParseVerbs"/>),
+    /// so tests exercise the real option attributes and parser settings instead of hand-built args objects.
     /// </summary>
-    /// <remarks>Keep the parser settings and verb list in sync with <c>Program.Main</c>.</remarks>
     internal static class CliArgs
     {
-        public static ParserResult<object> ParseResult(params string[] args)
-        {
-            var parser = new Parser(config =>
-            {
-                config.CaseInsensitiveEnumValues = true;
-                config.HelpWriter = null;
-            });
-
-            return parser.ParseArguments<VideoDownloadArgs, ClipDownloadArgs, ChatDownloadArgs, ChatUpdateArgs, ChatRenderArgs, InfoArgs, FfmpegArgs, CacheArgs, UpdateArgs, TsMergeArgs>(
-                PreParseArgs.Parse(args, "TwitchDownloaderCLI"));
-        }
+        public static ParserResult<object> ParseResult(params string[] args) =>
+            Program.ParseVerbs(PreParseArgs.Parse(args, "TwitchDownloaderCLI"), out _);
 
         /// <summary>Parses <paramref name="args"/> and asserts that it produced a <typeparamref name="T"/>.</summary>
         public static T Parse<T>(params string[] args)

@@ -4,17 +4,26 @@
 Expects --results to contain one folder per platform (test-results-<os>/), each holding the
 *.junit.xml and coverage.cobertura*.xml files written by `dotnet test`.
 """
+from __future__ import annotations
+
 import argparse
 import glob
 import os
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 
+# file -> (covered lines, coverable lines)
+Coverage = dict[str, tuple[int, int]]
+# platform -> (total, failed, skipped)
+TestSummary = dict[str, tuple[int, int, int]]
+# (platform, test name, first line of the failure message)
+Failure = tuple[str, str, str]
+
 WORST_FILES_SHOWN = 5
 FAILURES_SHOWN = 25
 
 
-def repo_relative(path, top_dirs):
+def repo_relative(path: str, top_dirs: set[str]) -> str | None:
     """Map an absolute (Windows or POSIX) source path from any runner to a repo-relative path, or None if it isn't ours."""
     parts = path.replace("\\", "/").split("/")
     for i, part in enumerate(parts):
@@ -23,9 +32,9 @@ def repo_relative(path, top_dirs):
     return None
 
 
-def read_coverage(files, top_dirs):
+def read_coverage(files: list[str], top_dirs: set[str]) -> Coverage:
     """Union line hits across all reports: a line counts as covered if any platform/test project executed it."""
-    lines = defaultdict(dict)  # file -> {line number: covered}
+    lines: defaultdict[str, dict[int, bool]] = defaultdict(dict)  # file -> {line number: covered}
     for report in files:
         root = ET.parse(report).getroot()
         sources = [s.text or "" for s in root.iter("source")] or [""]
@@ -39,16 +48,16 @@ def read_coverage(files, top_dirs):
             if not rel:
                 continue
             for line in cls.iter("line"):
-                number = int(line.get("number"))
+                number = int(line.get("number", "0"))
                 hit = int(line.get("hits", "0")) > 0
                 lines[rel][number] = lines[rel].get(number, False) or hit
     return {f: (sum(v.values()), len(v)) for f, v in lines.items()}
 
 
-def read_tests(results_dir):
+def read_tests(results_dir: str) -> tuple[TestSummary, list[Failure]]:
     """Per-platform pass/fail/skip counts and the list of failing tests."""
-    summary = {}
-    failures = []
+    summary: TestSummary = {}
+    failures: list[Failure] = []
     for platform_dir in sorted(glob.glob(os.path.join(results_dir, "test-results-*"))):
         platform = os.path.basename(platform_dir).removeprefix("test-results-")
         total = failed = skipped = 0
@@ -68,11 +77,11 @@ def read_tests(results_dir):
     return summary, failures
 
 
-def pct(hit, total):
+def pct(hit: int, total: int) -> float:
     return 100.0 * hit / total if total else 100.0
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--results", required=True)
     parser.add_argument("--changed", required=True, help="File listing paths changed by the PR, one per line")
@@ -106,7 +115,7 @@ def main():
         hit = sum(h for h, _ in coverage.values())
         total = sum(t for _, t in coverage.values())
         out += ["", f"### Line coverage: {pct(hit, total):.1f}% ({hit}/{total} lines)", ""]
-        per_project = defaultdict(lambda: [0, 0])
+        per_project: defaultdict[str, list[int]] = defaultdict(lambda: [0, 0])
         for path, (h, t) in coverage.items():
             per_project[path.split("/")[0]][0] += h
             per_project[path.split("/")[0]][1] += t
@@ -118,7 +127,7 @@ def main():
     covered_projects = {path.split("/")[0] for path in coverage}
     untracked = [f for f in changed if coverage and f.split("/")[0] not in covered_projects and os.path.exists(os.path.join(args.repo_root, f)) and ".Tests/" not in f]
     if touched or untracked:
-        out += ["", f"### Least-covered files touched by this PR", "", "| File | Line coverage | Lines |", "|---|---|---|"]
+        out += ["", "### Least-covered files touched by this PR", "", "| File | Line coverage | Lines |", "|---|---|---|"]
         for percent, path, h, t in touched[:WORST_FILES_SHOWN]:
             out.append(f"| `{path}` | {percent:.1f}% | {h}/{t} |")
         for path in untracked[:WORST_FILES_SHOWN]:

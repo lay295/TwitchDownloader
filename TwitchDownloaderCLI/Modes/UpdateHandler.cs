@@ -27,7 +27,7 @@ namespace TwitchDownloaderCLI.Modes
 #endif
         }
 
-        private static async Task CheckForUpdate(UpdateArgs args, ITaskProgress progress)
+        internal static async Task CheckForUpdate(UpdateArgs args, ITaskProgress progress)
         {
             // Get the current version
             var oldVersion = Assembly.GetExecutingAssembly().GetName().Version!.StripRevisionIfDefault();
@@ -82,7 +82,7 @@ namespace TwitchDownloaderCLI.Modes
         }
 
         [return: MaybeNull]
-        private static string ConstructPackageName(string origPackageName)
+        internal static string ConstructPackageName(string origPackageName)
         {
             var arch = RuntimeInformation.OSArchitecture;
 
@@ -163,7 +163,7 @@ namespace TwitchDownloaderCLI.Modes
             progress.LogInfo($"{nameof(TwitchDownloaderCLI)} has been updated to v{newVersion}!");
         }
 
-        private static async Task DownloadUpdateArchive(string url, ITaskProgress progress, string archivePath)
+        internal static async Task DownloadUpdateArchive(string url, ITaskProgress progress, string archivePath)
         {
             using var response = await HttpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
@@ -186,7 +186,7 @@ namespace TwitchDownloaderCLI.Modes
             }
         }
 
-        private static UnixFileMode? GetUnixFilePermissions(ITaskProgress progress, string currentExePath)
+        internal static UnixFileMode? GetUnixFilePermissions(ITaskProgress progress, string currentExePath)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
@@ -203,7 +203,7 @@ namespace TwitchDownloaderCLI.Modes
             return null;
         }
 
-        private static void ApplyUnixFilePermissions(ITaskProgress progress, string currentExePath, UnixFileMode? previousPermissions)
+        internal static void ApplyUnixFilePermissions(ITaskProgress progress, string currentExePath, UnixFileMode? previousPermissions)
         {
             if (OperatingSystem.IsWindows() || !previousPermissions.HasValue)
             {
@@ -224,7 +224,7 @@ namespace TwitchDownloaderCLI.Modes
             }
         }
 
-        private static void BackupCurrentExecutable(string currentExePath, ITaskProgress progress)
+        internal static void BackupCurrentExecutable(string currentExePath, ITaskProgress progress)
         {
             try
             {
@@ -244,7 +244,7 @@ namespace TwitchDownloaderCLI.Modes
             }
         }
 
-        private static async Task ExtractZipFiles(ITaskProgress progress, string archivePath, string destinationDir)
+        internal static async Task ExtractZipFiles(ITaskProgress progress, string archivePath, string destinationDir)
         {
             await using (var archiveFs = File.Open(archivePath, FileMode.Open, FileAccess.Read, FileShare.Read))
             {

@@ -11,7 +11,6 @@ namespace TwitchDownloaderCore.Tests.RenderTests
     // Layout reference at the harness' 12pt font: section height 20px, vertical padding 12px, emotes 28px, badges 18px.
     public class ChatRendererRenderTests
     {
-        private const int ROW_PITCH = 32; // section height + vertical padding for a one-line comment at 12pt
         private static readonly SKColor DarkAccent = new(0xFF26262C); // PayingForward
         private static readonly SKColor GrayAccent = new(0xFF80808C); // WatchStreak, Combo, ChannelPointHighlight
 
@@ -105,15 +104,13 @@ namespace TwitchDownloaderCore.Tests.RenderTests
             Assert.Equal(0, video.Pixel(29, 0, 0).Alpha);
             Assert.Equal(0, mask.Pixel(29, 0, 0).Red);
 
-            var emoteX = video.FirstColumnOf(29, FixtureColors.FirstPartyEmote);
-            Assert.NotEqual(-1, emoteX);
-            var emoteY = 200 - ROW_PITCH + 10; // middle of the last row
-            Assert.Equal(FixtureColors.FirstPartyEmote, video.Pixel(29, emoteX + 5, emoteY));
-            Assert.Equal(255, mask.Pixel(29, emoteX + 5, emoteY).Red);
-
-            var accentY = 200 - 2 * ROW_PITCH + 10; // middle of the gift row; the accent stroke starts at the 3px side padding
-            Assert.Equal(FixtureColors.Purple, video.Pixel(29, 4, accentY));
-            Assert.Equal(255, mask.Pixel(29, 4, accentY).Red);
+            // Wherever the opaque emote or the gift message's accent stroke is drawn, the mask must be fully opaque too
+            foreach (var color in new[] { FixtureColors.FirstPartyEmote, FixtureColors.Purple })
+            {
+                var pixels = video.PixelsOf(29, color).ToList();
+                Assert.NotEmpty(pixels);
+                Assert.All(pixels, p => Assert.Equal(255, mask.Pixel(29, p.X, p.Y).Red));
+            }
         }
 
         /// <summary>
@@ -152,19 +149,11 @@ namespace TwitchDownloaderCore.Tests.RenderTests
             var video = await harness.RenderAsync(c => c.comments = offsets.Select(o => RenderHarness.EmoteComment(o)).ToList(), Ct);
 
             Assert.Equal(10, video.FrameCount);
-            var xs = new int[offsets.Length];
-            for (var row = 0; row < offsets.Length; row++)
-            {
-                var y = 200 - (offsets.Length - row) * ROW_PITCH + 10;
-                xs[row] = Enumerable.Range(0, 300).FirstOrDefault(x => video.Pixel(9, x, y) == FixtureColors.FirstPartyEmote, -1);
-                Assert.True(xs[row] > 0, $"row {row} has no emote");
-            }
-
+            // One emote per comment, top to bottom; where each starts shows how wide that comment's timestamp was
+            var xs = video.Bands(9, FixtureColors.FirstPartyEmote).Select(b => b.Left).ToArray();
+            Assert.Equal(offsets.Length, xs.Length);
             Assert.True(xs[0] < xs[1] && xs[1] < xs[2] && xs[2] < xs[3] && xs[3] == xs[4], string.Join(", ", xs));
         }
-
-        [UnsafeAccessor(UnsafeAccessorKind.StaticField, Name = "DefaultAvatarUrls")]
-        private static extern ref string[] DefaultAvatarUrls(ChatRenderer? @null);
 
         private static void CacheAvatar(string avatarDir, string url, SKColor color)
         {
@@ -192,7 +181,7 @@ namespace TwitchDownloaderCore.Tests.RenderTests
             harness.Options.RenderUserAvatars = renderAvatars;
             var avatarDir = Directory.CreateDirectory(harness.Temp.Combine("TwitchDownloader", "avatars")).FullName;
             CacheAvatar(avatarDir, LOGO, avatarColor);
-            foreach (var url in DefaultAvatarUrls(null))
+            foreach (var url in ChatRenderer.DefaultAvatarUrls)
             {
                 CacheAvatar(avatarDir, url, defaultAvatarColor);
             }
@@ -283,11 +272,16 @@ namespace TwitchDownloaderCore.Tests.RenderTests
                 RenderHarness.MakeComment(0, "carol", "third"),
             ], Ct);
 
-            const int X = 298;
-            Assert.Equal(highlight, video.Pixel(29, X, 200 - 1 * ROW_PITCH + 10)); // carol, index 2
-            Assert.Equal(alternate, video.Pixel(29, X, 200 - 2 * ROW_PITCH + 10)); // bob, index 1
-            Assert.Equal(RenderHarness.Background, video.Pixel(29, X, 200 - 3 * ROW_PITCH + 10)); // alice, index 0
-            Assert.Equal(RenderHarness.Background, video.Pixel(29, X, 10));
+            // Bob (index 1) gets the alternate background and Carol (highlighted) the highlight colour, each across one whole row
+            // (the right edge, which no text reaches); Alice (index 0) keeps the normal background above them.
+            var alternateRows = video.Bands(29, alternate);
+            var highlightRows = video.Bands(29, highlight);
+            Assert.Single(alternateRows);
+            Assert.Single(highlightRows);
+            Assert.True(alternateRows[0].Bottom < highlightRows[0].Top, "bob's row should be above carol's");
+            Assert.Equal(alternate, video.Pixel(29, 299, alternateRows[0].Top));
+            Assert.Equal(highlight, video.Pixel(29, 299, highlightRows[0].Top));
+            Assert.True(video.FirstNonBackgroundRow(29, RenderHarness.Background) < alternateRows[0].Top, "alice's row should be above bob's");
         }
 
         /// <summary>
@@ -373,8 +367,8 @@ namespace TwitchDownloaderCore.Tests.RenderTests
                 RenderHarness.MakeComment(0, "dave", "Dave gifted a Tier 1 sub to Eve! ", displayName: "Dave")
             ], Ct);
 
-            // Right edge of the message area, inside the side padding, where no text is drawn.
-            Assert.NotEqual(RenderHarness.Background, video.Pixel(29, 300 - 3 - 2, 200 - ROW_PITCH + 10));
+            // The right edge of the chat, where this short message's text never reaches, shows the highlight background
+            Assert.Contains(Enumerable.Range(0, 200), y => video.Pixel(29, 300 - 3 - 2, y) != RenderHarness.Background);
         }
 
         /// <summary>
@@ -495,11 +489,13 @@ namespace TwitchDownloaderCore.Tests.RenderTests
 
             var video = await harness.RenderAsync(c => c.comments = [RenderHarness.MakeComment(0, "alice", body, fragments, bits: 15)], Ct);
 
-            Assert.InRange(video.FirstNonBackgroundRow(9, RenderHarness.Background), 0, 400 - 10 * 20); // at least ten 20px lines tall
+            // The single comment wraps over many lines, and each kind of image is spread across more than one of them: the rows it
+            // covers are taller than one image (the fixture images are drawn 28 px tall)
+            Assert.InRange(video.FirstNonBackgroundRow(9, RenderHarness.Background), 0, 200);
             foreach (var color in new[] { FixtureColors.FirstPartyEmote, FixtureColors.StaticThirdParty, FixtureColors.Cheer1 })
             {
-                var rows = Enumerable.Range(0, 400).Where(y => Enumerable.Range(0, 400).Any(x => video.Pixel(9, x, y) == color)).ToList();
-                Assert.True(rows.Count > 0 && rows[^1] - rows[0] >= 20, $"{color} does not span several lines");
+                var bands = video.Bands(9, color);
+                Assert.True(bands.Count > 0 && bands[^1].Bottom - bands[0].Top + 1 > 28, $"{color} does not span several lines");
             }
         }
 

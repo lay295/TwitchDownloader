@@ -1,4 +1,3 @@
-using System.Reflection;
 using TwitchDownloaderCore.Tests.TestHelpers;
 using TwitchDownloaderWPF.Models;
 using TwitchDownloaderWPF.Properties;
@@ -13,15 +12,13 @@ namespace TwitchDownloaderWPF.Tests.ServiceTests
     [Collection(ProcessStateCollection.NAME)]
     public sealed class FileCollisionServiceTests : IDisposable
     {
-        private static readonly FieldInfo SessionBehaviorField = typeof(FileCollisionService).GetField("_sessionCollisionBehavior", BindingFlags.NonPublic | BindingFlags.Static)!;
-
         private readonly int _originalSetting = Settings.Default.FileCollisionBehavior;
         private readonly TempDirectory _tempDir = new();
         private readonly FileInfo _existingFile;
 
         public FileCollisionServiceTests()
         {
-            SessionBehaviorField.SetValue(null, null);
+            FileCollisionService._sessionCollisionBehavior = null;
             _existingFile = new FileInfo(_tempDir.Combine("video.mp4"));
             File.WriteAllText(_existingFile.FullName, "existing recording");
         }
@@ -29,7 +26,7 @@ namespace TwitchDownloaderWPF.Tests.ServiceTests
         public void Dispose()
         {
             Settings.Default.FileCollisionBehavior = _originalSetting;
-            SessionBehaviorField.SetValue(null, null);
+            FileCollisionService._sessionCollisionBehavior = null;
             _tempDir.Dispose();
         }
 
@@ -76,7 +73,7 @@ namespace TwitchDownloaderWPF.Tests.ServiceTests
         public void RememberedSessionChoice_OverridesPromptSetting()
         {
             Settings.Default.FileCollisionBehavior = (int)CollisionBehavior.Prompt;
-            SessionBehaviorField.SetValue(null, CollisionBehavior.Cancel);
+            FileCollisionService._sessionCollisionBehavior = CollisionBehavior.Cancel;
 
             Assert.Null(FileCollisionService.HandleCollisionCallback(_existingFile, null!));
         }

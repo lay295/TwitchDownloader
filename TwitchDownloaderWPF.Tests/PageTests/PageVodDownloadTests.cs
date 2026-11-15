@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 
 namespace TwitchDownloaderWPF.Tests.PageTests
 {
@@ -6,9 +5,6 @@ namespace TwitchDownloaderWPF.Tests.PageTests
     // or -1, which the page treats as "show the invalid link message". (URL parsing itself is covered by Core's IdParseTests.)
     public class PageVodDownloadTests
     {
-        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "ValidateUrl")]
-        private static extern long ValidateUrl(PageVodDownload? @null, string text);
-
         // Verifies VOD URLs, highlight URLs and bare IDs (with surrounding whitespace) yield the numeric ID.
         // Why: these are the forms users paste; each must reach GetVideoInfo as the right long.
         [Theory]
@@ -17,7 +13,7 @@ namespace TwitchDownloaderWPF.Tests.PageTests
         [InlineData("  41546181  ", 41546181)]
         public void ValidateUrl_ReturnsVideoId(string input, long expected)
         {
-            Assert.Equal(expected, ValidateUrl(null, input));
+            Assert.Equal(expected, PageVodDownload.ValidateUrl(input));
         }
 
         // Verifies clip links and garbage yield the -1 sentinel.
@@ -28,7 +24,7 @@ namespace TwitchDownloaderWPF.Tests.PageTests
         [InlineData("")]
         public void ValidateUrl_ReturnsMinusOneForNonVideos(string input)
         {
-            Assert.Equal(-1, ValidateUrl(null, input));
+            Assert.Equal(-1, PageVodDownload.ValidateUrl(input));
         }
     }
 }

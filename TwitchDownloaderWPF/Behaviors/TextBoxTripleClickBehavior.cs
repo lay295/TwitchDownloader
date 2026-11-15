@@ -36,7 +36,7 @@ namespace TwitchDownloaderWPF.Behaviors
             }
         }
 
-        private static (int start, int length) GetCurrentLine(TextBox textBox)
+        internal static (int start, int length) GetCurrentLine(TextBox textBox)
         {
             var caretPos = textBox.CaretIndex;
             var text = textBox.Text;

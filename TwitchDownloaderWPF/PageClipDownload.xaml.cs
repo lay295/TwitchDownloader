@@ -119,7 +119,7 @@ namespace TwitchDownloaderWPF
             BtnCancel.Visibility = Visibility.Collapsed;
         }
 
-        private static string ValidateUrl(string text)
+        internal static string ValidateUrl(string text)
         {
             var clipIdMatch = IdParse.MatchClipId(text);
             return clipIdMatch is { Success: true }

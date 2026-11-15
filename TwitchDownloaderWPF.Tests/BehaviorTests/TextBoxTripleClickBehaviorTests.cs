@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using System.Windows.Controls;
 using TwitchDownloaderWPF.Behaviors;
 using TwitchDownloaderWPF.Tests.TestHelpers;
@@ -10,16 +9,13 @@ namespace TwitchDownloaderWPF.Tests.BehaviorTests
     // TextBox must be created on an STA thread, hence StaThread.Run.
     public class TextBoxTripleClickBehaviorTests
     {
-        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "GetCurrentLine")]
-        private static extern (int start, int length) GetCurrentLine(TextBoxTripleClickBehavior? @null, TextBox textBox);
-
         private static (int start, int length) LineAt(string text, int caretIndex)
         {
             (int, int) result = default;
             StaThread.Run(() =>
             {
                 var textBox = new TextBox { Text = text, CaretIndex = caretIndex };
-                result = GetCurrentLine(null, textBox);
+                result = TextBoxTripleClickBehavior.GetCurrentLine(textBox);
             });
             return result;
         }

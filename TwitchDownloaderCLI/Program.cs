@@ -12,18 +12,12 @@ namespace TwitchDownloaderCLI
 {
     internal static partial class Program
     {
-        private static void Main(string[] args)
+        internal static void Main(string[] args)
         {
             var preParsedArgs = PreParseArgs.Parse(args, Path.GetFileName(Environment.ProcessPath));
 
-            var parser = new Parser(config =>
-            {
-                config.CaseInsensitiveEnumValues = true;
-                config.HelpWriter = null; // Use null instead of TextWriter.Null due to how CommandLine works internally
-            });
-
-            var parserResult = parser.ParseArguments<VideoDownloadArgs, ClipDownloadArgs, ChatDownloadArgs, ChatUpdateArgs, ChatRenderArgs, InfoArgs, FfmpegArgs, CacheArgs, UpdateArgs, TsMergeArgs>(preParsedArgs);
-            parserResult.WithNotParsed(errors => WriteHelpText(errors, parserResult, parser.Settings));
+            var parserResult = ParseVerbs(preParsedArgs, out var parserSettings);
+            parserResult.WithNotParsed(errors => WriteHelpText(errors, parserResult, parserSettings));
 
             CoreLicensor.EnsureFilesExist(null);
             WriteApplicationBanner((ITwitchDownloaderArgs)parserResult.Value);
@@ -39,6 +33,19 @@ namespace TwitchDownloaderCLI
                 .WithParsed<CacheArgs>(CacheHandler.ParseArgs)
                 .WithParsed<UpdateArgs>(UpdateHandler.ParseArgs)
                 .WithParsed<TsMergeArgs>(MergeTs.Merge);
+        }
+
+        /// <summary>Parses the (pre-parsed) arguments into one of the verb argument types. The tests parse through this as well.</summary>
+        internal static ParserResult<object> ParseVerbs(string[] preParsedArgs, out ParserSettings settings)
+        {
+            var parser = new Parser(config =>
+            {
+                config.CaseInsensitiveEnumValues = true;
+                config.HelpWriter = null; // Use null instead of TextWriter.Null due to how CommandLine works internally
+            });
+
+            settings = parser.Settings;
+            return parser.ParseArguments<VideoDownloadArgs, ClipDownloadArgs, ChatDownloadArgs, ChatUpdateArgs, ChatRenderArgs, InfoArgs, FfmpegArgs, CacheArgs, UpdateArgs, TsMergeArgs>(preParsedArgs);
         }
 
         private static void WriteHelpText(IEnumerable<Error> errors, ParserResult<object> parserResult, ParserSettings parserSettings)
@@ -74,9 +81,9 @@ namespace TwitchDownloaderCLI
         }
 
         [GeneratedRegex("""(?<=\d)\+[0-9a-f]+""")]
-        private static partial Regex GitHashRegex { get; }
+        internal static partial Regex GitHashRegex { get; }
 
-        private static void WriteApplicationBanner(ITwitchDownloaderArgs args)
+        internal static void WriteApplicationBanner(ITwitchDownloaderArgs args)
         {
             if (args.ShowBanner == false || (args.LogLevel & LogLevel.None) != 0)
             {

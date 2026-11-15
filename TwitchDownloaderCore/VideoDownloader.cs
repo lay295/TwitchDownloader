@@ -233,7 +233,7 @@ namespace TwitchDownloaderCore
             LogDownloadThreadExceptions(downloadExceptions);
         }
 
-        private async Task<IReadOnlyCollection<Exception>> WaitForDownloadThreads(VideoDownloadThread[] downloadThreads, VideoDownloadState downloadState, bool limitThreadRestarts, CancellationToken cancellationToken)
+        internal async Task<IReadOnlyCollection<Exception>> WaitForDownloadThreads(VideoDownloadThread[] downloadThreads, VideoDownloadState downloadState, bool limitThreadRestarts, CancellationToken cancellationToken)
         {
             var allThreadsExited = false;
             var totalPartsToDownload = downloadState.PartCount;
@@ -327,7 +327,7 @@ namespace TwitchDownloaderCore
             _progress.LogInfo(sb.ToString());
         }
 
-        private async Task VerifyDownloadedParts(VideoDownloadState downloadState, CancellationToken cancellationToken)
+        internal async Task VerifyDownloadedParts(VideoDownloadState downloadState, CancellationToken cancellationToken)
         {
             var partCount = downloadState.PartCount;
             var invalidCount = await Task.Run(() => GetInvalidParts(downloadState), cancellationToken).ConfigureAwait(false);
@@ -567,7 +567,7 @@ namespace TwitchDownloaderCore
         [GeneratedRegex(@"(?<=time=)(\d\d):(\d\d):(\d\d)\.(\d\d)")]
         private static partial Regex EncodingTimeRegex { get; }
 
-        private void HandleFfmpegOutput(string output, TimeSpan videoLength)
+        internal void HandleFfmpegOutput(string output, TimeSpan videoLength)
         {
             var encodingTimeMatch = EncodingTimeRegex.Match(output);
             if (!encodingTimeMatch.Success)
@@ -588,7 +588,7 @@ namespace TwitchDownloaderCore
         [GeneratedRegex(@"-muted-\w+(?=\.m3u8$)")]
         private static partial Regex MutedHighlightRegex { get; }
 
-        private async Task<(M3U8 playlist, DateTimeOffset airDate)> GetVideoPlaylist(string playlistUrl, CancellationToken cancellationToken)
+        internal async Task<(M3U8 playlist, DateTimeOffset airDate)> GetVideoPlaylist(string playlistUrl, CancellationToken cancellationToken)
         {
             string playlistString;
             try
@@ -618,7 +618,7 @@ namespace TwitchDownloaderCore
             return (playlist, airDate);
         }
 
-        private Range GetStreamListTrim(IList<M3U8.Stream> streamList, out TimeSpan videoLength, out decimal startOffset, out decimal endDuration)
+        internal Range GetStreamListTrim(IList<M3U8.Stream> streamList, out TimeSpan videoLength, out decimal startOffset, out decimal endDuration)
         {
             startOffset = 0;
             endDuration = 0;

@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 
 namespace TwitchDownloaderWPF.Tests.PageTests
 {
@@ -6,9 +5,6 @@ namespace TwitchDownloaderWPF.Tests.PageTests
     // (URL parsing itself is covered by Core's IdParseTests.)
     public class PageClipDownloadTests
     {
-        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "ValidateUrl")]
-        private static extern string? ValidateUrl(PageClipDownload? @null, string text);
-
         // Verifies clip URLs and bare slugs yield the slug.
         // Why: these are the forms users paste into the clip page.
         [Theory]
@@ -17,7 +13,7 @@ namespace TwitchDownloaderWPF.Tests.PageTests
         [InlineData("SpineyPieTwitchRPGNurturing", "SpineyPieTwitchRPGNurturing")]
         public void ValidateUrl_ReturnsClipSlug(string input, string expected)
         {
-            Assert.Equal(expected, ValidateUrl(null, input));
+            Assert.Equal(expected, PageClipDownload.ValidateUrl(input));
         }
 
         // Verifies numeric VOD IDs/URLs are rejected with null.
@@ -27,7 +23,7 @@ namespace TwitchDownloaderWPF.Tests.PageTests
         [InlineData("https://www.twitch.tv/videos/6834869128")]
         public void ValidateUrl_RejectsVideos(string input)
         {
-            Assert.Null(ValidateUrl(null, input));
+            Assert.Null(PageClipDownload.ValidateUrl(input));
         }
     }
 }

@@ -277,7 +277,7 @@ namespace TwitchDownloaderWPF
             }
         }
 
-        private static long ValidateUrl(string text)
+        internal static long ValidateUrl(string text)
         {
             var vodIdMatch = IdParse.MatchVideoId(text);
             if (vodIdMatch is {Success: true} && long.TryParse(vodIdMatch.ValueSpan, out var vodId))

@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using TwitchDownloaderCLI.Models;
 using TwitchDownloaderCLI.Modes;
 using TwitchDownloaderCLI.Modes.Arguments;
@@ -19,13 +18,8 @@ namespace TwitchDownloaderCLI.Tests.ModeTests
     [Collection(StaticHttpClientCollection.NAME)]
     public class DownloadVideoTests
     {
-        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "GetDownloadOptions")]
-        private static extern VideoDownloadOptions GetDownloadOptions(
-            [UnsafeAccessorType("TwitchDownloaderCLI.Modes.DownloadVideo, TwitchDownloaderCLI")] object? @class,
-            VideoDownloadArgs inputOptions, FileCollisionHandler collisionHandler, ITaskLogger logger);
-
         private static VideoDownloadOptions Map(VideoDownloadArgs args, ITaskLogger? logger = null) =>
-            GetDownloadOptions(null, args, new FileCollisionHandler(args, new RecordingTaskProgress()), logger ?? new RecordingTaskProgress());
+            DownloadVideo.GetDownloadOptions(args, new FileCollisionHandler(args, new RecordingTaskProgress()), logger ?? new RecordingTaskProgress());
 
         // All plain options must be copied to the Core options unchanged, and a VOD URL must be reduced to its numeric id.
         [Fact]
@@ -133,7 +127,7 @@ namespace TwitchDownloaderCLI.Tests.ModeTests
             var args = CliArgs.Parse<VideoDownloadArgs>("videodownload", "--id", "123", "-o", "a.mp4", "--collision", "Overwrite");
             var handler = new FileCollisionHandler(args, new RecordingTaskProgress());
 
-            var options = GetDownloadOptions(null, args, handler, new RecordingTaskProgress());
+            var options = DownloadVideo.GetDownloadOptions(args, handler, new RecordingTaskProgress());
 
             Assert.Same(handler, options.FileCollisionCallback.Target);
             Assert.Equal(OverwriteBehavior.Overwrite, args.OverwriteBehavior);

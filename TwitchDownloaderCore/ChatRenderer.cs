@@ -27,12 +27,12 @@ namespace TwitchDownloaderCore
     {
         private const char ZERO_WIDTH_JOINER = '\u200D';
         public bool Disposed { get; private set; } = false;
-        public ChatRoot chatRoot { get; private set; } = new ChatRoot();
+        public ChatRoot chatRoot { get; internal set; } = new ChatRoot();
 
         private static readonly SKColor Purple = new(0xFF7B2CF2); // AARRGGBB
         private static readonly SKColor[] DefaultUsernameColors = [new(0xFFFF0000), new(0xFF0000FF), new(0xFF00FF00), new(0xFFB22222), new(0xFFFF7F50), new(0xFF9ACD32), new(0xFFFF4500), new(0xFF2E8B57), new(0xFFDAA520), new(0xFFD2691E), new(0xFF5F9EA0), new(0xFF1E90FF), new(0xFFFF69B4), new(0xFF8A2BE2), new(0xFF00FF7F)];
 
-        private static readonly string[] DefaultAvatarUrls =
+        internal static readonly string[] DefaultAvatarUrls =
         [
             "https://static-cdn.jtvnw.net/user-default-pictures-uv/75305d54-c7cc-40d1-bb9c-91fbe85943c7-profile_image-70x70.png",
             "https://static-cdn.jtvnw.net/user-default-pictures-uv/ebe4cd89-b4f4-4cd9-adac-2f30151b4209-profile_image-70x70.png",
@@ -63,7 +63,7 @@ namespace TwitchDownloaderCore
         private DisposableDictionary<string, TwitchEmote> _emoteCache = [];
         private DisposableDictionary<string, TwitchEmote> _emoteThirdCache = [];
         private DisposableDictionary<string, CheerEmote> _cheermoteCache = [];
-        private DisposableDictionary<string, SKImage> _emojiCache = [];
+        internal DisposableDictionary<string, SKImage> _emojiCache = [];
         private DisposableDictionary<string, SKImage> _avatarCache = [];
         private DisposableDictionary<int, SKPaint> _fallbackFontCache = [];
         private DisposableDictionary<SKColor, SKPaint> _paintCache = [];
@@ -205,7 +205,7 @@ namespace TwitchDownloaderCore
         /// To get around this we can re-evaluate comment offsets according to their creation date to help restore
         /// the better readability of comments coming in 1-by-1.
         /// </summary>
-        private static void DisperseCommentOffsets(List<Comment> comments)
+        internal static void DisperseCommentOffsets(List<Comment> comments)
         {
             var commentSpan = CollectionsMarshal.AsSpan(comments);
 
@@ -251,7 +251,7 @@ namespace TwitchDownloaderCore
         /// The only drawback to this method is there will never be multiple comments drawn on the same tick
         /// like in a real chat. The overall improved chat flow is still worth it regardless. */
         /// </summary>
-        private static void JitterCommentOffsets(List<Comment> comments)
+        internal static void JitterCommentOffsets(List<Comment> comments)
         {
             var jitterRnd = new Random(comments.Count);
 
@@ -290,7 +290,7 @@ namespace TwitchDownloaderCore
         /* Why are we doing this? The question is when to display a 0.5 second offset comment with an update rate of 1.
          * At the update frame at 0 seconds, or 1 second? We're choosing at 0 seconds here. Flooring to either the
          * update rate, or if the update rate is greater than 1 just to the next whole number */
-        private void FloorCommentOffsets(List<Comment> comments)
+        internal void FloorCommentOffsets(List<Comment> comments)
         {
             if (renderOptions.UpdateRate <= 0)
                 return;
@@ -308,7 +308,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private void RemoveRestrictedComments(List<Comment> comments)
+        internal void RemoveRestrictedComments(List<Comment> comments)
         {
             if (renderOptions.IgnoreUsersArray.Length == 0 && renderOptions.BannedWordsArray.Length == 0)
             {
@@ -339,7 +339,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private static SKTypeface GetInterTypeface(SKFontStyle fontStyle)
+        internal static SKTypeface GetInterTypeface(SKFontStyle fontStyle)
         {
             MemoryStream stream = null;
             try {
@@ -429,7 +429,7 @@ namespace TwitchDownloaderCore
             maskProcess?.WaitForExit(100_000);
         }
 
-        private static unsafe void SetFrameMask(ReadOnlySpan<byte> frame, Span<byte> maskBytes)
+        internal static unsafe void SetFrameMask(ReadOnlySpan<byte> frame, Span<byte> maskBytes)
         {
             Debug.Assert(frame.Length == maskBytes.Length * 4); // 32bpp -> 8bpp
 
@@ -647,7 +647,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private static int ComputeAnimFrameIndex(TwitchEmote emote, long currentTickMs)
+        internal static int ComputeAnimFrameIndex(TwitchEmote emote, long currentTickMs)
         {
             var imageFrame = currentTickMs % (emote.TotalDuration * 10);
             var durations = emote.EmoteFrameDurations;
@@ -804,7 +804,7 @@ namespace TwitchDownloaderCore
             return lastUpdate;
         }
 
-        private SKColor GetMessageBackground(int commentIndex, [AllowNull] out SKPaint paint)
+        internal SKColor GetMessageBackground(int commentIndex, [AllowNull] out SKPaint paint)
         {
             var commenter = chatRoot.comments[commentIndex].commenter;
             var isHighlighted = renderOptions.HighlightUsersArray.Length > 0
@@ -1249,7 +1249,7 @@ namespace TwitchDownloaderCore
 
         private static readonly SearchValues<char> EmojiExcludeChars = SearchValues.Create('\uFE0F');
 
-        private bool ContainsEmoji(ReadOnlySpan<char> text, out int firstEmoji)
+        internal bool ContainsEmoji(ReadOnlySpan<char> text, out int firstEmoji)
         {
             var emojiLookup = _emojiCache.GetAlternateLookup<ReadOnlySpan<char>>();
             Span<char> stackSpace = stackalloc char[16];
@@ -1647,7 +1647,7 @@ namespace TwitchDownloaderCore
         /// Produces a <see langword="string"/> less than or equal to <paramref name="maxWidth"/> when drawn with <paramref name="textFont"/> OR substringed to the last index of any character in <paramref name="delimiters"/>.
         /// </summary>
         /// <returns>A shortened in visual width or delimited <see langword="string"/>, whichever comes first.</returns>
-        private static ReadOnlySpan<char> SubstringToTextWidth(ReadOnlySpan<char> text, SKPaint textFont, int maxWidth, bool isRtl, SearchValues<char> delimiters)
+        internal static ReadOnlySpan<char> SubstringToTextWidth(ReadOnlySpan<char> text, SKPaint textFont, int maxWidth, bool isRtl, SearchValues<char> delimiters)
         {
             // If we are dealing with non-RTL and don't have any delimiters then SKPaint.BreakText is over 9x faster
             if (!isRtl && text.IndexOfAny(delimiters) == -1)
@@ -1695,13 +1695,13 @@ namespace TwitchDownloaderCore
         /// </summary>
         /// <returns>A shortened in visual width <see cref="ReadOnlySpan{T}"/>.</returns>
         /// <remarks>This is not compatible with text that needs to be shaped.</remarks>
-        private static ReadOnlySpan<char> SubstringToTextWidth(ReadOnlySpan<char> text, SKPaint textFont, int maxWidth)
+        internal static ReadOnlySpan<char> SubstringToTextWidth(ReadOnlySpan<char> text, SKPaint textFont, int maxWidth)
         {
             var length = (int)textFont.BreakText(text, maxWidth);
             return text[..length];
         }
 
-        private static float MeasureText(ReadOnlySpan<char> text, SKPaint textFont, bool? isRtl = null, SKShaper shaper = null)
+        internal static float MeasureText(ReadOnlySpan<char> text, SKPaint textFont, bool? isRtl = null, SKShaper shaper = null)
         {
             isRtl ??= IsRightToLeft(text);
 
@@ -1761,7 +1761,7 @@ namespace TwitchDownloaderCore
             drawPos.Y = savedY;
         }
 
-        private SKColor AdjustUsernameVisibility(SKColor userColor, SKColor backgroundColor)
+        internal SKColor AdjustUsernameVisibility(SKColor userColor, SKColor backgroundColor)
         {
             const byte OPAQUE_THRESHOLD = byte.MaxValue / 2;
             if (!renderOptions.Outline && backgroundColor.Alpha < OPAQUE_THRESHOLD)
@@ -1777,7 +1777,7 @@ namespace TwitchDownloaderCore
                 : userColor.Lerp(newUserColor, (float)backgroundColor.Alpha / byte.MaxValue);
         }
 
-        private static SKColor AdjustColorVisibility(SKColor foreground, SKColor background)
+        internal static SKColor AdjustColorVisibility(SKColor foreground, SKColor background)
         {
             background.ToHsl(out var bgHue, out var bgSat, out _);
             foreground.ToHsl(out var fgHue, out var fgSat, out var fgLight);
@@ -2131,7 +2131,7 @@ namespace TwitchDownloaderCore
             });
         }
 
-        private (int startTick, int totalTicks) GetVideoTicks()
+        internal (int startTick, int totalTicks) GetVideoTicks()
         {
             if (renderOptions.StartOverride != -1 && renderOptions.EndOverride != -1)
             {
@@ -2161,7 +2161,7 @@ namespace TwitchDownloaderCore
             return paint;
         }
 
-        private SKPaint GetFallbackFont(int input)
+        internal SKPaint GetFallbackFont(int input)
         {
             ref var fallbackPaint = ref CollectionsMarshal.GetValueRefOrAddDefault(_fallbackFontCache, input, out bool alreadyExists);
             if (alreadyExists)
@@ -2186,7 +2186,7 @@ namespace TwitchDownloaderCore
         }
 
         // string.GetHashCode() is randomized per process, which gave the same user a different default color/avatar on every render
-        private static int StableIndex(string text, int length)
+        internal static int StableIndex(string text, int length)
         {
             var hash = 2166136261u; // FNV-1a
             foreach (var c in text)
@@ -2197,7 +2197,7 @@ namespace TwitchDownloaderCore
             return (int)(hash % (uint)length);
         }
 
-        private static bool IsNotAscii(char input)
+        internal static bool IsNotAscii(char input)
         {
             return input > 127;
         }
@@ -2207,7 +2207,7 @@ namespace TwitchDownloaderCore
         /// <param name="destination">The RTL-swapped output from enumerating the <paramref name="enumerator"/>.</param>
         /// <returns>The number of words written.</returns>
         /// <exception cref="IndexOutOfRangeException"><paramref name="destination"/> was too small.</exception>
-        private static int SwapRightToLeft(MemoryExtensions.SpanSplitEnumerator<char> enumerator, Span<Range> destination)
+        internal static int SwapRightToLeft(MemoryExtensions.SpanSplitEnumerator<char> enumerator, Span<Range> destination)
         {
             var source = enumerator.Source;
             var rtlStack = ArrayPool<Range>.Shared.Rent(destination.Length);
@@ -2255,7 +2255,7 @@ namespace TwitchDownloaderCore
             }
         }
 
-        private static bool IsRightToLeft(ReadOnlySpan<char> message)
+        internal static bool IsRightToLeft(ReadOnlySpan<char> message)
         {
             if (message.Length > 0)
             {

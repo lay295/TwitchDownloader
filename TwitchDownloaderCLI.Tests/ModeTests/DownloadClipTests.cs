@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using TwitchDownloaderCLI.Modes;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tests.CliTestHelpers;
@@ -16,15 +15,10 @@ namespace TwitchDownloaderCLI.Tests.ModeTests
     [Collection(StaticHttpClientCollection.NAME)]
     public class DownloadClipTests
     {
-        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "GetDownloadOptions")]
-        private static extern ClipDownloadOptions GetDownloadOptions(
-            [UnsafeAccessorType("TwitchDownloaderCLI.Modes.DownloadClip, TwitchDownloaderCLI")] object? @class,
-            ClipDownloadArgs inputOptions, FileCollisionHandler collisionHandler, ITaskLogger logger);
-
         private static ClipDownloadOptions Map(params string[] argv)
         {
             var args = CliArgs.Parse<ClipDownloadArgs>(argv);
-            return GetDownloadOptions(null, args, new FileCollisionHandler(args, new RecordingTaskProgress()), new RecordingTaskProgress());
+            return DownloadClip.GetDownloadOptions(args, new FileCollisionHandler(args, new RecordingTaskProgress()), new RecordingTaskProgress());
         }
 
         // All options must be copied over, and both clip URL styles must be reduced to the bare slug Twitch's API expects.

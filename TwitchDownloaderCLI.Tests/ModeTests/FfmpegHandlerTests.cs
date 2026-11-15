@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using TwitchDownloaderCLI.Modes;
 using TwitchDownloaderCLI.Modes.Arguments;
 using TwitchDownloaderCLI.Tests.CliTestHelpers;
@@ -16,10 +15,6 @@ namespace TwitchDownloaderCLI.Tests.ModeTests
     [Collection(ProcessStateCollection.NAME)]
     public class FfmpegHandlerTests
     {
-        [UnsafeAccessor(UnsafeAccessorKind.Constructor)]
-        [return: UnsafeAccessorType("TwitchDownloaderCLI.Modes.FfmpegHandler+XabeProgressHandler, TwitchDownloaderCLI")]
-        private static extern object CreateXabeProgressHandler(ITaskProgress progress);
-
         private static string CreateFakeFfmpeg(string directory)
         {
             var path = Path.Combine(directory, FfmpegHandler.FfmpegExecutableName);
@@ -116,7 +111,7 @@ namespace TwitchDownloaderCLI.Tests.ModeTests
         public async Task XabeProgressHandler_ForwardsPercentages()
         {
             var progress = new RecordingTaskProgress();
-            var handler = CreateXabeProgressHandler(progress);
+            var handler = new FfmpegHandler.XabeProgressHandler(progress);
             var reporter = (IProgress<ProgressInfo>)handler;
 
             using ((IDisposable)handler)

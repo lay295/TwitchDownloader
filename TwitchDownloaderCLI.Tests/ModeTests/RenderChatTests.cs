@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using SkiaSharp;
 using TwitchDownloaderCLI.Modes;
 using TwitchDownloaderCLI.Modes.Arguments;
@@ -17,15 +16,10 @@ namespace TwitchDownloaderCLI.Tests.ModeTests
     // for a corrupt input (a real render needs ffmpeg and is covered elsewhere); the missing-ffmpeg branch calls Environment.Exit.
     public class RenderChatTests
     {
-        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "GetRenderOptions")]
-        private static extern ChatRenderOptions GetRenderOptions(
-            [UnsafeAccessorType("TwitchDownloaderCLI.Modes.RenderChat, TwitchDownloaderCLI")] object? @class,
-            ChatRenderArgs inputOptions, FileCollisionHandler collisionHandler, ITaskLogger logger);
-
         private static ChatRenderOptions Map(RecordingTaskProgress logger, params string[] extraArgs)
         {
             var args = CliArgs.Parse<ChatRenderArgs>(["chatrender", "-i", "chat.json", "-o", "chat.mp4", ..extraArgs]);
-            return GetRenderOptions(null, args, new FileCollisionHandler(args, logger), logger);
+            return RenderChat.GetRenderOptions(args, new FileCollisionHandler(args, logger), logger);
         }
 
         private static ChatRenderOptions Map(params string[] extraArgs) => Map(new RecordingTaskProgress(), extraArgs);

@@ -4,13 +4,18 @@
 Writes <out>/images/*.png, <out>/logs/*.txt and <out>/comment.md, whose image links point at --image-url (where CI hosts the
 images; the default "images" makes the comment viewable next to the local output).
 """
+from __future__ import annotations
+
 import argparse
 import os
 import subprocess
 import tempfile
 
+# A rendered video and its per-frame hashes
+Render = tuple[str, list[str]]
+
 # (name, fixture relative to TestData, description, extra chatrender args)
-CASES = [
+CASES: list[tuple[str, str, str, list[str]]] = [
     # 60 s of a real Twitch highlight chat with embedded emotes/badges; commenter names and ids are anonymized
     ("real-chat", "Render/real_chat_60s.json.gz", "real highlight chat: 559 messages, real emotes and badges",
      []),
@@ -29,7 +34,7 @@ COMMON_ARGS = ["--offline", "--framerate", "10", "--chat-height", "500", '--outp
 FPS = 10
 
 
-def run(cmd, log_path=None, timeout=600):
+def run(cmd: list[str], log_path: str | None = None, timeout: int = 600) -> subprocess.CompletedProcess[str]:
     result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=timeout)
     if log_path:
         with open(log_path, "w", encoding="utf-8") as f:
@@ -37,25 +42,25 @@ def run(cmd, log_path=None, timeout=600):
     return result
 
 
-def frame_hashes(video):
+def frame_hashes(video: str) -> list[str]:
     out = run(["ffmpeg", "-v", "error", "-i", video, "-f", "framemd5", "-"]).stdout
     return [line.rsplit(",", 1)[-1].strip() for line in out.splitlines() if line and not line.startswith("#")]
 
 
-def extract_frames(video, frames, png):
+def extract_frames(video: str, frames: list[int], png: str) -> bool:
     """Stacks the given frame indices vertically into one PNG."""
     select = "+".join(f"eq(n\\,{n})" for n in frames)
     vf = f"select={select},tile=1x{len(frames)}:padding=6:color=0x808080"
     return run(["ffmpeg", "-v", "error", "-y", "-i", video, "-vf", vf, "-frames:v", "1", png]).returncode == 0
 
 
-def diff_image(base_png, head_png, png):
+def diff_image(base_png: str, head_png: str, png: str) -> bool:
     """Pixel difference between the two PNGs, brightened 4x so small changes are visible. Fails if the sizes differ."""
     graph = "[0]format=gbrp[a];[1]format=gbrp[b];[a][b]blend=all_mode=difference,lutrgb=r=val*4:g=val*4:b=val*4"
     return run(["ffmpeg", "-v", "error", "-y", "-i", base_png, "-i", head_png, "-filter_complex", graph, png]).returncode == 0
 
 
-def compare(key, base, head, labels, images, url):
+def compare(key: str, base: Render, head: Render, labels: tuple[str, str], images: str, url: str) -> tuple[str, list[str]]:
     """Compares two successfully rendered videos frame by frame. Returns (status, markdown rows)."""
     (base_video, base_hashes), (head_video, head_hashes) = base, head
     count = min(len(base_hashes), len(head_hashes))
@@ -82,12 +87,12 @@ def compare(key, base, head, labels, images, url):
     return status, rows
 
 
-def tail(path, lines=15):
+def tail(path: str, lines: int = 15) -> str:
     with open(path, encoding="utf-8", errors="replace") as f:
         return "".join(f.readlines()[-lines:]).strip()
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--base", required=True, help="Base-branch TwitchDownloaderCLI executable")
     parser.add_argument("--head", required=True, help="PR TwitchDownloaderCLI executable")
@@ -102,11 +107,13 @@ def main():
     os.makedirs(images, exist_ok=True)
     os.makedirs(logs, exist_ok=True)
 
-    summary, details = [], []
+    summary: list[str] = []
+    details: list[str] = []
     for name, fixture, description, extra in CASES:
         chat = os.path.join(args.fixtures, fixture)
 
-        results = {}
+        # side -> (rendered ok, video path, log path, frame hashes)
+        results: dict[str, tuple[bool, str, str, list[str]]] = {}
         for side, cli in (("base", args.base), ("head", args.head)):
             video = os.path.join(tempfile.mkdtemp(), f"{name}-{side}.mkv")
             log = os.path.join(logs, f"{name}-{side}.txt")
@@ -116,12 +123,12 @@ def main():
             results[side] = (ok, video, log, frame_hashes(video) if ok else [])
 
         (base_ok, base_video, base_log, base_hashes), (head_ok, head_video, head_log, head_hashes) = results["base"], results["head"]
-        rows = []
+        rows: list[str] = []
         if base_ok and head_ok:
             labels = (args.base_label, args.head_label)
             status, rows = compare(name, (base_video, base_hashes), (head_video, head_hashes), labels, images, args.image_url)
             if "--generate-mask" in extra:
-                masks = []
+                masks: list[Render] = []
                 for video in (base_video, head_video):
                     root, ext = os.path.splitext(video)
                     mask = f"{root}_mask{ext}"

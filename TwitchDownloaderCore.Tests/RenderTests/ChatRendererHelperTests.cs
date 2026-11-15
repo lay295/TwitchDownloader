@@ -11,71 +11,11 @@ using TwitchDownloaderCore.TwitchObjects;
 
 namespace TwitchDownloaderCore.Tests.RenderTests
 {
-    // Unit tests for ChatRenderer's private helpers (reached with [UnsafeAccessor]): comment timing (dispersion/jitter/flooring),
+    // Unit tests for ChatRenderer's internal helpers: comment timing (dispersion/jitter/flooring),
     // filtering, tick math, mask extraction, animation timing, RTL handling, text measuring/wrapping, colours and emoji lookup.
     // These run without ffmpeg and pin down edge cases that are too fiddly to see in a rendered frame.
     public class ChatRendererHelperTests
     {
-        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "DisperseCommentOffsets")]
-        private static extern void DisperseCommentOffsets(ChatRenderer? @null, List<Comment> comments);
-
-        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "JitterCommentOffsets")]
-        private static extern void JitterCommentOffsets(ChatRenderer? @null, List<Comment> comments);
-
-        [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "FloorCommentOffsets")]
-        private static extern void FloorCommentOffsets(ChatRenderer renderer, List<Comment> comments);
-
-        [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "RemoveRestrictedComments")]
-        private static extern void RemoveRestrictedComments(ChatRenderer renderer, List<Comment> comments);
-
-        [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "GetVideoTicks")]
-        private static extern (int startTick, int totalTicks) GetVideoTicks(ChatRenderer renderer);
-
-        [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "set_chatRoot")]
-        private static extern void SetChatRoot(ChatRenderer renderer, ChatRoot chatRoot);
-
-        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "SetFrameMask")]
-        private static extern void SetFrameMask(ChatRenderer? @null, ReadOnlySpan<byte> frame, Span<byte> maskBytes);
-
-        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "ComputeAnimFrameIndex")]
-        private static extern int ComputeAnimFrameIndex(ChatRenderer? @null, TwitchEmote emote, long currentTickMs);
-
-        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "IsNotAscii")]
-        private static extern bool IsNotAscii(ChatRenderer? @null, char input);
-
-        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "IsRightToLeft")]
-        private static extern bool IsRightToLeft(ChatRenderer? @null, ReadOnlySpan<char> message);
-
-        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "SwapRightToLeft")]
-        private static extern int SwapRightToLeft(ChatRenderer? @null, MemoryExtensions.SpanSplitEnumerator<char> enumerator, Span<Range> destination);
-
-        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "MeasureText")]
-        private static extern float MeasureText(ChatRenderer? @null, ReadOnlySpan<char> text, SKPaint textFont, bool? isRtl, SKShaper? shaper);
-
-        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "SubstringToTextWidth")]
-        private static extern ReadOnlySpan<char> SubstringToTextWidth(ChatRenderer? @null, ReadOnlySpan<char> text, SKPaint textFont, int maxWidth, bool isRtl, SearchValues<char> delimiters);
-
-        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "GetInterTypeface")]
-        private static extern SKTypeface GetInterTypeface(ChatRenderer? @null, SKFontStyle fontStyle);
-
-        [UnsafeAccessor(UnsafeAccessorKind.StaticMethod, Name = "AdjustColorVisibility")]
-        private static extern SKColor AdjustColorVisibility(ChatRenderer? @null, SKColor foreground, SKColor background);
-
-        [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "AdjustUsernameVisibility")]
-        private static extern SKColor AdjustUsernameVisibility(ChatRenderer renderer, SKColor userColor, SKColor backgroundColor);
-
-        [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "GetMessageBackground")]
-        private static extern SKColor GetMessageBackground(ChatRenderer renderer, int commentIndex, out SKPaint? paint);
-
-        [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "GetFallbackFont")]
-        private static extern SKPaint GetFallbackFont(ChatRenderer renderer, int input);
-
-        [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "ContainsEmoji")]
-        private static extern bool ContainsEmoji(ChatRenderer renderer, ReadOnlySpan<char> text, out int firstEmoji);
-
-        [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_emojiCache")]
-        private static extern ref DisposableDictionary<string, SKImage> EmojiCache(ChatRenderer renderer);
-
         private static readonly DateTime Created = new(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
         private static ChatRenderer NewRenderer(ChatRenderOptions? options = null, RecordingTaskProgress? progress = null) =>
@@ -101,7 +41,7 @@ namespace TwitchDownloaderCore.Tests.RenderTests
                 return c;
             }).ToList();
 
-            DisperseCommentOffsets(null, comments);
+            ChatRenderer.DisperseCommentOffsets(comments);
 
             Assert.Equal(actual, Offsets(comments));
         }
@@ -113,7 +53,7 @@ namespace TwitchDownloaderCore.Tests.RenderTests
             var comments = CommentsAt(1, 1.5, 2);
             comments[0].created_at = Created.AddHours(1); // would otherwise trigger dispersion/jitter
 
-            DisperseCommentOffsets(null, comments);
+            ChatRenderer.DisperseCommentOffsets(comments);
 
             Assert.Equal([1, 1.5, 2], Offsets(comments));
         }
@@ -128,7 +68,7 @@ namespace TwitchDownloaderCore.Tests.RenderTests
             var comments = CommentsAt(20, 20, 20, 20, 21);
             comments[4].created_at = Created.AddSeconds(30);
 
-            DisperseCommentOffsets(null, comments);
+            ChatRenderer.DisperseCommentOffsets(comments);
 
             var offsets = Offsets(comments);
             Assert.Equal(20, offsets[0]);
@@ -148,8 +88,8 @@ namespace TwitchDownloaderCore.Tests.RenderTests
             var first = CommentsAt(1, 2, 2, 2, 2, 3);
             var second = CommentsAt(1, 2, 2, 2, 2, 3);
 
-            JitterCommentOffsets(null, first);
-            JitterCommentOffsets(null, second);
+            ChatRenderer.JitterCommentOffsets(first);
+            ChatRenderer.JitterCommentOffsets(second);
 
             var offsets = Offsets(first);
             Assert.Equal(offsets, Offsets(second));
@@ -170,7 +110,7 @@ namespace TwitchDownloaderCore.Tests.RenderTests
         {
             var comments = CommentsAt(4, 4, 4, 4, 4.5, 6.5, 6.5);
 
-            JitterCommentOffsets(null, comments);
+            ChatRenderer.JitterCommentOffsets(comments);
 
             var offsets = Offsets(comments);
             Assert.All(offsets[..4], o => Assert.InRange(o, 4, 4.5));
@@ -188,8 +128,8 @@ namespace TwitchDownloaderCore.Tests.RenderTests
             var group = CommentsAt(1, 2, 2, 2, 2, 3);
             var pair = CommentsAt(5, 5, 6);
 
-            JitterCommentOffsets(null, group);
-            JitterCommentOffsets(null, pair);
+            ChatRenderer.JitterCommentOffsets(group);
+            ChatRenderer.JitterCommentOffsets(pair);
 
             var offsets = Offsets(group);
             Assert.True(offsets[1] == 2 && offsets[2] > 2 && offsets[3] > offsets[2] && offsets[4] > offsets[3] && offsets[4] < 3, string.Join(", ", offsets));
@@ -213,7 +153,7 @@ namespace TwitchDownloaderCore.Tests.RenderTests
             using var renderer = NewRenderer(new ChatRenderOptions { UpdateRate = updateRate });
             var comments = CommentsAt(offset);
 
-            FloorCommentOffsets(renderer, comments);
+            renderer.FloorCommentOffsets(comments);
 
             Assert.Equal(expected, comments[0].content_offset_seconds, 9);
         }
@@ -225,7 +165,7 @@ namespace TwitchDownloaderCore.Tests.RenderTests
             using var renderer = NewRenderer(new ChatRenderOptions { UpdateRate = 0.2 });
             var comments = CommentsAt(0.6, 1.2);
 
-            FloorCommentOffsets(renderer, comments);
+            renderer.FloorCommentOffsets(comments);
 
             Assert.Equal(0.6, comments[0].content_offset_seconds, 9);
             Assert.Equal(1.2, comments[1].content_offset_seconds, 9);
@@ -238,7 +178,7 @@ namespace TwitchDownloaderCore.Tests.RenderTests
             using var renderer = NewRenderer();
             var comments = CommentsAt(1, 2, 3);
 
-            RemoveRestrictedComments(renderer, comments);
+            renderer.RemoveRestrictedComments(comments);
 
             Assert.Equal(3, comments.Count);
         }
@@ -258,7 +198,7 @@ namespace TwitchDownloaderCore.Tests.RenderTests
                 RenderHarness.MakeComment(2, "test_user", "hello", displayName: "테스트"),
             };
 
-            RemoveRestrictedComments(renderer, comments);
+            renderer.RemoveRestrictedComments(comments);
 
             Assert.Equal("alice", Assert.Single(comments).commenter.name);
         }
@@ -282,7 +222,7 @@ namespace TwitchDownloaderCore.Tests.RenderTests
             using var renderer = NewRenderer(new ChatRenderOptions { BannedWordsArray = [bannedWord] });
             var comments = new List<Comment> { RenderHarness.MakeComment(0, "alice", body) };
 
-            RemoveRestrictedComments(renderer, comments);
+            renderer.RemoveRestrictedComments(comments);
 
             Assert.Equal(removed, comments.Count == 0);
         }
@@ -294,7 +234,7 @@ namespace TwitchDownloaderCore.Tests.RenderTests
             using var renderer = NewRenderer(new ChatRenderOptions { BannedWordsArray = ["!drop"] });
             var comments = new List<Comment> { RenderHarness.MakeComment(0, "alice", "!drop"), RenderHarness.MakeComment(1, "bob", "type !drop now") };
 
-            RemoveRestrictedComments(renderer, comments);
+            renderer.RemoveRestrictedComments(comments);
 
             Assert.Empty(comments);
         }
@@ -311,9 +251,9 @@ namespace TwitchDownloaderCore.Tests.RenderTests
         public void GetVideoTicks_UsesChatRangeOrBothOverrides(double start, double end, int startOverride, int endOverride, int fps, int expectedStart, int expectedTotal)
         {
             using var renderer = NewRenderer(new ChatRenderOptions { Framerate = fps, StartOverride = startOverride, EndOverride = endOverride });
-            SetChatRoot(renderer, new ChatRoot { video = new Video { start = start, end = end }, comments = [] });
+            renderer.chatRoot = new ChatRoot { video = new Video { start = start, end = end }, comments = [] };
 
-            Assert.Equal((expectedStart, expectedTotal), GetVideoTicks(renderer));
+            Assert.Equal((expectedStart, expectedTotal), renderer.GetVideoTicks());
         }
 
         /// <summary>
@@ -336,7 +276,7 @@ namespace TwitchDownloaderCore.Tests.RenderTests
             new Random(pixels).NextBytes(frame);
             var mask = new byte[pixels];
 
-            SetFrameMask(null, frame, mask);
+            ChatRenderer.SetFrameMask(frame, mask);
 
             for (var i = 0; i < pixels; i++)
             {
@@ -370,7 +310,7 @@ namespace TwitchDownloaderCore.Tests.RenderTests
             using var emote = await LoadFixtureEmote("AnimThird");
 
             Assert.Equal(3, emote.FrameCount);
-            Assert.Equal(expectedFrame, ComputeAnimFrameIndex(null, emote, ms));
+            Assert.Equal(expectedFrame, ChatRenderer.ComputeAnimFrameIndex(emote, ms));
         }
 
         /// <summary>A frame starting at exactly 100 ms (or 300 ms) must be shown from that millisecond on, not one millisecond later.</summary>
@@ -379,8 +319,8 @@ namespace TwitchDownloaderCore.Tests.RenderTests
         {
             using var emote = await LoadFixtureEmote("AnimThird");
 
-            Assert.Equal(1, ComputeAnimFrameIndex(null, emote, 100));
-            Assert.Equal(2, ComputeAnimFrameIndex(null, emote, 300));
+            Assert.Equal(1, ChatRenderer.ComputeAnimFrameIndex(emote, 100));
+            Assert.Equal(2, ChatRenderer.ComputeAnimFrameIndex(emote, 300));
         }
 
         /// <summary>Non-ASCII detection decides when display names need a fallback font and are checked against ignored users.</summary>
@@ -392,7 +332,7 @@ namespace TwitchDownloaderCore.Tests.RenderTests
         [InlineData('漢', true)]
         public void IsNotAscii_DetectsCharsAbove127(char c, bool expected)
         {
-            Assert.Equal(expected, IsNotAscii(null, c));
+            Assert.Equal(expected, ChatRenderer.IsNotAscii(c));
         }
 
         /// <summary>
@@ -410,7 +350,7 @@ namespace TwitchDownloaderCore.Tests.RenderTests
         [InlineData("", false)]
         public void IsRightToLeft_ChecksFirstChar(string text, bool expected)
         {
-            Assert.Equal(expected, IsRightToLeft(null, text));
+            Assert.Equal(expected, ChatRenderer.IsRightToLeft(text));
         }
 
         /// <summary>
@@ -427,12 +367,12 @@ namespace TwitchDownloaderCore.Tests.RenderTests
         {
             var destination = new Range[input.Length + 1];
 
-            var written = SwapRightToLeft(null, input.AsSpan().Split(' '), destination);
+            var written = ChatRenderer.SwapRightToLeft(input.AsSpan().Split(' '), destination);
 
             Assert.Equal(expected, string.Join(' ', destination.Take(written).Select(r => input[r])));
         }
 
-        private static SKPaint InterPaint() => new() { Typeface = GetInterTypeface(null, SKFontStyle.Normal), TextSize = 24 };
+        private static SKPaint InterPaint() => new() { Typeface = ChatRenderer.GetInterTypeface(SKFontStyle.Normal), TextSize = 24 };
 
         /// <summary>
         /// LTR text is measured with Skia directly and RTL text with HarfBuzz shaping, auto-detected when isRtl is null; a supplied shaper
@@ -444,12 +384,12 @@ namespace TwitchDownloaderCore.Tests.RenderTests
             using var paint = InterPaint();
             using var shaper = new SKShaper(paint.Typeface);
 
-            Assert.Equal(paint.MeasureText("hello"), MeasureText(null, "hello", paint, null, null));
-            Assert.Equal(paint.MeasureText("hello"), MeasureText(null, "hello", paint, false, null));
+            Assert.Equal(paint.MeasureText("hello"), ChatRenderer.MeasureText("hello", paint, null, null));
+            Assert.Equal(paint.MeasureText("hello"), ChatRenderer.MeasureText("hello", paint, false, null));
 
-            var rtl = MeasureText(null, "שלום", paint, null, null);
+            var rtl = ChatRenderer.MeasureText("שלום", paint, null, null);
             Assert.True(rtl > 0);
-            Assert.Equal(rtl, MeasureText(null, "שלום", paint, true, shaper));
+            Assert.Equal(rtl, ChatRenderer.MeasureText("שלום", paint, true, shaper));
         }
 
         /// <summary>
@@ -464,20 +404,20 @@ namespace TwitchDownloaderCore.Tests.RenderTests
 
             const string ALPHABET = "abcdefghijklmnopqrstuvwxyz";
             var maxWidth = (int)paint.MeasureText("abcdefghij");
-            var cut = SubstringToTextWidth(null, ALPHABET, paint, maxWidth, false, delimiters).ToString();
+            var cut = ChatRenderer.SubstringToTextWidth(ALPHABET, paint, maxWidth, false, delimiters).ToString();
             Assert.StartsWith(cut, ALPHABET);
             Assert.True(paint.MeasureText(cut) <= maxWidth);
             Assert.True(paint.MeasureText(ALPHABET[..(cut.Length + 1)]) > maxWidth);
 
             const string DASHED = "aaaa-bbbb-cccc-dddd";
-            Assert.Equal("aaaa-bbbb-", SubstringToTextWidth(null, DASHED, paint, (int)paint.MeasureText("aaaa-bbbb-cc"), false, delimiters).ToString());
-            Assert.Equal(DASHED, SubstringToTextWidth(null, DASHED, paint, 10_000, false, delimiters).ToString());
+            Assert.Equal("aaaa-bbbb-", ChatRenderer.SubstringToTextWidth(DASHED, paint, (int)paint.MeasureText("aaaa-bbbb-cc"), false, delimiters).ToString());
+            Assert.Equal(DASHED, ChatRenderer.SubstringToTextWidth(DASHED, paint, 10_000, false, delimiters).ToString());
 
             const string HEBREW = "שלוםשלוםשלוםשלום";
-            var rtlMax = (int)(MeasureText(null, HEBREW, paint, true, null) / 2);
-            var rtlCut = SubstringToTextWidth(null, HEBREW, paint, rtlMax, true, delimiters);
+            var rtlMax = (int)(ChatRenderer.MeasureText(HEBREW, paint, true, null) / 2);
+            var rtlCut = ChatRenderer.SubstringToTextWidth(HEBREW, paint, rtlMax, true, delimiters);
             Assert.InRange(rtlCut.Length, 1, HEBREW.Length - 1);
-            Assert.True(MeasureText(null, rtlCut, paint, true, null) <= rtlMax);
+            Assert.True(ChatRenderer.MeasureText(rtlCut, paint, true, null) <= rtlMax);
         }
 
         /// <summary>The embedded Inter font must load in every style the CLI/GUI offer, so the default font never depends on the OS.</summary>
@@ -496,7 +436,7 @@ namespace TwitchDownloaderCore.Tests.RenderTests
                 _ => SKFontStyle.Normal,
             };
 
-            using var typeface = GetInterTypeface(null, style);
+            using var typeface = ChatRenderer.GetInterTypeface(style);
 
             Assert.Equal("Inter", typeface.FamilyName);
             Assert.Equal(weight, typeface.FontStyle.Weight);
@@ -518,11 +458,11 @@ namespace TwitchDownloaderCore.Tests.RenderTests
             using var plain = NewRenderer(new ChatRenderOptions());
             using var outlined = NewRenderer(new ChatRenderOptions { Outline = true });
 
-            Assert.Equal(user, AdjustUsernameVisibility(plain, user, SKColors.Transparent));
-            Assert.Equal(AdjustColorVisibility(null, user, opaque), AdjustUsernameVisibility(plain, user, opaque));
-            Assert.Equal(user.Lerp(AdjustColorVisibility(null, user, translucent), 0xC8 / 255f), AdjustUsernameVisibility(plain, user, translucent));
-            Assert.Equal(AdjustColorVisibility(null, user, SKColors.Black), AdjustUsernameVisibility(outlined, user, SKColors.Transparent));
-            Assert.NotEqual(user, AdjustUsernameVisibility(outlined, user, SKColors.Transparent));
+            Assert.Equal(user, plain.AdjustUsernameVisibility(user, SKColors.Transparent));
+            Assert.Equal(ChatRenderer.AdjustColorVisibility(user, opaque), plain.AdjustUsernameVisibility(user, opaque));
+            Assert.Equal(user.Lerp(ChatRenderer.AdjustColorVisibility(user, translucent), 0xC8 / 255f), plain.AdjustUsernameVisibility(user, translucent));
+            Assert.Equal(ChatRenderer.AdjustColorVisibility(user, SKColors.Black), outlined.AdjustUsernameVisibility(user, SKColors.Transparent));
+            Assert.NotEqual(user, outlined.AdjustUsernameVisibility(user, SKColors.Transparent));
         }
 
         /// <summary>
@@ -532,7 +472,7 @@ namespace TwitchDownloaderCore.Tests.RenderTests
         [Fact]
         public void AdjustColorVisibility_SaturatedColoursFarApartInHue_KeepHue()
         {
-            AdjustColorVisibility(null, new SKColor(0xFFFF0000), new SKColor(0xFF0000FF)).ToHsl(out var hue, out var saturation, out _);
+            ChatRenderer.AdjustColorVisibility(new SKColor(0xFFFF0000), new SKColor(0xFF0000FF)).ToHsl(out var hue, out var saturation, out _);
 
             Assert.True(hue < 1 || hue > 359, $"hue {hue}");
             Assert.Equal(90, saturation, 1.0); // HSL → 8-bit RGB → HSL round trip
@@ -552,27 +492,27 @@ namespace TwitchDownloaderCore.Tests.RenderTests
                 AlternateMessageBackgrounds = true, HighlightUsersArray = ["CAROL", "dave"],
             };
             using var renderer = NewRenderer(options);
-            SetChatRoot(renderer, new ChatRoot
+            renderer.chatRoot = new ChatRoot
             {
                 comments =
                 [
                     RenderHarness.MakeComment(0, "alice", "a"), RenderHarness.MakeComment(0, "bob", "b"),
                     RenderHarness.MakeComment(0, "carol_tv", "c", displayName: "Carol"), RenderHarness.MakeComment(0, "dave", "d"),
                 ]
-            });
+            };
 
-            Assert.Equal(options.BackgroundColor, GetMessageBackground(renderer, 0, out var paint0));
+            Assert.Equal(options.BackgroundColor, renderer.GetMessageBackground(0, out var paint0));
             Assert.Null(paint0);
 
-            Assert.Equal(options.AlternateBackgroundColor, GetMessageBackground(renderer, 1, out var paint1));
+            Assert.Equal(options.AlternateBackgroundColor, renderer.GetMessageBackground(1, out var paint1));
             Assert.Same(options.AlternateBackgroundPaint, paint1);
 
-            Assert.Equal(options.HighlightUserColor, GetMessageBackground(renderer, 2, out var paint2));
+            Assert.Equal(options.HighlightUserColor, renderer.GetMessageBackground(2, out var paint2));
             Assert.Equal(options.HighlightUserColor, paint2!.Color);
-            GetMessageBackground(renderer, 2, out var paint2Again);
+            renderer.GetMessageBackground(2, out var paint2Again);
             Assert.Same(paint2, paint2Again);
 
-            var color3 = GetMessageBackground(renderer, 3, out var paint3);
+            var color3 = renderer.GetMessageBackground(3, out var paint3);
             Assert.Same(options.AlternateBackgroundHighlightUserPaint, paint3);
             Assert.Equal(paint3!.Color, color3);
         }
@@ -587,13 +527,13 @@ namespace TwitchDownloaderCore.Tests.RenderTests
             var progress = new RecordingTaskProgress();
             using var renderer = NewRenderer(new ChatRenderOptions { FontSize = 18 }, progress);
 
-            var first = GetFallbackFont(renderer, '漢');
-            Assert.Same(first, GetFallbackFont(renderer, '漢'));
+            var first = renderer.GetFallbackFont('漢');
+            Assert.Same(first, renderer.GetFallbackFont('漢'));
             Assert.Equal(18, first.TextSize);
             Assert.NotNull(first.Typeface);
 
-            GetFallbackFont(renderer, 0x10FFFD);
-            GetFallbackFont(renderer, 0x10FFFC);
+            renderer.GetFallbackFont(0x10FFFD);
+            renderer.GetFallbackFont(0x10FFFC);
             Assert.True(progress.Warnings.Count <= 1);
         }
 
@@ -603,7 +543,7 @@ namespace TwitchDownloaderCore.Tests.RenderTests
             using var bitmap = new SKBitmap(1, 1);
             foreach (var emoji in emojis)
             {
-                EmojiCache(renderer).Add(emoji, SKImage.FromBitmap(bitmap));
+                renderer._emojiCache.Add(emoji, SKImage.FromBitmap(bitmap));
             }
 
             return renderer;
@@ -624,7 +564,7 @@ namespace TwitchDownloaderCore.Tests.RenderTests
         {
             using var renderer = RendererWithEmojis("\U0001F600", "☺", "\U0001F469");
 
-            Assert.Equal(expected, ContainsEmoji(renderer, text, out var index));
+            Assert.Equal(expected, renderer.ContainsEmoji(text, out var index));
             Assert.Equal(expectedIndex, index);
         }
 
@@ -635,7 +575,7 @@ namespace TwitchDownloaderCore.Tests.RenderTests
             using var renderer = RendererWithEmojis("\U0001F600");
             var zalgo = "a" + new string('\u0337', 20);
 
-            Assert.False(ContainsEmoji(renderer, zalgo, out _));
+            Assert.False(renderer.ContainsEmoji(zalgo, out _));
         }
 
         /// <summary>The constructor decides block-art pre-wrapping from the chat width: only chats wider than ~29 characters pre-wrap.</summary>

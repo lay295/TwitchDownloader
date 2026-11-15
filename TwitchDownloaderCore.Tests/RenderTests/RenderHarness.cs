@@ -188,6 +188,34 @@ namespace TwitchDownloaderCore.Tests.RenderTests
             return -1;
         }
 
+        /// <summary>Every position in the frame whose pixel is exactly <paramref name="color"/>, row by row.</summary>
+        public IEnumerable<(int X, int Y)> PixelsOf(int frame, SKColor color)
+        {
+            for (var y = 0; y < Height; y++)
+            for (var x = 0; x < Width; x++)
+            {
+                if (Pixel(frame, x, y) == color) yield return (x, y);
+            }
+        }
+
+        /// <summary>
+        /// The horizontal bands (runs of consecutive rows) containing <paramref name="color"/>, top to bottom, with the leftmost column
+        /// of the colour in each band. Each band is one chat line the colour appears on, so tests need not know the layout's row height.
+        /// </summary>
+        public List<(int Top, int Bottom, int Left)> Bands(int frame, SKColor color)
+        {
+            var bands = new List<(int Top, int Bottom, int Left)>();
+            foreach (var (x, y) in PixelsOf(frame, color))
+            {
+                if (bands.Count > 0 && y - bands[^1].Bottom <= 1)
+                    bands[^1] = (bands[^1].Top, y, Math.Min(bands[^1].Left, x));
+                else
+                    bands.Add((y, y, x));
+            }
+
+            return bands;
+        }
+
         /// <summary>The topmost row that differs from <paramref name="background"/>, or -1 if the frame is empty.</summary>
         public int FirstNonBackgroundRow(int frame, SKColor background)
         {
