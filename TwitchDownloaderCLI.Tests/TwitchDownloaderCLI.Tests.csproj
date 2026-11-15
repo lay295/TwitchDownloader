@@ -17,7 +17,7 @@
     <ItemGroup>
         <!-- Share the Core test helpers and sample data instead of duplicating them -->
         <Compile Include="..\TwitchDownloaderCore.Tests\TestHelpers\*.cs" LinkBase="TestHelpers" />
-        <None Include="..\TwitchDownloaderCore.Tests\TestData\**" LinkBase="TestData" CopyToOutputDirectory="PreserveNewest" />
+        <None Include="..\TestData\**" Exclude="..\TestData\generators\**;..\TestData\README.md" LinkBase="TestData" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 
     <ItemGroup>

@@ -295,7 +295,7 @@
       {
         "id": "e2etp1",
         "imageScale": 2,
-        "data": "iVBORw0KGgoAAAANSUhEUgAAADgAAAA4CAIAAAAn5KxJAAAACXBIWXMAAAABAAAAAQBPJcTWAAAAV0lEQVR4nO3OwQkAIRAAsRXsv+TjWvAREGFSQdbMNy/YtwOnimpFtaJaUa2oVlQrqhXVimpFtaJaUa2oVlQrqhXVimpFtaJaUa2oVlQrqhXVimpFtaLaD9qiAdwroTBNAAAAAElFTkSuQmCC",
+        "data": "iVBORw0KGgoAAAANSUhEUgAAADgAAAA4CAIAAAAn5KxJAAAASElEQVR4nO3OQQkAMBADsPoXPebgvqUQiIAkeSP6A1FRUVFRUVFRUdEB/YGoqKioqKioqKjogP5AVFRUVFRUVFRUdEB/ICp6+Ul9KDWSDvCnAAAAAElFTkSuQmCC",
         "name": "E2eThird",
         "width": 28,
         "height": 28
@@ -305,7 +305,7 @@
       {
         "id": "e2efp1",
         "imageScale": 2,
-        "data": "iVBORw0KGgoAAAANSUhEUgAAADgAAAA4CAIAAAAn5KxJAAAACXBIWXMAAAABAAAAAQBPJcTWAAAAVUlEQVR4nO3OQQkAIAAAMQX7Nxas4GMgwi3B5h5/WK8Dt4pqRbWiWlGtqFZUK6oV1YpqRbWiWlGtqFZUK6oV1YpqRbWiWlGtqFZUK6oV1YpqRbWi2gG3pwHbt1wVTwAAAABJRU5ErkJggg==",
+        "data": "iVBORw0KGgoAAAANSUhEUgAAADgAAAA4CAIAAAAn5KxJAAAASUlEQVR4nO3OQQkAMBADsPr3PJiD+5ZCIAKSl0zoD0RFRUVFRUVFRUUH9AeioqKioqKioqKiA/oDUVFRUVFRUVFR0QH9gajo7QMRZxv1aAiaLAAAAABJRU5ErkJggg==",
         "name": "E2eFirst",
         "width": 28,
         "height": 28
@@ -318,7 +318,7 @@
           "1": {
             "title": "E2E Badge",
             "description": "E2E Badge",
-            "bytes": "iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAIAAABuYg/PAAAACXBIWXMAAAABAAAAAQBPJcTWAAAAK0lEQVR4nO3NQQ0AAAgEIN3sbXVTeC8oQNdWzOQqmUwmk8lkMplMJpPJvh3p8wEN4q3B1QAAAABJRU5ErkJggg=="
+            "bytes": "iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAIAAABuYg/PAAAAKUlEQVR4nO3NMQ0AAAjAsDnHOi44SJP+remOTCaTyWQymUwmk8lkf7IFs3SDD7VNwwIAAAAASUVORK5CYII="
           }
         }
       }

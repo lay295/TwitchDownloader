@@ -15,7 +15,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="TestData\**" CopyToOutputDirectory="PreserveNewest" />
+        <None Include="..\TestData\**" Exclude="..\TestData\generators\**;..\TestData\README.md" LinkBase="TestData" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 
     <ItemGroup>

@@ -70,7 +70,7 @@ jobs:
           IMAGE_URL: https://raw.githubusercontent.com/${{ github.repository }}/render-previews/${{ steps.pr.outputs.image_dir }}
         run: |
           python3 head/.github/scripts/render_preview.py --base cli/base/TwitchDownloaderCLI --head cli/head/TwitchDownloaderCLI \
-            --fixtures head/TwitchDownloaderCore.Tests/TestData --out preview --base-label "$BASE_REF" --head-label "this PR" \
+            --fixtures head/TestData --out preview --base-label "$BASE_REF" --head-label "this PR" \
             --image-url "$IMAGE_URL"
           cat preview/comment.md >> "$GITHUB_STEP_SUMMARY"
 
