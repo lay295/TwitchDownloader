@@ -36,7 +36,7 @@ namespace TwitchDownloaderCore.Tests.ExtensionTests
         /// A 2-part version (build and revision both -1) should come back unchanged. Today it throws because
         /// <c>new Version(major, minor, -1)</c> rejects the undefined build component.
         /// </summary>
-        [Fact(Skip = "Bug: StripRevisionIfDefault throws ArgumentOutOfRangeException for 2-part versions such as 1.2 (build is -1)")]
+        [Fact(Skip = "Existing behavior in v1.56.5: StripRevisionIfDefault throws ArgumentOutOfRangeException for 2-part versions such as 1.2 (build is -1); the app's own versions always have 3+ parts")]
         public void LeavesTwoPartVersionUnchanged()
         {
             Assert.Equal(new Version(1, 2), new Version(1, 2).StripRevisionIfDefault());

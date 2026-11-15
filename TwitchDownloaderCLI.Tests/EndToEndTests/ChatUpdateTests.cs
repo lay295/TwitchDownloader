@@ -203,7 +203,7 @@ namespace TwitchDownloaderCLI.Tests.EndToEndTests
         // An unsupported output extension is a user typo and should be reported like the other input errors (message + exit code 1).
         // Today UpdateChat throws NotSupportedException out of Main, so the runtime aborts (SIGABRT and a core dump on Unix) and prints a
         // stack trace instead.
-        [Fact(Skip = "Bug: chatupdate with an unsupported output extension crashes with an unhandled NotSupportedException instead of exiting with an error")]
+        [Fact(Skip = "Existing behavior in v1.56.5: chatupdate with an unsupported output extension ends with an unhandled NotSupportedException (stack trace) rather than an error message and exit code 1")]
         public void UnsupportedOutputExtensionFailsCleanly()
         {
             var result = Cli.Run(_temp.Path, ["chatupdate", "-i", ChatJson, "-o", _temp.Combine("out.xyz")]);

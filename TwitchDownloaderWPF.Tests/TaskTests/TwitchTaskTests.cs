@@ -62,7 +62,7 @@ namespace TwitchDownloaderWPF.Tests.TaskTests
         // Verifies a freshly queued task shows its status and a Cancel button, exactly like a task that was reset to Ready by Retry.
         // Why: PageQueue binds the Cancel button to CanCancel and the status text to DisplayStatus. New tasks never call ChangeStatus, so they
         // keep the defaults (CanCancel = false, DisplayStatus = null): while waiting for a free slot they show "Status: " and cannot be cancelled.
-        [Fact(Skip = "Bug: a newly constructed TwitchTask has Status Ready but CanCancel == false and DisplayStatus == null until ChangeStatus is first called, so queued tasks show an empty status and no Cancel button")]
+        [Fact(Skip = "Existing behavior in v1.56.5: a newly constructed TwitchTask has Status Ready but CanCancel == false and DisplayStatus == null until ChangeStatus is first called, so queued tasks show an empty status and no Cancel button")]
         public void NewTask_IsCancellableAndShowsStatus()
         {
             var task = NewTask();

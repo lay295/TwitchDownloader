@@ -57,7 +57,12 @@ python3 .github/scripts/test_report.py --results results --changed changed.txt -
 - Fixtures live in `TestData/` and are small, synthetic and anonymized; the one exception is `Render/real_chat_60s.json.gz` (~0.8 MB, a real chat with anonymized commenters, used only by the render preview). Every generated fixture has a script in `TestData/generators/`; change the generator, re-run it and commit both (see `TestData/README.md`). Binary types are declared in `TestData/.gitattributes`; `*.cs` files are CRLF in the working copy per the root `.gitattributes`.
 - Python (`.github/scripts/`, `TestData/generators/`) is Python 3.10+ with full type hints and must pass `mypy --strict .github/scripts/*.py TestData/generators/*.py` (CI checks it).
 - Temp files go in `TempDirectory` (deleted on dispose). Write cross-platform: `Path.Combine`, `\n` for console assertions (`ConsoleCapture` normalises), no assumptions about case-sensitive file systems (macOS is not), `/tmp` may be `/private/tmp` on macOS, Windows cannot delete the current directory or an open file, no hard-coded timings below ~50 ms.
-- Found a bug while writing a test? Keep the test asserting the *correct* behaviour and mark it `[Fact(Skip = "Bug: <root cause and symptom>")]` (or `Assert.SkipWhen(..., "Bug: ...")` for platform-specific ones). `grep -rn 'Skip = "Bug' *.Tests` lists the open ones; fixing a bug means removing its Skip. Don't skip for any other reason except a missing ffmpeg (`TestData.RequireFfmpeg()`).
+- Found something wrong while writing a test? Keep the test asserting the behaviour you believe is *correct* and skip it with a reason:
+  `Skip = "Bug: <root cause and symptom>"` when the code is clearly wrong (wrong variable, off-by-one, crash on valid data, leak, regression), or
+  `Skip = "Existing behavior in v<version>: <what it does>"` when it may be intentional (validation/parsing strictness, required option combinations,
+  error-reporting style, UI choices), so a maintainer can decide later. Use `Assert.SkipWhen(..., "Bug: ...")` for platform-specific ones.
+  `grep -rnE '"(Bug|Existing behavior in v[0-9.]+): ' --include=*.cs .` lists them; fixing or accepting one means removing its Skip (and, if the
+  current behaviour is the intended one, rewriting the test to assert it). Don't skip for any other reason except a missing ffmpeg (`TestData.RequireFfmpeg()`).
 - Keep the suites fast: Core ≈ 30 s, CLI ≈ 15 s. Fake delays (cancel the token) instead of waiting for retry back-offs.
 - Block-scoped namespaces, `Assert.Equal(expected, actual)`, one assertion topic per test, no `Thread.Sleep` to "wait for" work.
 

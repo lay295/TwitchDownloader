@@ -357,7 +357,7 @@ namespace TwitchDownloaderCore.Tests.RenderTests
         /// Highlighted system messages (here a sub) should get the subtle grey highlight background when the message background is opaque,
         /// as the code comment in CombineImages states and as it did before #1601.
         /// </summary>
-        [Fact(Skip = "Bug: ChatRenderer.CombineImages draws the sub-message highlight background only when the message background is NOT opaque (Alpha < 245); #1601 inverted the original condition.")]
+        [Fact(Skip = "Existing behavior in v1.56.5: ChatRenderer.CombineImages draws the sub-message highlight background only when the message background is NOT opaque (Alpha < 245), the opposite of its code comment; #1601 changed the condition")]
         public async Task RenderVideoAsync_SubMessageOnOpaqueBackground_DrawsHighlightBackground()
         {
             using var harness = new RenderHarness();

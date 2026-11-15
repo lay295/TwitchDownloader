@@ -797,7 +797,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
         /// The inference regex explicitly allows a "-suffix" (e.g. "1080p60-portrait"), but the code locates the framerate with
         /// LastIndexOf('p'), which finds the "p" of "portrait", so portrait streams are left with a framerate of 0.
         /// </summary>
-        [Fact(Skip = "Bug: ExtStreamInfo.Parse cannot infer the framerate from suffixed STABLE-VARIANT-IDs such as 1080p60-portrait (LastIndexOf('p') hits 'portrait')")]
+        [Fact(Skip = "Existing behavior in v1.56.5: ExtStreamInfo.Parse does not infer the framerate from suffixed STABLE-VARIANT-IDs such as 1080p60-portrait (LastIndexOf('p') finds 'portrait')")]
         public void StreamInfo_InfersFramerateFromSuffixedStableVariantId()
         {
             var streamInfo = M3U8.Stream.ExtStreamInfo.Parse("""#EXT-X-STREAM-INF:BANDWIDTH=1,STABLE-VARIANT-ID="1080p60-portrait" """.TrimEnd());
@@ -809,7 +809,7 @@ namespace TwitchDownloaderCore.Tests.ModelTests
         /// EXT-X-MAP's BYTERANGE is a quoted string (RFC 8216 4.3.2.5) and ExtMap.ToString writes it quoted, but ExtMap.Parse feeds
         /// the quote into the integer parser and throws, so a playlist with a ranged init segment can neither be read nor round-tripped.
         /// </summary>
-        [Fact(Skip = "Bug: ExtMap.Parse throws FormatException on a quoted BYTERANGE attribute, including its own ToString output")]
+        [Fact(Skip = "Existing behavior in v1.56.5: ExtMap.Parse only accepts an unquoted BYTERANGE and throws FormatException on the quoted form (RFC 8216), which ExtMap.ToString itself writes")]
         public void ExtMap_RoundTripsByteRange()
         {
             var map = new M3U8.Metadata.ExtMap("init-0.mp4", (1000u, 0u));

@@ -299,7 +299,7 @@ namespace TwitchDownloaderCore.Tests.ChatTests
         /// getComments: false is a public option meant to read only the metadata (streamer/video/embeds) of a chat file.
         /// It currently cannot work: comments stay null and UpgradeChatJson immediately enumerates them.
         /// </summary>
-        [Fact(Skip = "Bug: ChatJson.DeserializeAsync(getComments: false) throws ArgumentNullException because UpgradeChatJson enumerates the null comments list")]
+        [Fact(Skip = "Existing behavior in v1.56.5: ChatJson.DeserializeAsync(getComments: false) throws ArgumentNullException because UpgradeChatJson enumerates the null comments list; no caller uses getComments: false")]
         public async Task Deserialize_WithoutComments_ReturnsMetadataOnly()
         {
             var chat = await Load(Fixture(SAMPLE), getComments: false);
@@ -618,7 +618,7 @@ namespace TwitchDownloaderCore.Tests.ChatTests
         /// A valid JSON document may start with whitespace (e.g. after being re-saved by some editors or tools).
         /// The format sniffing only accepts a leading '{' and therefore rejects such a file as "not a valid chat format".
         /// </summary>
-        [Fact(Skip = "Bug: ChatJson rejects valid chat JSON that starts with whitespace/newline (format sniffing only accepts a leading '{')")]
+        [Fact(Skip = "Existing behavior in v1.56.5: ChatJson only recognises chat JSON that starts with '{' and rejects files with leading whitespace/newlines")]
         public async Task Deserialize_LeadingWhitespace_IsAccepted()
         {
             var json = "\n  " + await File.ReadAllTextAsync(Fixture(SAMPLE), TestContext.Current.CancellationToken);

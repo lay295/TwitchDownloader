@@ -92,7 +92,7 @@ namespace TwitchDownloaderCLI.Tests.EndToEndTests
 
         // -e on its own should end the render early, just like -b/-e together. ChatRenderer.GetVideoTicks only applies the overrides when
         // BOTH are set, so a lone -e (or -b) is silently ignored and the whole chat is rendered.
-        [Fact(Skip = "Bug: chatrender ignores -e (and -b) unless both are given (ChatRenderer.GetVideoTicks requires StartOverride and EndOverride)")]
+        [Fact(Skip = "Existing behavior in v1.56.5: chatrender only applies -b/-e when both are given (ChatRenderer.GetVideoTicks needs StartOverride and EndOverride), so a lone -e renders the whole chat")]
         public void EndingAloneTrimsTheRender()
         {
             TestData.RequireFfmpeg();

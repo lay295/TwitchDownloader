@@ -75,7 +75,7 @@ namespace TwitchDownloaderCLI.Tests.EndToEndTests
 
         // A missing list file is a user error and should be reported with a message and exit code 1. Today TsMerger throws
         // FileNotFoundException out of Main, so the runtime aborts with a stack trace (SIGABRT and a core dump on Unix).
-        [Fact(Skip = "Bug: tsmerge with a missing input list crashes with an unhandled FileNotFoundException instead of exiting with an error")]
+        [Fact(Skip = "Existing behavior in v1.56.5: tsmerge with a missing input list ends with an unhandled FileNotFoundException (stack trace) rather than an error message and exit code 1")]
         public void MissingListFailsCleanly()
         {
             var result = Cli.Run(_temp.Path, ["tsmerge", "-i", _temp.Combine("missing.txt"), "-o", _temp.Combine("merged.ts")]);

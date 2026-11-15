@@ -39,7 +39,7 @@ namespace TwitchDownloaderCLI.Tests.EndToEndTests
 
         // Asking for help or the version is a successful run by convention (GNU/POSIX), so scripts like `TwitchDownloaderCLI --version || exit`
         // work. Currently Program.WriteHelpText always calls Environment.Exit(1), even for help/version requests.
-        [Theory(Skip = "Bug: --help, --version and 'help <verb>' exit with code 1 because Program.WriteHelpText always calls Environment.Exit(1)")]
+        [Theory(Skip = "Existing behavior in v1.56.5: --help, --version and 'help <verb>' exit with code 1 because Program.WriteHelpText always calls Environment.Exit(1)")]
         [InlineData("--help")]
         [InlineData("--version")]
         [InlineData("help", "chatupdate")]

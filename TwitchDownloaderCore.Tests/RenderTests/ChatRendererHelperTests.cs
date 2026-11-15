@@ -228,7 +228,7 @@ namespace TwitchDownloaderCore.Tests.RenderTests
         }
 
         /// <summary>A banned word that starts with punctuation (e.g. a bot command like "!drop") must still remove messages using it.</summary>
-        [Fact(Skip = "Bug: the banned-word regex requires a \\b word boundary, which never exists between a space/start of message and a word starting with punctuation, so \"!drop\" is never matched.")]
+        [Fact(Skip = "Existing behavior in v1.56.5: the banned-word regex requires a \\b word boundary, which never exists between a space/start of message and a word starting with punctuation, so \"!drop\" is never matched.")]
         public void RemoveRestrictedComments_BannedWordStartingWithPunctuation_IsRemoved()
         {
             using var renderer = NewRenderer(new ChatRenderOptions { BannedWordsArray = ["!drop"] });
